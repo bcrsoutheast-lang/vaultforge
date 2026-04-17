@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge Partners</title>
+
+<style>
+:root{
+--bg:#08101f;
+--panel:#121935;
+--line:#2a3766;
+--text:#f3f6ff;
+--muted:#a8b3d1;
+--blue:#3b82f6;
+--green:#22c55e;
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:Inter,Arial,sans-serif;
+background:linear-gradient(180deg,#08101f 0%,#0b1020 100%);
+color:var(--text);
+}
+
+.wrap{
+max-width:1400px;
+margin:0 auto;
+padding:28px 18px 60px;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:18px;
+flex-wrap:wrap;
+margin-bottom:22px;
+}
+
+h1{
+margin:0;
+font-size:30px;
+}
+
+.sub{
+margin-top:8px;
+color:var(--muted);
+line-height:1.5;
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.actions a,
+.actions button{
+border:1px solid var(--line);
+background:var(--panel);
+color:var(--text);
+padding:11px 14px;
+border-radius:12px;
+text-decoration:none;
+cursor:pointer;
+font:inherit;
+}
+
+.filters{
+display:grid;
+grid-template-columns:1.4fr 1fr 1fr auto;
+gap:12px;
+margin-bottom:18px;
+}
+
+input,select,button{
+font:inherit;
+}
+
+.field{
+width:100%;
+border:1px solid var(--line);
+background:var(--panel);
+color:var(--text);
+border-radius:12px;
+padding:12px 14px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:14px;
+}
+
+.card{
+background:rgba(18,25,53,.94);
+border:1px solid var(--line);
+border-radius:18px;
+padding:18px;
+}
+
+.name{
+font-size:20px;
+font-weight:700;
+margin-bottom:8px;
+}
+
+.role{
+display:inline-block;
+padding:6px 10px;
+border-radius:999px;
+background:#162142;
+border:1px solid var(--line);
+font-size:12px;
+margin-bottom:14px;
+color:#dbe4ff;
+}
+
+.meta{
+color:var(--muted);
+font-size:14px;
+line-height:1.6;
+margin-bottom:10px;
+}
+
+.status{
+display:inline-block;
+padding:6px 10px;
+border-radius:999px;
+background:rgba(34,197,94,.12);
+border:1px solid rgba(34,197,94,.35);
+color:#86efac;
+font-size:12px;
+}
+
+.empty{
+padding:30px;
+text-align:center;
+color:var(--muted);
+border:1px solid var(--line);
+border-radius:18px;
+background:rgba(18,25,53,.94);
+}
+
+@media (max-width:1100px){
+.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.filters{grid-template-columns:1fr 1fr}
+}
+
+@media (max-width:700px){
+.grid{grid-template-columns:1fr}
+.filters{grid-template-columns:1fr}
+h1{font-size:24px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="topbar">
+<div>
+<h1>VaultForge Partners</h1>
+<div class="sub">Approved private operator network.</div>
+</div>
+
+<div class="actions">
+<a href="/admin.html">Admin</a>
+<button id="logoutBtn" type="button">Logout</button>
+</div>
+</div>
+
+<div class="filters">
+<input id="searchInput" class="field" type="text" placeholder="Search company, contact, city, state..." />
+<select id="roleFilter" class="field">
+<option value="">All roles</option>
+</select>
+<select id="statusFilter" class="field">
+<option value="">All statuses</option>
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+</select>
+<button id="clearBtn" class="field" type="button">Clear</button>
+</div>
+
+<div id="grid" class="grid"></div>
+
+</div>
+
+<script type="module">
+import { requireAuth, logout } from "./auth.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+requireAuth();
+
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const grid = document.getElementById("grid");
+const searchInput = document.getElementById("searchInput");
+const roleFilter = document.getElementById("roleFilter");
+const statusFilter = document.getElementById("statusFilter");
+const clearBtn = document.getElementById("clearBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+let rows = [];
+
+function esc(value){
+return String(value ?? "")
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
+}
+
+function renderRoleOptions(){
+const roles = [...new Set(rows.map(r => r.role).filter(Boolean))].sort();
+roleFilter.innerHTML =
+`<option value="">All roles</option>` +
+roles.map(role => `<option value="${esc(role)}">${esc(role)}</option>`).join("");
+}
+
+function getFiltered(){
+const q = searchInput.value.trim().toLowerCase();
+const role = roleFilter.value;
+const status = statusFilter.value;
+
+return rows.filter(row => {
+const haystack = [
+row.company_name,
+row.contact_name,
+row.city,
+row.state,
+row.role,
+row.market
+].join(" ").toLowerCase();
+
+const matchSearch = !q || haystack.includes(q);
+const matchRole = !role || row.role === role;
+const matchStatus = !status || row.status === status;
+
+return matchSearch && matchRole && matchStatus;
+});
+}
+
+function render(){
+const filtered = getFiltered();
+
+if(!filtered.length){
+grid.innerHTML = `<div class="empty">No partners found.</div>`;
+return;
+}
+
+grid.innerHTML = filtered.map(row => `
+<div class="card">
+<div class="name">${esc(row.company_name || row.contact_name || "Partner")}</div>
+<div class="role">${esc(row.role || "Partner")}</div>
+
+<div class="meta">
+${esc(row.contact_name || "")}<br>
+${esc(row.city || "")}${row.city && row.state ? ", " : ""}${esc(row.state || "")}<br>
+${esc(row.market || "")}
+</div>
+
+<div class="status">${esc(row.status || "active")}</div>
+</div>
+`).join("");
+}
+
+async function loadData(){
+const { data, error } = await supabase
+.from("partners")
+.select("*")
+.order("created_at",{ ascending:false });
+
+if(error){
+grid.innerHTML = `<div class="empty">Failed to load partners.</div>`;
+return;
+}
+
+rows = data || [];
+renderRoleOptions();
+render();
+}
+
+searchInput.addEventListener("input", render);
+roleFilter.addEventListener("change", render);
+statusFilter.addEventListener("change", render);
+
+clearBtn.addEventListener("click", () => {
+searchInput.value = "";
+roleFilter.value = "";
+statusFilter.value = "";
+render();
+});
+
+logoutBtn.addEventListener("click", logout);
+
+loadData();
+</script>
+
+</body>
+</html>
