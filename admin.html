@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge Admin</title>
+  <style>
+    :root {
+      --bg: #0b0b0d;
+      --panel: #141418;
+      --panel-2: #1b1b21;
+      --text: #f5f5f7;
+      --muted: #b8b8c2;
+      --gold: #d4af37;
+      --border: rgba(255,255,255,0.08);
+      --success: #1f9d62;
+      --danger: #c25050;
+      --warning: #b89322;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 18px;
+      --max: 1280px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    .container {
+      width: min(100% - 28px, var(--max));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(11,11,13,0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.08rem;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--gold), #f4d36a);
+      color: #111;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      flex-wrap: wrap;
+    }
+
+    .page {
+      padding: 26px 0 48px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 780px;
+    }
+
+    .note {
+      margin-top: 10px;
+      color: #f0d98a;
+      font-size: 0.92rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 0.8fr auto auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #181920;
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(212,175,55,0.45);
+      box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+    }
+
+    button {
+      min-height: 48px;
+      border: none;
+      border-radius: 14px;
+      padding: 0 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), #f0cb59);
+      color: #111;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .status-banner {
+      display: none;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+    }
+
+    .status-banner.show {
+      display: block;
+    }
+
+    .status-success {
+      background: rgba(31,157,98,0.12);
+      border: 1px solid rgba(31,157,98,0.24);
+      color: #9ef0c3;
+    }
+
+    .status-error {
+      background: rgba(194,80,80,0.12);
+      border: 1px solid rgba(194,80,80,0.24);
+      color: #ffb5b5;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+
+    thead th {
+      text-align: left;
+      font-size: 0.84rem;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      background: #121318;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      font-size: 0.95rem;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,0.015);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .pill.pending {
+      color: #f5d67a;
+      border-color: rgba(212,175,55,0.24);
+      background: rgba(212,175,55,0.08);
+    }
+
+    .pill.contacted {
+      color: #9bc8ff;
+      border-color: rgba(83,145,255,0.24);
+      background: rgba(83,145,255,0.08);
+    }
+
+    .pill.approved {
+      color: #9ef0c3;
+      border-color: rgba(31,157,98,0.24);
+      background: rgba(31,157,98,0.08);
+    }
+
+    .pill.rejected {
+      color: #ffb5b5;
+      border-color: rgba(194,80,80,0.24);
+      background: rgba(194,80,80,0.08);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      border: 1px solid var(--border);
+      background: #181920;
+      color: var(--text);
+    }
+
+    .empty-state {
+      padding: 28px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .gate {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .gate-card {
+      width: min(100%, 480px);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .gate-card h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 1.8rem;
+    }
+
+    .gate-card p {
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .gate-error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(194,80,80,0.12);
+      border: 1px solid rgba(194,80,80,0.24);
+      color: #ffb5b5;
+      font-size: 0.92rem;
+    }
+
+    .gate-error.show {
+      display: block;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .grid-4,
+      .grid-2,
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="gateView" class="gate">
+    <div class="gate-card">
+      <h2>VaultForge Admin</h2>
+      <p>
+        Enter your admin access code to view partner applications.
+      </p>
+
+      <div class="field">
+        <label for="adminCode">Admin Access Code</label>
+        <input id="adminCode" type="password" placeholder="Enter access code" />
+      </div>
+
+      <div style="margin-top: 16px;">
+        <button id="unlockAdminBtn" class="btn-primary" type="button">Unlock Admin</button>
+      </div>
+
+      <div id="gateError" class="gate-error">
+        Incorrect access code.
+      </div>
+    </div>
+  </div>
+
+  <div id="adminView" class="hidden">
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand">
+          <span class="brand-mark">V</span>
+          <span>VaultForge Admin</span>
+        </div>
+
+        <div class="nav-right">
+          <span>Partner application dashboard</span>
+          <button id="logoutBtn" class="btn-ghost" type="button">Lock</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="container">
+        <div class="hero">
+          <div>
+            <h1>Applications</h1>
+            <p>
+              Review buyers, lenders, title partners, attorneys, and vendors applying to the founding VaultForge network.
+            </p>
+            <div class="note">
+              Quick admin for now. Do not link this page publicly.
+            </div>
+          </div>
+        </div>
+
+        <div id="statusBanner" class="status-banner"></div>
+
+        <section class="grid grid-4" style="margin-bottom: 18px;">
+          <div class="card">
+            <div class="stat-label">Total Applications</div>
+            <div id="totalCount" class="stat-value">0</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Pending</div>
+            <div id="pendingCount" class="stat-value">0</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Approved</div>
+            <div id="approvedCount" class="stat-value">0</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Contacted</div>
+            <div id="contactedCount" class="stat-value">0</div>
+          </div>
+        </section>
+
+        <section class="card" style="margin-bottom: 18px;">
+          <div class="toolbar">
+            <div class="field">
+              <label for="searchInput">Search</label>
+              <input id="searchInput" type="text" placeholder="Search by name, email, company, market, role" />
+            </div>
+
+            <div class="field">
+              <label for="roleFilter">Filter by Role</label>
+              <select id="roleFilter">
+                <option value="">All Roles</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="statusFilter">Filter by Status</label>
+              <select id="statusFilter">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="contacted">Contacted</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            <button id="refreshBtn" class="btn-primary" type="button">Refresh</button>
+            <button id="exportBtn" class="btn-ghost" type="button">Export CSV</button>
+          </div>
+        </section>
+
+        <section class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Created</th>
+                <th>Role</th>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Markets</th>
+                <th>Notes</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTableBody">
+              <tr>
+                <td colspan="10" class="empty-state">Loading applications...</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://mnwwvpuxrzostrplfgmq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Change this code to whatever you want.
+    // This is only a simple front-end gate for convenience, not true secure auth.
+    const ADMIN_ACCESS_CODE = "vaultforgeadmin";
+
+    const gateView = document.getElementById("gateView");
+    const adminView = document.getElementById("adminView");
+    const adminCodeInput = document.getElementById("adminCode");
+    const unlockAdminBtn = document.getElementById("unlockAdminBtn");
+    const gateError = document.getElementById("gateError");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const statusBanner = document.getElementById("statusBanner");
+    const totalCount = document.getElementById("totalCount");
+    const pendingCount = document.getElementById("pendingCount");
+    const approvedCount = document.getElementById("approvedCount");
+    const contactedCount = document.getElementById("contactedCount");
+
+    const searchInput = document.getElementById("searchInput");
+    const roleFilter = document.getElementById("roleFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const applicationsTableBody = document.getElementById("applicationsTableBody");
+
+    let allApplications = [];
+    let filteredApplications = [];
+
+    function showBanner(message, type = "success") {
+      statusBanner.textContent = message;
+      statusBanner.className = "status-banner show " + (type === "error" ? "status-error" : "status-success");
+    }
+
+    function hideBanner() {
+      statusBanner.className = "status-banner";
+      statusBanner.textContent = "";
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      if (Number.isNaN(date.getTime())) return dateString;
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeStatus(value) {
+      return String(value || "pending").toLowerCase().trim();
+    }
+
+    function populateRoleFilter(rows) {
+      const roles = [...new Set(rows.map(row => row.role).filter(Boolean))].sort();
+      roleFilter.innerHTML = `<option value="">All Roles</option>`;
+      roles.forEach(role => {
+        const option = document.createElement("option");
+        option.value = role;
+        option.textContent = role;
+        roleFilter.appendChild(option);
+      });
+    }
+
+    function updateStats(rows) {
+      totalCount.textContent = rows.length;
+      pendingCount.textContent = rows.filter(row => normalizeStatus(row.status) === "pending").length;
+      approvedCount.textContent = rows.filter(row => normalizeStatus(row.status) === "approved").length;
+      contactedCount.textContent = rows.filter(row => normalizeStatus(row.status) === "contacted").length;
+    }
+
+    function renderTable(rows) {
+      if (!rows.length) {
+        applicationsTableBody.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty-state">No applications found for the current filters.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      applicationsTableBody.innerHTML = rows.map(row => {
+        const status = normalizeStatus(row.status);
+        return `
+          <tr>
+            <td>${escapeHtml(formatDate(row.created_at))}</td>
+            <td>${escapeHtml(row.role || "")}</td>
+            <td>${escapeHtml(row.full_name || "")}</td>
+            <td>${escapeHtml(row.company || "")}</td>
+            <td>${escapeHtml(row.email || "")}</td>
+            <td>${escapeHtml(row.phone || "")}</td>
+            <td>${escapeHtml(row.markets || "")}</td>
+            <td>${escapeHtml(row.notes || "")}</td>
+            <td><span class="pill ${status}">${escapeHtml(status)}</span></td>
+            <td>
+              <div class="actions">
+                <button type="button" data-id="${row.id}" data-status="pending">Pending</button>
+                <button type="button" data-id="${row.id}" data-status="contacted">Contacted</button>
+                <button type="button" data-id="${row.id}" data-status="approved">Approve</button>
+                <button type="button" data-id="${row.id}" data-status="rejected">Reject</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function applyFilters() {
+      const search = searchInput.value.trim().toLowerCase();
+      const role = roleFilter.value;
+      const status = statusFilter.value;
+
+      filteredApplications = allApplications.filter(row => {
+        const matchesSearch =
+          !search ||
+          [
+            row.role,
+            row.full_name,
+            row.company,
+            row.email,
+            row.phone,
+            row.markets,
+            row.notes,
+            row.status
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(search);
+
+        const matchesRole = !role || row.role === role;
+        const matchesStatus = !status || normalizeStatus(row.status) === status;
+
+        return matchesSearch && matchesRole && matchesStatus;
+      });
+
+      renderTable(filteredApplications);
+    }
+
+    async function loadApplications() {
+      hideBanner();
+      applicationsTableBody.innerHTML = `
+        <tr>
+          <td colspan="10" class="empty-state">Loading applications...</td>
+        </tr>
+      `;
+
+      const { data, error } = await supabase
+        .from("applications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Load error:", error);
+        applicationsTableBody.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty-state">Could not load applications.</td>
+          </tr>
+        `;
+        showBanner("Could not load applications. If this keeps happening, we may need a select policy.", "error");
+        return;
+      }
+
+      allApplications = data || [];
+      populateRoleFilter(allApplications);
+      updateStats(allApplications);
+      applyFilters();
+    }
+
+    async function updateStatus(id, newStatus) {
+      hideBanner();
+
+      const { error } = await supabase
+        .from("applications")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (error) {
+        console.error("Update error:", error);
+        showBanner("Status update failed. If this keeps happening, we may need an update policy.", "error");
+        return;
+      }
+
+      allApplications = allApplications.map(row =>
+        row.id === id ? { ...row, status: newStatus } : row
+      );
+
+      updateStats(allApplications);
+      applyFilters();
+      showBanner(`Application marked as ${newStatus}.`);
+    }
+
+    function exportCsv() {
+      const rows = filteredApplications.length ? filteredApplications : allApplications;
+
+      if (!rows.length) {
+        showBanner("No applications available to export.", "error");
+        return;
+      }
+
+      const headers = [
+        "created_at",
+        "role",
+        "full_name",
+        "company",
+        "email",
+        "phone",
+        "markets",
+        "notes",
+        "status"
+      ];
+
+      const csv = [
+        headers.join(","),
+        ...rows.map(row =>
+          headers.map(header => {
+            const value = String(row[header] ?? "").replace(/"/g, '""');
+            return `"${value}"`;
+          }).join(",")
+        )
+      ].join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "vaultforge-applications.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showBanner("CSV export downloaded.");
+    }
+
+    function unlockAdmin() {
+      const code = adminCodeInput.value.trim();
+
+      if (code !== ADMIN_ACCESS_CODE) {
+        gateError.classList.add("show");
+        return;
+      }
+
+      gateError.classList.remove("show");
+      gateView.classList.add("hidden");
+      adminView.classList.remove("hidden");
+      loadApplications();
+    }
+
+    unlockAdminBtn.addEventListener("click", unlockAdmin);
+
+    adminCodeInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        unlockAdmin();
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      adminView.classList.add("hidden");
+      gateView.classList.remove("hidden");
+      adminCodeInput.value = "";
+    });
+
+    refreshBtn.addEventListener("click", loadApplications);
+    exportBtn.addEventListener("click", exportCsv);
+    searchInput.addEventListener("input", applyFilters);
+    roleFilter.addEventListener("change", applyFilters);
+    statusFilter.addEventListener("change", applyFilters);
+
+    applicationsTableBody.addEventListener("click", async (event) => {
+      const button = event.target.closest("button[data-id][data-status]");
+      if (!button) return;
+
+      const id = button.getAttribute("data-id");
+      const newStatus = button.getAttribute("data-status");
+
+      await updateStatus(id, newStatus);
+    });
+  </script>
+</body>
+</html>
