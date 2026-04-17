@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>VaultForge Partner Directory</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #171a21;
+        --line: #2c3444;
+        --text: #f5f7fb;
+        --muted: #aab4c5;
+        --input: #11151d;
+        --chip: #222938;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .wrap {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+
+      .title h1 {
+        margin: 0 0 6px;
+        font-size: 30px;
+      }
+
+      .title p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .topbar a {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        text-decoration: none;
+        padding: 10px 14px;
+        border-radius: 10px;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .input,
+      .select,
+      .button {
+        width: 100%;
+        background: var(--input);
+        border: 1px solid var(--line);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 12px 14px;
+        outline: none;
+      }
+
+      .button {
+        cursor: pointer;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+      }
+
+      .card h3 {
+        margin: 0 0 6px;
+        font-size: 20px;
+      }
+
+      .card .sub {
+        color: var(--muted);
+        margin-bottom: 14px;
+      }
+
+      .meta {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .row-label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+
+      .chip {
+        background: var(--chip);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .section {
+        margin-top: 14px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .empty {
+        padding: 28px;
+        text-align: center;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+      }
+
+      @media (max-width: 1100px) {
+        .controls {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .controls,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .title h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="title">
+          <h1>VaultForge Partner Directory</h1>
+          <p>Private internal supply-side network</p>
+        </div>
+
+        <a href="/admin">Back to Admin</a>
+      </div>
+
+      <div class="controls">
+        <input id="searchInput" class="input" type="text" placeholder="Search company, contact, email, role, market..." />
+        <select id="roleFilter" class="select">
+          <option value="">All roles</option>
+        </select>
+        <select id="stateFilter" class="select">
+          <option value="">All states</option>
+        </select>
+        <select id="statusFilter" class="select">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button id="clearBtn" class="button" type="button">Clear</button>
+      </div>
+
+      <div id="partnersGrid" class="grid"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const SUPABASE_URL = "YOUR_SUPABASE_URL";
+      const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const els = {
+        searchInput: document.getElementById("searchInput"),
+        roleFilter: document.getElementById("roleFilter"),
+        stateFilter: document.getElementById("stateFilter"),
+        statusFilter: document.getElementById("statusFilter"),
+        clearBtn: document.getElementById("clearBtn"),
+        partnersGrid: document.getElementById("partnersGrid")
+      };
+
+      const state = {
+        partners: []
+      };
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function renderOptions() {
+        const roles = Array.from(new Set(state.partners.map((p) => p.role).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+        const states = Array.from(new Set(state.partners.map((p) => p.state).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+
+        els.roleFilter.innerHTML = `<option value="">All roles</option>${roles.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("")}`;
+        els.stateFilter.innerHTML = `<option value="">All states</option>${states.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("")}`;
+      }
+
+      function getFilteredPartners() {
+        const q = els.searchInput.value.trim().toLowerCase();
+        const role = els.roleFilter.value;
+        const stateValue = els.stateFilter.value;
+        const status = els.statusFilter.value;
+
+        return state.partners.filter((partner) => {
+          const haystack = [
+            partner.company_name,
+            partner.contact_name,
+            partner.email,
+            partner.role,
+            partner.city,
+            partner.state,
+            partner.market,
+            partner.specialties,
+            partner.internal_notes
+          ].join(" ").toLowerCase();
+
+          const matchesQuery = !q || haystack.includes(q);
+          const matchesRole = !role || partner.role === role;
+          const matchesState = !stateValue || partner.state === stateValue;
+          const matchesStatus = !status || partner.status === status;
+
+          return matchesQuery && matchesRole && matchesState && matchesStatus;
+        });
+      }
+
+      function renderPartners() {
+        const rows = getFilteredPartners();
+
+        if (!rows.length) {
+          els.partnersGrid.innerHTML = `<div class="empty">No partners found.</div>`;
+          return;
+        }
+
+        els.partnersGrid.innerHTML = rows.map((partner) => `
+          <article class="card">
+            <h3>${escapeHtml(partner.company_name || partner.contact_name || "Unnamed Partner")}</h3>
+            <div class="sub">${escapeHtml(partner.role || "—")}</div>
+
+            <div class="chips">
+              <span class="chip">${escapeHtml(partner.status || "active")}</span>
+              <span class="chip">${escapeHtml(partner.city || "")}${partner.city && partner.state ? ", " : ""}${escapeHtml(partner.state || partner.market || "—")}</span>
+            </div>
+
+            <div class="meta">
+              <div>
+                <div class="row-label">Contact</div>
+                <div>${escapeHtml(partner.contact_name || "—")}</div>
+              </div>
+              <div>
+                <div class="row-label">Email</div>
+                <div>${escapeHtml(partner.email || "—")}</div>
+              </div>
+              <div>
+                <div class="row-label">Phone</div>
+                <div>${escapeHtml(partner.phone || "—")}</div>
+              </div>
+              <div>
+                <div class="row-label">Market</div>
+                <div>${escapeHtml(partner.market || "—")}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="row-label">Specialties</div>
+              <div>${escapeHtml(partner.specialties || "—")}</div>
+            </div>
+
+            <div class="section">
+              <div class="row-label">Internal Notes</div>
+              <div class="muted">${escapeHtml(partner.internal_notes || "—")}</div>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      async function loadPartners() {
+        const { data, error } = await supabaseClient
+          .from("partners")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error(error);
+          els.partnersGrid.innerHTML = `<div class="empty">Failed to load partners.</div>`;
+          return;
+        }
+
+        state.partners = data || [];
+        renderOptions();
+        renderPartners();
+      }
+
+      els.searchInput.addEventListener("input", renderPartners);
+      els.roleFilter.addEventListener("change", renderPartners);
+      els.stateFilter.addEventListener("change", renderPartners);
+      els.statusFilter.addEventListener("change", renderPartners);
+      els.clearBtn.addEventListener("click", () => {
+        els.searchInput.value = "";
+        els.roleFilter.value = "";
+        els.stateFilter.value = "";
+        els.statusFilter.value = "";
+        renderPartners();
+      });
+
+      loadPartners();
+    </script>
+  </body>
+</html>
