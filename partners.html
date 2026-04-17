@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VaultForge Admin</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121935;
+        --panel-2: #18213f;
+        --line: #2a3766;
+        --text: #f3f6ff;
+        --muted: #a8b3d1;
+        --green: #22c55e;
+        --red: #ef4444;
+        --blue: #3b82f6;
+        --purple: #8b5cf6;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background: linear-gradient(180deg, #08101f 0%, #0b1020 100%);
+        color: var(--text);
+      }
+
+      .wrap {
+        max-width: 1380px;
+        margin: 0 auto;
+        padding: 28px 18px 60px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 30px;
+      }
+
+      .sub {
+        color: var(--muted);
+        margin-top: 6px;
+      }
+
+      .top-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .top-actions a,
+      .top-actions button {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .stat {
+        background: rgba(18, 25, 53, 0.92);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .stat-label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .stat-value {
+        font-size: 30px;
+        font-weight: 700;
+        margin-top: 8px;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr 1fr 1fr auto;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      input,
+      select,
+      button {
+        font: inherit;
+      }
+
+      .field,
+      .button {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 12px 14px;
+      }
+
+      .button {
+        cursor: pointer;
+      }
+
+      .table-shell {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(18, 25, 53, 0.92);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1220px;
+      }
+
+      thead th {
+        text-align: left;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        padding: 14px 12px;
+        border-bottom: 1px solid var(--line);
+        background: #0f1731;
+      }
+
+      tbody td {
+        padding: 14px 12px;
+        border-bottom: 1px solid rgba(42, 55, 102, 0.72);
+        vertical-align: top;
+      }
+
+      .name {
+        font-weight: 700;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 4px;
+      }
+
+      .chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        border: 1px solid var(--line);
+        background: #141d3b;
+      }
+
+      .chip.pending {
+        color: #ffd166;
+      }
+
+      .chip.approved {
+        color: #86efac;
+      }
+
+      .chip.contacted {
+        color: #93c5fd;
+      }
+
+      .chip.rejected {
+        color: #fca5a5;
+      }
+
+      .chip.partner {
+        color: #c4b5fd;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .action {
+        border: 0;
+        color: white;
+        padding: 9px 10px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .approve { background: var(--green); }
+      .contacted { background: var(--blue); }
+      .reject { background: var(--red); }
+      .promote { background: var(--purple); }
+
+      .empty {
+        text-align: center;
+        color: var(--muted);
+        padding: 30px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        background: #10172b;
+        color: white;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 14px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: 0.2s ease;
+        pointer-events: none;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 1100px) {
+        .stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .controls {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .stats,
+        .controls {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <h1>VaultForge Admin</h1>
+          <div class="sub">Applications pipeline + partner promotion</div>
+        </div>
+
+        <div class="top-actions">
+          <a href="/" target="_blank" rel="noreferrer">Public Site</a>
+          <a href="/partners.html" target="_blank" rel="noreferrer">Partners</a>
+          <button id="logoutBtn" type="button">Logout</button>
+          <button id="refreshBtn" type="button">Refresh</button>
+          <button id="exportBtn" type="button">Export CSV</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Total Applications</div>
+          <div class="stat-value" id="totalCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="pendingCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" id="approvedCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Promoted to Partners</div>
+          <div class="stat-value" id="partnerCount">0</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input id="searchInput" class="field" type="text" placeholder="Search company, contact, email, role, city, state..." />
+        <select id="statusFilter" class="field">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="contacted">Contacted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <select id="roleFilter" class="field">
+          <option value="">All roles</option>
+        </select>
+        <select id="partnerFilter" class="field">
+          <option value="">All partner states</option>
+          <option value="promoted">Promoted only</option>
+          <option value="not_promoted">Not promoted</option>
+        </select>
+        <button id="clearBtn" class="button" type="button">Clear</button>
+      </div>
+
+      <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>Applicant</th>
+              <th>Business</th>
+              <th>Role</th>
+              <th>Market</th>
+              <th>Status</th>
+              <th>Partner</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td colspan="8" class="empty">Loading applications...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+      import { requireAuth, logout } from "./auth.js";
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+      requireAuth();
+
+      const SUPABASE_URL = "YOUR_SUPABASE_URL";
+      const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+      const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const state = {
+        applications: [],
+        partners: []
+      };
+
+      const els = {
+        tableBody: document.getElementById("tableBody"),
+        totalCount: document.getElementById("totalCount"),
+        pendingCount: document.getElementById("pendingCount"),
+        approvedCount: document.getElementById("approvedCount"),
+        partnerCount: document.getElementById("partnerCount"),
+        searchInput: document.getElementById("searchInput"),
+        statusFilter: document.getElementById("statusFilter"),
+        roleFilter: document.getElementById("roleFilter"),
+        partnerFilter: document.getElementById("partnerFilter"),
+        clearBtn: document.getElementById("clearBtn"),
+        refreshBtn: document.getElementById("refreshBtn"),
+        exportBtn: document.getElementById("exportBtn"),
+        logoutBtn: document.getElementById("logoutBtn"),
+        toast: document.getElementById("toast")
+      };
+
+      function showToast(message) {
+        els.toast.textContent = message;
+        els.toast.classList.add("show");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(() => {
+          els.toast.classList.remove("show");
+        }, 2400);
+      }
+
+      function esc(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function formatDate(value) {
+        if (!value) return "—";
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return String(value);
+        return d.toLocaleString();
+      }
+
+      function get(row, keys, fallback = "") {
+        for (const key of keys) {
+          if (row[key] !== undefined && row[key] !== null && row[key] !== "") {
+            return row[key];
+          }
+        }
+        return fallback;
+      }
+
+      function normalizeStatus(value) {
+        const v = String(value || "pending").trim().toLowerCase();
+        if (["pending", "approved", "contacted", "rejected"].includes(v)) return v;
+        return "pending";
+      }
+
+      function mapApplication(row) {
+        return {
+          raw: row,
+          id: row.id,
+          company_name: get(row, ["company_name", "business_name", "company", "organization"]),
+          contact_name: get(row, ["contact_name", "full_name", "name"]),
+          email: get(row, ["email"]),
+          phone: get(row, ["phone", "phone_number"]),
+          role: get(row, ["role", "partner_type", "user_type"], "Unknown"),
+          city: get(row, ["city"]),
+          state: get(row, ["state", "region"]),
+          market: get(row, ["market"]),
+          specialties: get(row, ["specialties", "specialty", "notes", "message"]),
+          website: get(row, ["website"]),
+          service_area: get(row, ["service_area", "servicearea"]),
+          internal_notes: get(row, ["internal_notes"]),
+          status: normalizeStatus(get(row, ["status"], "pending")),
+          created_at: get(row, ["created_at", "submitted_at"])
+        };
+      }
+
+      function partnerKeyByApp(app) {
+        return `${String(app.id || "")}::${String(app.email || "").toLowerCase()}::${String(app.role || "").toLowerCase()}`;
+      }
+
+      function partnerKeyByRow(row) {
+        return `${String(row.application_id || "")}::${String(row.email || "").toLowerCase()}::${String(row.role || "").toLowerCase()}`;
+      }
+
+      function buildPromotedSet() {
+        const set = new Set();
+
+        state.partners.forEach((row) => {
+          set.add(partnerKeyByRow(row));
+          set.add(`::${String(row.email || "").toLowerCase()}::${String(row.role || "").toLowerCase()}`);
+        });
+
+        return set;
+      }
+
+      function isPromoted(app, promotedSet) {
+        return promotedSet.has(partnerKeyByApp(app)) ||
+          promotedSet.has(`::${String(app.email || "").toLowerCase()}::${String(app.role || "").toLowerCase()}`);
+      }
+
+      function renderStats() {
+        const promotedSet = buildPromotedSet();
+        els.totalCount.textContent = String(state.applications.length);
+        els.pendingCount.textContent = String(state.applications.filter(a => a.status === "pending").length);
+        els.approvedCount.textContent = String(state.applications.filter(a => a.status === "approved").length);
+        els.partnerCount.textContent = String(state.applications.filter(a => isPromoted(a, promotedSet)).length);
+      }
+
+      function renderRoleOptions() {
+        const roles = [...new Set(state.applications.map(a => a.role).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        els.roleFilter.innerHTML =
+          `<option value="">All roles</option>` +
+          roles.map(role => `<option value="${esc(role)}">${esc(role)}</option>`).join("");
+      }
+
+      function getFilteredRows() {
+        const q = els.searchInput.value.trim().toLowerCase();
+        const status = els.statusFilter.value;
+        const role = els.roleFilter.value;
+        const partnerState = els.partnerFilter.value;
+        const promotedSet = buildPromotedSet();
+
+        return state.applications.filter((app) => {
+          const haystack = [
+            app.company_name,
+            app.contact_name,
+            app.email,
+            app.phone,
+            app.role,
+            app.city,
+            app.state,
+            app.market,
+            app.specialties
+          ].join(" ").toLowerCase();
+
+          const matchesSearch = !q || haystack.includes(q);
+          const matchesStatus = !status || app.status === status;
+          const matchesRole = !role || app.role === role;
+
+          const promoted = isPromoted(app, promotedSet);
+          const matchesPartner =
+            !partnerState ||
+            (partnerState === "promoted" && promoted) ||
+            (partnerState === "not_promoted" && !promoted);
+
+          return matchesSearch && matchesStatus && matchesRole && matchesPartner;
+        });
+      }
+
+      function renderTable() {
+        const rows = getFilteredRows();
+        const promotedSet = buildPromotedSet();
+
+        if (!rows.length) {
+          els.tableBody.innerHTML = `
+            <tr>
+              <td colspan="8" class="empty">No applications found.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        els.tableBody.innerHTML = rows.map((app) => {
+          const promoted = isPromoted(app, promotedSet);
+
+          return `
+            <tr>
+              <td>
+                <div class="name">${esc(app.contact_name || "Unnamed")}</div>
+                <div class="muted">${esc(app.email || "—")}</div>
+                <div class="muted">${esc(app.phone || "—")}</div>
+              </td>
+              <td>
+                <div class="name">${esc(app.company_name || "—")}</div>
+                <div class="muted">${esc(app.website || "")}</div>
+              </td>
+              <td>${esc(app.role || "—")}</td>
+              <td>
+                <div>${esc(app.city || "")}${app.city && app.state ? ", " : ""}${esc(app.state || "")}</div>
+                <div class="muted">${esc(app.market || app.service_area || "—")}</div>
+              </td>
+              <td>
+                <div class="chips">
+                  <span class="chip ${esc(app.status)}">${esc(app.status)}</span>
+                </div>
+              </td>
+              <td>
+                <div class="chips">
+                  <span class="chip partner">${promoted ? "In partners" : "Not promoted"}</span>
+                </div>
+              </td>
+              <td>${esc(formatDate(app.created_at))}</td>
+              <td>
+                <div class="actions">
+                  <button class="action approve" data-action="approve" data-id="${esc(app.id)}">Approve</button>
+                  <button class="action contacted" data-action="contacted" data-id="${esc(app.id)}">Contacted</button>
+                  <button class="action reject" data-action="reject" data-id="${esc(app.id)}">Reject</button>
+                  <button class="action promote" data-action="promote" data-id="${esc(app.id)}" ${promoted ? "disabled" : ""}>
+                    ${promoted ? "Promoted" : "Promote to Partner"}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      async function loadApplications() {
+        const { data, error } = await supabaseClient
+          .from("applications")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        state.applications = (data || []).map(mapApplication);
+      }
+
+      async function loadPartners() {
+        const { data, error } = await supabaseClient
+          .from("partners")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        state.partners = data || [];
+      }
+
+      async function loadAll() {
+        try {
+          await Promise.all([loadApplications(), loadPartners()]);
+          renderRoleOptions();
+          renderStats();
+          renderTable();
+        } catch (error) {
+          console.error(error);
+          els.tableBody.innerHTML = `
+            <tr>
+              <td colspan="8" class="empty">Failed to load admin data.</td>
+            </tr>
+          `;
+          showToast(error.message || "Load failed");
+        }
+      }
+
+      async function updateStatus(id, status) {
+        const { error } = await supabaseClient
+          .from("applications")
+          .update({ status })
+          .eq("id", id);
+
+        if (error) throw error;
+
+        const row = state.applications.find((item) => item.id === id);
+        if (row) row.status = status;
+      }
+
+      async function promoteToPartner(id) {
+        const app = state.applications.find((item) => item.id === id);
+        if (!app) throw new Error("Application not found");
+
+        const payload = {
+          application_id: app.id,
+          company_name: app.company_name || null,
+          contact_name: app.contact_name || null,
+          email: app.email || null,
+          phone: app.phone || null,
+          role: app.role || null,
+          city: app.city || null,
+          state: app.state || null,
+          market: app.market || null,
+          specialties: app.specialties || null,
+          website: app.website || null,
+          service_area: app.service_area || null,
+          status: "active",
+          internal_notes: app.internal_notes || null,
+          raw_application: app.raw || {}
+        };
+
+        const { error: upsertError } = await supabaseClient
+          .from("partners")
+          .upsert(payload, { onConflict: "email,role" });
+
+        if (upsertError) throw upsertError;
+
+        const { error: statusError } = await supabaseClient
+          .from("applications")
+          .update({ status: "approved" })
+          .eq("id", id);
+
+        if (statusError) throw statusError;
+
+        const row = state.applications.find((item) => item.id === id);
+        if (row) row.status = "approved";
+
+        await loadPartners();
+      }
+
+      function exportCsv() {
+        const rows = getFilteredRows();
+        const headers = [
+          "id",
+          "contact_name",
+          "company_name",
+          "email",
+          "phone",
+          "role",
+          "city",
+          "state",
+          "market",
+          "status",
+          "created_at"
+        ];
+
+        const csv = [
+          headers.join(","),
+          ...rows.map((row) => headers.map((header) => {
+            const value = String(row[header] ?? "").replaceAll('"', '""');
+            return `"${value}"`;
+          }).join(","))
+        ].join("\n");
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `vaultforge-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      els.searchInput.addEventListener("input", renderTable);
+      els.statusFilter.addEventListener("change", renderTable);
+      els.roleFilter.addEventListener("change", renderTable);
+      els.partnerFilter.addEventListener("change", renderTable);
+
+      els.clearBtn.addEventListener("click", () => {
+        els.searchInput.value = "";
+        els.statusFilter.value = "";
+        els.roleFilter.value = "";
+        els.partnerFilter.value = "";
+        renderTable();
+      });
+
+      els.refreshBtn.addEventListener("click", loadAll);
+      els.exportBtn.addEventListener("click", exportCsv);
+      els.logoutBtn.addEventListener("click", logout);
+
+      els.tableBody.addEventListener("click", async (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+
+        const id = button.dataset.id;
+        const action = button.dataset.action;
+        if (!id || !action) return;
+
+        button.disabled = true;
+
+        try {
+          if (action === "approve") {
+            await updateStatus(id, "approved");
+            showToast("Application approved");
+          } else if (action === "contacted") {
+            await updateStatus(id, "contacted");
+            showToast("Marked contacted");
+          } else if (action === "reject") {
+            await updateStatus(id, "rejected");
+            showToast("Application rejected");
+          } else if (action === "promote") {
+            await promoteToPartner(id);
+            showToast("Promoted to partner");
+          }
+
+          renderStats();
+          renderTable();
+        } catch (error) {
+          console.error(error);
+          showToast(error.message || "Action failed");
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      loadAll();
+    </script>
+  </body>
+</html>
