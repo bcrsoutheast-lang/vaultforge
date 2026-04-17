@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge | Private Real Estate Network</title>
+  <meta
+    name="description"
+    content="VaultForge is a private real estate network connecting buyers, lenders, title partners, attorneys, contractors, and key real estate operators before investor launch."
+  />
+
+  <style>
+    :root {
+      --bg: #07101f;
+      --bg-2: #0d1730;
+      --panel: #121b39;
+      --panel-2: #18244c;
+      --line: rgba(255,255,255,0.08);
+      --text: #f5f7ff;
+      --muted: #aeb9d8;
+      --blue: #3b82f6;
+      --blue-2: #2563eb;
+      --green: #22c55e;
+      --red: #ef4444;
+      --gold: #f4c95d;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(244,201,93,0.08), transparent 25%),
+        linear-gradient(180deg, var(--bg) 0%, #091225 100%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(7,16,31,0.78);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .topbar-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #111827;
+      background: linear-gradient(135deg, var(--gold), #fff0b5);
+      box-shadow: 0 12px 26px rgba(244,201,93,0.25);
+      font-weight: 900;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.16s ease, opacity 0.16s ease;
+      text-align: center;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      box-shadow: 0 14px 30px rgba(37,99,235,0.30);
+    }
+
+    .btn-secondary {
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .hero {
+      padding: 54px 0 28px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .hero-card,
+    .panel,
+    .card,
+    .cta {
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(24,36,76,0.93), rgba(18,27,57,0.93));
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      right: -70px;
+      bottom: -90px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.22), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.22);
+      color: #dbe7ff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -1.2px;
+      max-width: 760px;
+    }
+
+    .hero-copy {
+      margin: 0 0 22px;
+      font-size: 18px;
+      line-height: 1.72;
+      color: #d8e2fb;
+      max-width: 780px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .micro-points {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .mini strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .mini span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .stats-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stats-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(34,197,94,0.10);
+      border: 1px solid rgba(34,197,94,0.24);
+      color: #ddffe9;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .stat-box {
+      padding: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+    }
+
+    .stat-box h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .stat-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.56;
+    }
+
+    .section {
+      padding: 30px 0;
+    }
+
+    .section-head {
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(26px, 3vw, 38px);
+      letter-spacing: -0.6px;
+    }
+
+    .section-head p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 760px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      padding: 22px;
+      min-height: 100%;
+    }
+
+    .icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 14px;
+      font-size: 20px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.22);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+    }
+
+    .card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: #dbe7ff;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--gold);
+      margin-top: 8px;
+      flex: 0 0 auto;
+    }
+
+    .roles {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .role {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .role strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .role span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .cta {
+      padding: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.16), transparent 30%),
+        linear-gradient(180deg, rgba(24,36,76,0.94), rgba(18,27,57,0.94));
+    }
+
+    .cta h3 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      letter-spacing: -0.6px;
+    }
+
+    .cta p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 760px;
+    }
+
+    footer {
+      padding: 34px 0 60px;
+      color: var(--muted);
+    }
+
+    .footer-line {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(3,8,20,0.78);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: min(760px, 100%);
+      max-height: min(92vh, 920px);
+      overflow: auto;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #121b39, #0f1731);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.5);
+    }
+
+    .modal-head {
+      padding: 24px 24px 14px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .modal-head h3 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: -0.5px;
+    }
+
+    .modal-head p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .close-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 18px;
+      flex: 0 0 auto;
+    }
+
+    .form {
+      padding: 20px 24px 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #dde6ff;
+      letter-spacing: 0.2px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 14px;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #90a2ca;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(59,130,246,0.68);
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 6px 0 18px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .check-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex: 0 0 auto;
+      accent-color: var(--blue);
+    }
+
+    .check-row span {
+      color: #dbe7ff;
+      font-size: 14px;
+      line-height: 1.55;
+      font-weight: 600;
+    }
+
+    .status {
+      display: none;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.success {
+      background: rgba(34,197,94,0.10);
+      border: 1px solid rgba(34,197,94,0.24);
+      color: #ddffe9;
+    }
+
+    .status.error {
+      background: rgba(239,68,68,0.10);
+      border: 1px solid rgba(239,68,68,0.24);
+      color: #ffe2e2;
+    }
+
+    .tiny {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .grid-3,
+      .grid-2,
+      .roles,
+      .micro-points {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px 0;
+      }
+
+      .nav {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .hero {
+        padding-top: 34px;
+      }
+
+      .hero-card,
+      .stats-card,
+      .card,
+      .cta {
+        padding: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-head,
+      .form {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a href="/" class="brand">
+        <div class="brand-mark">V</div>
+        <div>
+          <div>VaultForge</div>
+          <div class="brand-sub">Private Real Estate Network</div>
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a class="nav-link" href="#network">Network</a>
+        <a class="nav-link" href="#roles">Who We Want</a>
+        <a class="nav-link" href="#future">What’s Coming</a>
+        <a class="nav-link" href="/partners.html">Partners</a>
+        <a class="nav-link" href="/login.html">Admin Login</a>
+        <button class="btn btn-primary" id="openApplicationBtnTop" type="button">Join the Network</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-card">
+          <div class="eyebrow">Built first for the supply side of the market</div>
+          <h1>Private access to the people real estate deals actually need.</h1>
+          <p class="hero-copy">
+            VaultForge is being built as a private network for serious operators:
+            buyers, lenders, title companies, real estate attorneys, contractors,
+            insurance providers, inspectors, investor-friendly agents, and other
+            deal-side vendors. We are onboarding the network first, before the
+            wider investor launch.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="openApplicationBtnHero" type="button">Apply to Join</button>
+            <a class="btn btn-secondary" href="#network">See how it works</a>
+          </div>
+
+          <div class="micro-points">
+            <div class="mini">
+              <strong>Curated network</strong>
+              <span>Not an open marketplace. We are building a reliable bench of real operators.</span>
+            </div>
+            <div class="mini">
+              <strong>Future targeted routing</strong>
+              <span>Deals, pain points, and opportunities will be routed to the right people fast.</span>
+            </div>
+            <div class="mini">
+              <strong>Built to solve stalled deals</strong>
+              <span>The Pain Button will later turn failed and stuck deals into opportunities.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel stats-card">
+          <div class="stats-head">
+            <h2 style="margin:0;font-size:22px;letter-spacing:-0.4px;">Why join now</h2>
+            <div class="badge">Founding access</div>
+          </div>
+
+          <div class="stack">
+            <div class="stat-box">
+              <h3>Get positioned before public traffic</h3>
+              <p>
+                We are laying the private side first so quality partners are already in place
+                before the larger investor and deal flow layers open up.
+              </p>
+            </div>
+
+            <div class="stat-box">
+              <h3>Be visible when demand starts routing</h3>
+              <p>
+                Approved partners are intended to become the first call when future demand,
+                deals, problem properties, and operator needs are matched inside VaultForge.
+              </p>
+            </div>
+
+            <div class="stat-box">
+              <h3>Help shape the network early</h3>
+              <p>
+                Early approved partners help define which roles, markets, pain points,
+                and solution channels matter most as the platform expands.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="network">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>What VaultForge is building</h2>
+            <p>
+              This is not just a directory. The long-term vision is an operating system for real estate
+              problems, people, deals, and solutions. First we build the network. Then we connect
+              opportunity, urgency, and deal flow to the right operators.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="icon">🤝</div>
+            <h3>Private operator network</h3>
+            <p>
+              We are assembling trusted buyers, lenders, attorneys, title partners, contractors,
+              agents, inspectors, and other vendors into one organized ecosystem.
+            </p>
+            <div class="list">
+              <div class="list-item"><span class="dot"></span><span>Role-based onboarding</span></div>
+              <div class="list-item"><span class="dot"></span><span>Market and coverage tracking</span></div>
+              <div class="list-item"><span class="dot"></span><span>Approval-first access model</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="icon">📡</div>
+            <h3>Targeted opportunity routing</h3>
+            <p>
+              When deals or needs enter the system, the goal is to route them to the right people
+              by role, market, capacity, and urgency instead of blasting noise to everyone.
+            </p>
+            <div class="list">
+              <div class="list-item"><span class="dot"></span><span>Buyer matching by market and strategy</span></div>
+              <div class="list-item"><span class="dot"></span><span>Vendor routing by service need</span></div>
+              <div class="list-item"><span class="dot"></span><span>Lender and attorney alignment by scenario</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="icon">🚨</div>
+            <h3>Pain Button intake</h3>
+            <p>
+              One of the signature future layers is the Pain Button: a guided intake for failed,
+              dead, delayed, or distressed deals that need the right solution fast.
+            </p>
+            <div class="list">
+              <div class="list-item"><span class="dot"></span><span>Stuck escrows and title issues</span></div>
+              <div class="list-item"><span class="dot"></span><span>Funding gaps and partner needs</span></div>
+              <div class="list-item"><span class="dot"></span><span>Problem properties that need operator attention</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="roles">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>Who we’re onboarding right now</h2>
+            <p>
+              We are currently building the approved partner side of the platform. If you operate in
+              or around real estate transactions, acquisitions, construction, funding, or closing,
+              this is the layer we are filling first.
+            </p>
+          </div>
+        </div>
+
+        <div class="roles">
+          <div class="role">
+            <strong>Buyers</strong>
+            <span>Cash buyers, landlords, rehabbers, flippers, and operators looking for targeted opportunity flow.</span>
+          </div>
+          <div class="role">
+            <strong>Lenders</strong>
+            <span>Hard money, private lending, transactional funding, gap capital, and other deal-side capital sources.</span>
+          </div>
+          <div class="role">
+            <strong>Title Companies</strong>
+            <span>Partners who can help close, clear, coordinate, and solve title-side bottlenecks.</span>
+          </div>
+          <div class="role">
+            <strong>Real Estate Attorneys</strong>
+            <span>Legal operators who can help with contracts, title issues, structure, disputes, and problem files.</span>
+          </div>
+          <div class="role">
+            <strong>Contractors</strong>
+            <span>Reliable crews and specialists who can estimate, fix, stabilize, and move real projects forward.</span>
+          </div>
+          <div class="role">
+            <strong>Insurance Providers</strong>
+            <span>Partners who understand investor properties, vacant risk, rehab, and layered real estate coverage needs.</span>
+          </div>
+          <div class="role">
+            <strong>Inspectors</strong>
+            <span>Inspection partners who can help create clarity fast for acquisitions, rehab, and underwriting.</span>
+          </div>
+          <div class="role">
+            <strong>Investor-Friendly Agents</strong>
+            <span>Agents who understand flips, investor exits, pricing strategy, disposition, and speed.</span>
+          </div>
+          <div class="role">
+            <strong>Other Vendors</strong>
+            <span>Any serious operator or support partner who can solve an important part of the real estate machine.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="future">
+      <div class="wrap">
+        <div class="grid-2">
+          <div class="card">
+            <div class="icon">🧭</div>
+            <h3>Where this goes next</h3>
+            <p>
+              Once the network foundation is strong, VaultForge expands into investor intake,
+              deal distribution, locked opportunity flows, and operator-specific routing.
+            </p>
+            <div class="list">
+              <div class="list-item"><span class="dot"></span><span>Investor waitlist and buyer-side onboarding</span></div>
+              <div class="list-item"><span class="dot"></span><span>Deal intake and approval workflows</span></div>
+              <div class="list-item"><span class="dot"></span><span>Smart routing by market, role, and urgency</span></div>
+              <div class="list-item"><span class="dot"></span><span>Pain Button submissions for stuck and dead deals</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="icon">🔒</div>
+            <h3>Why it matters</h3>
+            <p>
+              Real estate breaks down when the right people don’t find each other in time.
+              VaultForge is being built to reduce that friction and make good operators easier to activate.
+            </p>
+            <div class="list">
+              <div class="list-item"><span class="dot"></span><span>Less random networking, more qualified alignment</span></div>
+              <div class="list-item"><span class="dot"></span><span>Better access to the right people before a deal dies</span></div>
+              <div class="list-item"><span class="dot"></span><span>A cleaner pipeline between problem and solution</span></div>
+              <div class="list-item"><span class="dot"></span><span>Built as a premium network, not a noisy listing board</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="cta">
+          <div>
+            <h3>Want in early?</h3>
+            <p>
+              Apply now to be considered for the approved partner network. We review applicants by
+              role, market, fit, and usefulness to the ecosystem we’re building.
+            </p>
+          </div>
+          <button class="btn btn-primary" id="openApplicationBtnBottom" type="button">Apply to Join VaultForge</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-line">
+      <div>© VaultForge. Private real estate network buildout in progress.</div>
+      <div>
+        <a href="/partners.html">Partners</a>
+        &nbsp;•&nbsp;
+        <a href="/login.html">Admin Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="modal" id="applicationModal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="applicationTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="applicationTitle">Apply to Join VaultForge</h3>
+          <p>
+            Fill this out to be considered for the private network. Approved applicants
+            are later surfaced in the admin and partner workflow.
+          </p>
+        </div>
+        <button class="close-btn" id="closeApplicationBtn" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <form class="form" id="applicationForm" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="full_name">Full Name</label>
+            <input id="full_name" name="full_name" type="text" placeholder="Your full name" required />
+          </div>
+
+          <div class="field">
+            <label for="company_name">Company Name</label>
+            <input id="company_name" name="company_name" type="text" placeholder="Company or brand name" />
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="name@email.com" required />
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="Best contact number" required />
+          </div>
+
+          <div class="field">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+              <option value="">Select your role</option>
+              <option>Buyer</option>
+              <option>Lender</option>
+              <option>Title Company</option>
+              <option>Real Estate Attorney</option>
+              <option>Contractor</option>
+              <option>Insurance Provider</option>
+              <option>Inspector</option>
+              <option>Investor-Friendly Agent</option>
+              <option>Other Vendor</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="market">Primary Market</label>
+            <input id="market" name="market" type="text" placeholder="Example: Atlanta, Tampa, Jacksonville" required />
+          </div>
+
+          <div class="field">
+            <label for="website">Website or Social Link</label>
+            <input id="website" name="website" type="url" placeholder="https://..." />
+          </div>
+
+          <div class="field">
+            <label for="coverage_area">Coverage Area</label>
+            <input id="coverage_area" name="coverage_area" type="text" placeholder="Cities, counties, or regions you serve" />
+          </div>
+
+          <div class="field full">
+            <label for="services">What do you do?</label>
+            <textarea id="services" name="services" placeholder="Tell us what you do, the problems you solve, and the types of deals or clients you work with." required></textarea>
+          </div>
+
+          <div class="field full">
+            <label for="notes">Why should we add you to the network?</label>
+            <textarea id="notes" name="notes" placeholder="Explain your fit, experience, speed, deal focus, or why you'd be valuable inside VaultForge." required></textarea>
+          </div>
+        </div>
+
+        <label class="check-row">
+          <input id="consent" name="consent" type="checkbox" required />
+          <span>
+            I understand this is an application to join a private network, not a guarantee of approval,
+            placement, deal flow, or public listing.
+          </span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-full" id="submitApplicationBtn">
+          Submit Application
+        </button>
+
+        <div class="status" id="formStatus"></div>
+
+        <div class="tiny">
+          By submitting, you agree that VaultForge may review and store your application
+          for internal approval and network-building purposes.
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://mnwwvpuxrzostrplfgmq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const modal = document.getElementById("applicationModal");
+    const form = document.getElementById("applicationForm");
+    const statusBox = document.getElementById("formStatus");
+    const submitBtn = document.getElementById("submitApplicationBtn");
+    const closeBtn = document.getElementById("closeApplicationBtn");
+
+    const openButtons = [
+      document.getElementById("openApplicationBtnTop"),
+      document.getElementById("openApplicationBtnHero"),
+      document.getElementById("openApplicationBtnBottom")
+    ].filter(Boolean);
+
+    function openModal() {
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    function clearStatus() {
+      statusBox.textContent = "";
+      statusBox.className = "status";
+    }
+
+    function showStatus(message, type) {
+      statusBox.textContent = message;
+      statusBox.className = "status show " + type;
+    }
+
+    function getValue(name) {
+      return (form.elements[name]?.value || "").toString().trim();
+    }
+
+    function validateForm(payload) {
+      if (!payload.full_name) return "Full Name is required.";
+      if (!payload.email) return "Email is required.";
+      if (!payload.phone) return "Phone is required.";
+      if (!payload.role) return "Role is required.";
+      if (!payload.market) return "Primary Market is required.";
+      if (!payload.services) return "Please describe what you do.";
+      if (!payload.notes) return "Please explain why we should add you to the network.";
+      if (!payload.consent) return "Please confirm the application acknowledgment before submitting.";
+
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email);
+      if (!emailOk) return "Please enter a valid email address.";
+
+      if (payload.website) {
+        try {
+          new URL(payload.website);
+        } catch {
+          return "Please enter a valid website URL or leave it blank.";
+        }
+      }
+
+      return "";
+    }
+
+    async function submitApplication(payload) {
+      const response = await supabase
+        .from("applications")
+        .insert([payload])
+        .select();
+
+      return response;
+    }
+
+    openButtons.forEach((btn) => {
+      btn.addEventListener("click", openModal);
+    });
+
+    closeBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.classList.contains("open")) {
+        closeModal();
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearStatus();
+
+      const payload = {
+        full_name: getValue("full_name"),
+        company_name: getValue("company_name"),
+        email: getValue("email"),
+        phone: getValue("phone"),
+        role: getValue("role"),
+        market: getValue("market"),
+        website: getValue("website"),
+        coverage_area: getValue("coverage_area"),
+        services: getValue("services"),
+        notes: getValue("notes"),
+        consent: Boolean(form.elements["consent"]?.checked),
+        status: "pending"
+      };
+
+      const validationError = validateForm(payload);
+      if (validationError) {
+        showStatus(validationError, "error");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const { data, error, status, statusText } = await submitApplication(payload);
+
+        console.log("VaultForge application insert result:", {
+          data,
+          error,
+          status,
+          statusText,
+          payload
+        });
+
+        if (error) {
+          const detailedMessage =
+            error.message ||
+            error.details ||
+            error.hint ||
+            statusText ||
+            "Unknown Supabase error.";
+
+          throw new Error(detailedMessage);
+        }
+
+        showStatus(
+          "Application submitted successfully. We’ll review it and reach out if there’s a fit.",
+          "success"
+        );
+
+        form.reset();
+
+        setTimeout(() => {
+          closeModal();
+          clearStatus();
+        }, 1800);
+      } catch (err) {
+        console.error("VaultForge application submission failed:", err);
+
+        showStatus(
+          "Submission failed: " + (err?.message || "Unknown error."),
+          "error"
+        );
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Application";
+      }
+    });
+  </script>
+</body>
+</html>
