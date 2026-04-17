@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge</title>
+
+<style>
+:root{
+--bg:#08101f;
+--panel:#121935;
+--line:#2a3766;
+--text:#f3f6ff;
+--muted:#a8b3d1;
+--blue:#3b82f6;
+--green:#22c55e;
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:Inter,Arial,sans-serif;
+background:linear-gradient(180deg,#08101f 0%,#0b1020 100%);
+color:var(--text);
+}
+
+.wrap{
+max-width:1180px;
+margin:0 auto;
+padding:40px 18px 70px;
+}
+
+.hero{
+padding:48px 0;
+}
+
+h1{
+font-size:52px;
+line-height:1.05;
+margin:0 0 14px;
+max-width:780px;
+}
+
+.sub{
+font-size:20px;
+color:var(--muted);
+max-width:760px;
+line-height:1.5;
+margin-bottom:28px;
+}
+
+.cta{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+}
+
+button,a{
+font:inherit;
+}
+
+.btn{
+border:none;
+padding:14px 18px;
+border-radius:14px;
+cursor:pointer;
+text-decoration:none;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+}
+
+.btn-primary{
+background:var(--blue);
+color:white;
+}
+
+.btn-secondary{
+background:var(--panel);
+border:1px solid var(--line);
+color:var(--text);
+}
+
+.sections{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:16px;
+margin-top:28px;
+}
+
+.card{
+background:rgba(18,25,53,.92);
+border:1px solid var(--line);
+border-radius:18px;
+padding:18px;
+}
+
+.card h3{
+margin:0 0 10px;
+font-size:20px;
+}
+
+.card p{
+margin:0;
+color:var(--muted);
+line-height:1.55;
+}
+
+.banner{
+margin-top:22px;
+padding:18px;
+border-radius:18px;
+border:1px solid var(--line);
+background:rgba(18,25,53,.92);
+}
+
+.banner strong{
+display:block;
+margin-bottom:8px;
+font-size:18px;
+}
+
+.modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.68);
+display:none;
+align-items:center;
+justify-content:center;
+padding:18px;
+z-index:50;
+}
+
+.modal.show{
+display:flex;
+}
+
+.modal-card{
+width:100%;
+max-width:760px;
+max-height:92vh;
+overflow:auto;
+background:#0f1731;
+border:1px solid var(--line);
+border-radius:20px;
+padding:24px;
+}
+
+.modal-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+margin-bottom:18px;
+}
+
+.modal-top h2{
+margin:0;
+}
+
+.close{
+background:transparent;
+border:none;
+color:white;
+font-size:26px;
+cursor:pointer;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:14px;
+}
+
+.full{
+grid-column:1 / -1;
+}
+
+.field{
+display:flex;
+flex-direction:column;
+gap:7px;
+}
+
+label{
+font-size:14px;
+color:#dbe4ff;
+}
+
+input,select,textarea{
+width:100%;
+padding:12px 14px;
+border-radius:12px;
+border:1px solid var(--line);
+background:#121935;
+color:white;
+font:inherit;
+}
+
+textarea{
+min-height:120px;
+resize:vertical;
+}
+
+.submit{
+margin-top:16px;
+width:100%;
+background:var(--green);
+color:white;
+border:none;
+padding:14px;
+border-radius:14px;
+cursor:pointer;
+font-size:16px;
+font-weight:600;
+}
+
+.note{
+margin-top:12px;
+font-size:14px;
+color:var(--muted);
+text-align:center;
+}
+
+.success{
+margin-top:16px;
+padding:14px;
+border-radius:14px;
+background:#0f2d1c;
+border:1px solid #1f6b43;
+display:none;
+}
+
+@media(max-width:900px){
+.sections{
+grid-template-columns:1fr;
+}
+.grid{
+grid-template-columns:1fr;
+}
+h1{
+font-size:40px;
+}
+}
+
+@media(max-width:640px){
+h1{
+font-size:32px;
+}
+.sub{
+font-size:18px;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<section class="hero">
+<h1>Private Real Estate Network Built To Solve Stuck Deals</h1>
+
+<div class="sub">
+VaultForge is onboarding buyers, lenders, title companies, attorneys, and vendors first.  
+Investor deal submission opens after the network is fully built.
+</div>
+
+<div class="cta">
+<button id="openApplyBtn" class="btn btn-primary">Apply to Join Network</button>
+<a href="/admin" class="btn btn-secondary">Admin</a>
+</div>
+
+<div class="sections">
+
+<div class="card">
+<h3>Supply Side First</h3>
+<p>
+We are building the real operator network first: funding, title, legal, repair, insurance, and execution.
+</p>
+</div>
+
+<div class="card">
+<h3>Smart Routing</h3>
+<p>
+Every application strengthens future deal routing by geography, specialty, and speed.
+</p>
+</div>
+
+<div class="card">
+<h3>Pain Button</h3>
+<p>
+Future signature feature for failed, dead, delayed, or broken real estate deals.
+</p>
+</div>
+
+</div>
+
+<div class="banner">
+<strong>Launching Quietly</strong>
+Selective onboarding is open now for serious operators and service providers.
+</div>
+
+</section>
+
+</div>
+
+<div id="applyModal" class="modal">
+<div class="modal-card">
+
+<div class="modal-top">
+<h2>Apply to Join VaultForge</h2>
+<button id="closeModalBtn" class="close">&times;</button>
+</div>
+
+<form id="applyForm">
+
+<div class="grid">
+
+<div class="field">
+<label>Full Name</label>
+<input type="text" name="contact_name" required>
+</div>
+
+<div class="field">
+<label>Company Name</label>
+<input type="text" name="company_name" required>
+</div>
+
+<div class="field">
+<label>Email</label>
+<input type="email" name="email" required>
+</div>
+
+<div class="field">
+<label>Phone</label>
+<input type="text" name="phone">
+</div>
+
+<div class="field">
+<label>Role</label>
+<select id="roleSelect" name="role" required></select>
+</div>
+
+<div class="field">
+<label>City</label>
+<input type="text" name="city">
+</div>
+
+<div class="field">
+<label>State</label>
+<input type="text" name="state">
+</div>
+
+<div class="field">
+<label>Market</label>
+<input type="text" name="market">
+</div>
+
+<div class="field full">
+<label>Specialties</label>
+<textarea name="specialties"></textarea>
+</div>
+
+</div>
+
+<button class="submit" type="submit">Submit Application</button>
+
+<div class="note">
+Applications are reviewed privately.
+</div>
+
+<div id="successBox" class="success">
+Application received successfully.
+</div>
+
+</form>
+
+</div>
+</div>
+
+<script type="module">
+import { buildRoleOptions } from "./roles.js";
+
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+const modal = document.getElementById("applyModal");
+const openBtn = document.getElementById("openApplyBtn");
+const closeBtn = document.getElementById("closeModalBtn");
+const form = document.getElementById("applyForm");
+const successBox = document.getElementById("successBox");
+const roleSelect = document.getElementById("roleSelect");
+
+roleSelect.innerHTML =
+`<option value="">Select role</option>` +
+buildRoleOptions();
+
+openBtn.addEventListener("click", () => {
+modal.classList.add("show");
+});
+
+closeBtn.addEventListener("click", () => {
+modal.classList.remove("show");
+});
+
+modal.addEventListener("click", (e) => {
+if(e.target === modal){
+modal.classList.remove("show");
+}
+});
+
+form.addEventListener("submit", async (e) => {
+e.preventDefault();
+
+successBox.style.display = "none";
+
+const formData = new FormData(form);
+
+const payload = {
+contact_name: formData.get("contact_name"),
+company_name: formData.get("company_name"),
+email: formData.get("email"),
+phone: formData.get("phone"),
+role: formData.get("role"),
+city: formData.get("city"),
+state: formData.get("state"),
+market: formData.get("market"),
+specialties: formData.get("specialties"),
+status: "pending"
+};
+
+const { error } = await supabase
+.from("applications")
+.insert([payload]);
+
+if(error){
+alert(error.message);
+return;
+}
+
+successBox.style.display = "block";
+form.reset();
+
+roleSelect.innerHTML =
+`<option value="">Select role</option>` +
+buildRoleOptions();
+
+setTimeout(() => {
+modal.classList.remove("show");
+successBox.style.display = "none";
+}, 1800);
+});
+</script>
+
+</body>
+</html>
