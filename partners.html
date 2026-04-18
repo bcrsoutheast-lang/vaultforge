@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge Partners</title>
+  <meta name="description" content="VaultForge approved partner directory." />
+  <style>
+    :root {
+      --bg: #08101f;
+      --panel: #121b39;
+      --panel-2: #172347;
+      --line: rgba(255,255,255,0.08);
+      --text: #f5f7ff;
+      --muted: #b4bfd9;
+      --gold: #d6b35f;
+      --gold-2: #f1d28a;
+      --green: #22c55e;
+      --blue: #2563eb;
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --radius: 18px;
+      --max: 1280px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(214,179,95,0.08), transparent 28%),
+        linear-gradient(180deg, #07101e 0%, #08101f 100%);
+      color: var(--text);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .container {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(8,16,31,0.84);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(214,179,95,0.22), rgba(37,99,235,0.18));
+      border: 1px solid rgba(214,179,95,0.25);
+      color: var(--gold-2);
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      color: #201600;
+    }
+
+    main {
+      padding: 28px 0 48px;
+    }
+
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .page-head h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.03em;
+    }
+
+    .page-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 62ch;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: rgba(18,27,57,0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #0b1328;
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(214,179,95,0.55);
+      box-shadow: 0 0 0 3px rgba(214,179,95,0.12);
+    }
+
+    .status-box {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      display: none;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .status-box.show {
+      display: block;
+    }
+
+    .status-info {
+      background: rgba(37,99,235,0.1);
+      border: 1px solid rgba(37,99,235,0.24);
+      color: #cfe0ff;
+    }
+
+    .status-success {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.24);
+      color: #bcf5d0;
+    }
+
+    .status-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.24);
+      color: #fecaca;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .partner-card {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .partner-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+    }
+
+    .partner-name {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .partner-company {
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: capitalize;
+      white-space: nowrap;
+      background: rgba(34,197,94,0.14);
+      color: #bcf5d0;
+      border: 1px solid rgba(34,197,94,0.24);
+    }
+
+    .detail-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .detail-value {
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .detail-value a {
+      text-decoration: underline;
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1100px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .grid,
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        width: min(var(--max), calc(100% - 20px));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a href="/" class="brand" aria-label="VaultForge home">
+        <div class="brand-mark">VF</div>
+        <div>VaultForge Partners</div>
+      </a>
+
+      <div class="nav-actions">
+        <a class="btn btn-secondary" href="/admin.html">Admin</a>
+        <a class="btn btn-secondary" href="/login.html">Login</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-head">
+      <div>
+        <h1>Approved Network Directory</h1>
+        <p>
+          This is the internal approved operator layer for VaultForge. Search by name, company, role, or market to find active partners faster.
+        </p>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-secondary" id="refreshBtn" type="button">Refresh</button>
+      </div>
+    </div>
+
+    <div class="card controls">
+      <div class="controls-grid">
+        <input id="searchInput" type="text" placeholder="Search by name, company, email, phone, role, market..." />
+        <select id="roleFilter">
+          <option value="all">All roles</option>
+        </select>
+        <select id="marketFilter">
+          <option value="all">All markets</option>
+        </select>
+        <button class="btn btn-primary" id="clearFiltersBtn" type="button">Clear Filters</button>
+      </div>
+    </div>
+
+    <div id="statusBox" class="status-box" aria-live="polite"></div>
+    <div class="meta" id="resultsMeta">Loading partners...</div>
+
+    <div id="partnersGrid" class="grid">
+      <div class="card empty">Loading approved partners...</div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://mnwwvpuxrzostrplfgmq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const searchInput = document.getElementById("searchInput");
+    const roleFilter = document.getElementById("roleFilter");
+    const marketFilter = document.getElementById("marketFilter");
+    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const partnersGrid = document.getElementById("partnersGrid");
+    const statusBox = document.getElementById("statusBox");
+    const resultsMeta = document.getElementById("resultsMeta");
+
+    let partners = [];
+    let filteredPartners = [];
+
+    function showStatus(type, message) {
+      statusBox.className = "status-box show";
+      if (type === "success") statusBox.classList.add("status-success");
+      else if (type === "error") statusBox.classList.add("status-error");
+      else statusBox.classList.add("status-info");
+      statusBox.textContent = message;
+    }
+
+    function clearStatus() {
+      statusBox.className = "status-box";
+      statusBox.textContent = "";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeRow(row) {
+      return {
+        id: row.id,
+        created_at: row.created_at || null,
+        full_name: row.full_name || "",
+        company_name: row.company_name || row.company || "",
+        email: row.email || "",
+        phone: row.phone || "",
+        role: row.role || "",
+        market: row.market || row.markets || "",
+        website: row.website || "",
+        coverage_area: row.coverage_area || "",
+        services: row.services || "",
+        notes: row.notes || "",
+        status: row.status || "active"
+      };
+    }
+
+    function uniqueSorted(values) {
+      return Array.from(new Set(values.filter(Boolean).map(v => String(v).trim()))).sort((a, b) => a.localeCompare(b));
+    }
+
+    function populateFilters() {
+      const roles = uniqueSorted(partners.map(p => p.role));
+      const markets = uniqueSorted(partners.map(p => p.market));
+
+      roleFilter.innerHTML = '<option value="all">All roles</option>';
+      marketFilter.innerHTML = '<option value="all">All markets</option>';
+
+      roles.forEach((role) => {
+        const option = document.createElement("option");
+        option.value = role;
+        option.textContent = role;
+        roleFilter.appendChild(option);
+      });
+
+      markets.forEach((market) => {
+        const option = document.createElement("option");
+        option.value = market;
+        option.textContent = market;
+        marketFilter.appendChild(option);
+      });
+    }
+
+    function renderPartners(rows) {
+      resultsMeta.textContent = rows.length + " approved partner" + (rows.length === 1 ? "" : "s");
+
+      if (!rows.length) {
+        partnersGrid.innerHTML = '<div class="card empty">No approved partners match the current filters.</div>';
+        return;
+      }
+
+      partnersGrid.innerHTML = rows.map((row) => {
+        const name = escapeHtml(row.full_name || "Unnamed");
+        const company = escapeHtml(row.company_name || "—");
+        const role = escapeHtml(row.role || "—");
+        const market = escapeHtml(row.market || "—");
+        const email = escapeHtml(row.email || "—");
+        const phone = escapeHtml(row.phone || "—");
+        const coverage = escapeHtml(row.coverage_area || "—");
+        const services = escapeHtml(row.services || "—");
+        const notes = escapeHtml(row.notes || "—");
+        const website = row.website
+          ? '<a href="' + escapeHtml(row.website) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(row.website) + '</a>'
+          : "—";
+
+        return `
+          <div class="card partner-card">
+            <div class="partner-top">
+              <div>
+                <h3 class="partner-name">${name}</h3>
+                <div class="partner-company">${company}</div>
+              </div>
+              <div class="badge">${escapeHtml(row.status || "active")}</div>
+            </div>
+
+            <div class="detail-group">
+              <div class="detail">
+                <div class="detail-label">Role</div>
+                <div class="detail-value">${role}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detail-label">Market</div>
+                <div class="detail-value">${market}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detail-label">Contact</div>
+                <div class="detail-value">${email}<br>${phone}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detail-label">Website</div>
+                <div class="detail-value">${website}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detail-label">Coverage Area</div>
+                <div class="detail-value">${coverage}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detail-label">Services</div>
+                <div class="detail-value">${services}</div>
+              </div>
+
+              <div class="detail">
+                <div class="detail-label">Notes</div>
+                <div class="detail-value">${notes}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function applyFilters() {
+      const search = searchInput.value.trim().toLowerCase();
+      const selectedRole = roleFilter.value;
+      const selectedMarket = marketFilter.value;
+
+      filteredPartners = partners.filter((row) => {
+        const haystack = [
+          row.full_name,
+          row.company_name,
+          row.email,
+          row.phone,
+          row.role,
+          row.market,
+          row.coverage_area,
+          row.services,
+          row.notes
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = !search || haystack.includes(search);
+        const matchesRole = selectedRole === "all" || row.role === selectedRole;
+        const matchesMarket = selectedMarket === "all" || row.market === selectedMarket;
+
+        return matchesSearch && matchesRole && matchesMarket;
+      });
+
+      renderPartners(filteredPartners);
+    }
+
+    async function loadPartners() {
+      clearStatus();
+      partnersGrid.innerHTML = '<div class="card empty">Loading approved partners...</div>';
+      resultsMeta.textContent = "Loading partners...";
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("partners")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Load partners error:", error);
+          showStatus("error", "Failed to load partners: " + error.message);
+          partnersGrid.innerHTML = '<div class="card empty">Could not load approved partners.</div>';
+          resultsMeta.textContent = "0 approved partners";
+          return;
+        }
+
+        partners = (data || []).map(normalizeRow);
+        populateFilters();
+        applyFilters();
+        showStatus("success", "Approved partners loaded successfully.");
+      } catch (err) {
+        console.error("Unexpected partners load error:", err);
+        showStatus("error", "Unexpected load error: " + (err && err.message ? err.message : "Unknown error"));
+        partnersGrid.innerHTML = '<div class="card empty">Unexpected error loading approved partners.</div>';
+        resultsMeta.textContent = "0 approved partners";
+      }
+    }
+
+    searchInput.addEventListener("input", applyFilters);
+    roleFilter.addEventListener("change", applyFilters);
+    marketFilter.addEventListener("change", applyFilters);
+
+    clearFiltersBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      roleFilter.value = "all";
+      marketFilter.value = "all";
+      applyFilters();
+    });
+
+    refreshBtn.addEventListener("click", loadPartners);
+
+    loadPartners();
+  </script>
+</body>
+</html>
