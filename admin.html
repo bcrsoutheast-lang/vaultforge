@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultForge Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body{
+      margin:0;
+      background:#071844;
+      color:#fff;
+      font-family:Arial,sans-serif
+    }
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px
+    }
+    .card{
+      background:#0d1f59;
+      border-radius:24px;
+      padding:24px
+    }
+    h1{
+      margin:0 0 10px;
+      font-size:36px
+    }
+    h2{
+      margin:0 0 8px;
+      font-size:22px
+    }
+    h3{
+      margin:0 0 8px;
+      font-size:18px
+    }
+    p{
+      color:#c6d0f2
+    }
+    input,button,select{
+      padding:16px;
+      border-radius:16px;
+      font-size:16px
+    }
+    input,select{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid rgba(255,255,255,.12);
+      background:#02113f;
+      color:#fff
+    }
+    button{
+      border:none;
+      background:#e2c465;
+      color:#1e1604;
+      font-weight:900;
+      cursor:pointer
+    }
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:18px 0
+    }
+    .tab{
+      width:auto
+    }
+    .tab.active{
+      outline:3px solid rgba(255,255,255,.18)
+    }
+    .box{
+      margin-top:18px;
+      padding:16px;
+      border-radius:16px;
+      white-space:pre-wrap
+    }
+    .status{background:#10255f}
+    .error{background:#4a1f37}
+    .success{background:#173d2d}
+    .list{
+      display:grid;
+      gap:14px;
+      margin-top:18px
+    }
+    .item{
+      background:#09153f;
+      border-radius:18px;
+      padding:16px;
+      border:1px solid rgba(255,255,255,.06)
+    }
+    .hidden{display:none}
+    a{color:#c6d0f2}
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin:18px 0
+    }
+    .stat{
+      background:#09153f;
+      border-radius:18px;
+      padding:18px
+    }
+    .stat .label{
+      color:#c6d0f2;
+      font-size:14px;
+      margin-bottom:8px
+    }
+    .stat .value{
+      font-size:30px;
+      font-weight:900
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px
+    }
+    .meta{
+      color:#c6d0f2;
+      font-size:14px;
+      line-height:1.5
+    }
+    .pill{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      margin:4px 6px 0 0
+    }
+    .pill-open{background:#5b213a;color:#ffd7e3}
+    .pill-low{background:#193b2f;color:#bcf5dc}
+    .pill-medium{background:#3b3317;color:#fff1b9}
+    .pill-urgent,.pill-immediate{background:#5b213a;color:#ffd7e3}
+    .item-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:14px
+    }
+    .btn-small{
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:14px
+    }
+    .btn-secondary{
+      background:#1f3a8a;
+      color:#fff
+    }
+    .btn-success{
+      background:#16a34a;
+      color:#fff
+    }
+    .btn-danger{
+      background:#b91c1c;
+      color:#fff
+    }
+    .btn-neutral{
+      background:#334155;
+      color:#fff
+    }
+    .empty{
+      background:#09153f;
+      border-radius:18px;
+      padding:22px;
+      color:#c6d0f2
+    }
+    @media (max-width: 900px){
+      .stats{grid-template-columns:1fr 1fr}
+      .row{grid-template-columns:1fr}
+    }
+    @media (max-width: 640px){
+      .stats{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p><a href="/">← Home</a> | <a href="/members.html">Members</a> | <a href="/partners.html">Partners</a></p>
+
+    <div id="loginCard" class="card">
+      <h1>Admin Login</h1>
+      <p>Enter password to access admin operations.</p>
+      <input id="passwordInput" type="password" placeholder="Password">
+      <button id="loginBtn" style="width:100%;margin-top:14px;">Enter Admin</button>
+      <div id="loginStatus" class="box status">Waiting for password.</div>
+    </div>
+
+    <div id="adminCard" class="card hidden">
+      <div class="topbar">
+        <div>
+          <h1>VaultForge Admin</h1>
+          <p>Applications, pain requests, and operating visibility.</p>
+        </div>
+        <div class="actions">
+          <button id="reloadBtn" class="tab">Reload</button>
+          <button id="logoutBtn" class="tab">Logout</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Applications</div>
+          <div id="applicationsCount" class="value">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Pain Requests</div>
+          <div id="painCount" class="value">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Open Pain</div>
+          <div id="openPainCount" class="value">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Urgent / Immediate</div>
+          <div id="urgentPainCount" class="value">0</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button id="showAppsBtn" class="tab active">Applications</button>
+        <button id="showPainBtn" class="tab">Pain Requests</button>
+      </div>
+
+      <div id="adminStatus" class="box status">Admin ready.</div>
+
+      <div id="appsSection">
+        <div id="appsList" class="list"></div>
+      </div>
+
+      <div id="painSection" class="hidden">
+        <div id="painList" class="list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var loginCard = document.getElementById('loginCard');
+      var adminCard = document.getElementById('adminCard');
+      var loginStatus = document.getElementById('loginStatus');
+      var adminStatus = document.getElementById('adminStatus');
+      var appsList = document.getElementById('appsList');
+      var painList = document.getElementById('painList');
+      var appsSection = document.getElementById('appsSection');
+      var painSection = document.getElementById('painSection');
+      var applicationsCount = document.getElementById('applicationsCount');
+      var painCount = document.getElementById('painCount');
+      var openPainCount = document.getElementById('openPainCount');
+      var urgentPainCount = document.getElementById('urgentPainCount');
+      var showAppsBtn = document.getElementById('showAppsBtn');
+      var showPainBtn = document.getElementById('showPainBtn');
+
+      function setBox(el, cls, text) {
+        el.className = 'box ' + cls;
+        el.textContent = text;
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatDate(value) {
+        if (!value) return '';
+        try {
+          return new Date(value).toLocaleString();
+        } catch (e) {
+          return value;
+        }
+      }
+
+      function showTab(tabName) {
+        if (tabName === 'apps') {
+          appsSection.classList.remove('hidden');
+          painSection.classList.add('hidden');
+          showAppsBtn.classList.add('active');
+          showPainBtn.classList.remove('active');
+          setBox(adminStatus, 'status', 'Showing applications.');
+        } else {
+          painSection.classList.remove('hidden');
+          appsSection.classList.add('hidden');
+          showPainBtn.classList.add('active');
+          showAppsBtn.classList.remove('active');
+          setBox(adminStatus, 'status', 'Showing pain requests.');
+        }
+      }
+
+      try {
+        if (!window.supabase || !window.supabase.createClient) {
+          setBox(loginStatus, 'error', 'Supabase library failed to load.');
+          return;
+        }
+
+        var ADMIN_PASSWORD = 'Vault123!';
+        var SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+        var SUPABASE_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function showAdmin() {
+          loginCard.classList.add('hidden');
+          adminCard.classList.remove('hidden');
+          sessionStorage.setItem('vf_admin_ok', '1');
+        }
+
+        function showLogin() {
+          adminCard.classList.add('hidden');
+          loginCard.classList.remove('hidden');
+          sessionStorage.removeItem('vf_admin_ok');
+        }
+
+        async function loadApplications() {
+          appsList.innerHTML = '<div class="empty">Loading applications...</div>';
+
+          var result = await supabase
+            .from('applications')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (result.error) {
+            appsList.innerHTML = '<div class="empty">Applications error: ' + escapeHtml(result.error.message) + '</div>';
+            applicationsCount.textContent = '0';
+            return [];
+          }
+
+          var rows = result.data || [];
+          applicationsCount.textContent = String(rows.length);
+
+          if (!rows.length) {
+            appsList.innerHTML = '<div class="empty">No applications found.</div>';
+            return rows;
+          }
+
+          appsList.innerHTML = rows.map(function (row) {
+            return '' +
+              '<div class="item">' +
+                '<div class="row">' +
+                  '<div>' +
+                    '<h2>' + escapeHtml(row.name || 'Unnamed Applicant') + '</h2>' +
+                    '<div class="meta">' +
+                      '<strong>Email:</strong> ' + escapeHtml(row.email || '') + '<br>' +
+                      '<strong>Market:</strong> ' + escapeHtml(row.market || '') + '<br>' +
+                      '<strong>Created:</strong> ' + escapeHtml(formatDate(row.created_at || '')) +
+                    '</div>' +
+                  '</div>' +
+                  '<div>' +
+                    '<div class="meta">' +
+                      (row.phone ? '<strong>Phone:</strong> ' + escapeHtml(row.phone) + '<br>' : '') +
+                      (row.role ? '<strong>Role:</strong> ' + escapeHtml(row.role) + '<br>' : '') +
+                      (row.company ? '<strong>Company:</strong> ' + escapeHtml(row.company) + '<br>' : '') +
+                      (row.status ? '<strong>Status:</strong> ' + escapeHtml(row.status) : '')
+                    '</div>' +
+                  '</div>' +
+                '</div>' +
+              '</div>';
+          }).join('');
+
+          return rows;
+        }
+
+        function urgencyClass(value) {
+          var v = String(value || '').toLowerCase();
+          if (v === 'low') return 'pill-low';
+          if (v === 'medium') return 'pill-medium';
+          if (v === 'urgent') return 'pill-urgent';
+          if (v === 'immediate') return 'pill-immediate';
+          return 'pill-open';
+        }
+
+        async function updatePainStatus(id, nextStatus) {
+          setBox(adminStatus, 'status', 'Updating pain request #' + id + '...');
+          var result = await supabase
+            .from('pain_requests')
+            .update({ status: nextStatus })
+            .eq('id', id);
+
+          if (result.error) {
+            setBox(adminStatus, 'error', 'Update failed: ' + result.error.message);
+            return;
+          }
+
+          setBox(adminStatus, 'success', 'Pain request #' + id + ' updated to ' + nextStatus + '.');
+          await loadPain();
+        }
+
+        async function loadPain() {
+          painList.innerHTML = '<div class="empty">Loading pain requests...</div>';
+
+          var result = await supabase
+            .from('pain_requests')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (result.error) {
+            painList.innerHTML = '<div class="empty">Pain requests error: ' + escapeHtml(result.error.message) + '</div>';
+            painCount.textContent = '0';
+            openPainCount.textContent = '0';
+            urgentPainCount.textContent = '0';
+            return [];
+          }
+
+          var rows = result.data || [];
+          painCount.textContent = String(rows.length);
+          openPainCount.textContent = String(rows.filter(function (row) {
+            return String(row.status || '').toLowerCase() === 'open';
+          }).length);
+          urgentPainCount.textContent = String(rows.filter(function (row) {
+            var u = String(row.urgency || '').toLowerCase();
+            return u === 'urgent' || u === 'immediate';
+          }).length);
+
+          if (!rows.length) {
+            painList.innerHTML = '<div class="empty">No pain requests found.</div>';
+            return rows;
+          }
+
+          painList.innerHTML = rows.map(function (row) {
+            var safeStatus = escapeHtml(row.status || 'open');
+            var safeUrgency = escapeHtml(row.urgency || '');
+            var safeNeededRole = escapeHtml(row.needed_role || '');
+            var safeName = escapeHtml(row.name || '');
+            var safeEmail = escapeHtml(row.email || '');
+            var safeMarket = escapeHtml(row.market || '');
+            var safeBudget = escapeHtml(row.budget || '');
+            var safeProblem = escapeHtml(row.problem || '');
+            var safeCreated = escapeHtml(formatDate(row.created_at || ''));
+
+            return '' +
+              '<div class="item">' +
+                '<h2>#' + escapeHtml(row.id) + ' ' + safeName + '</h2>' +
+                '<div class="meta">' +
+                  '<strong>Email:</strong> ' + safeEmail + '<br>' +
+                  '<strong>Market:</strong> ' + safeMarket + '<br>' +
+                  '<strong>Created:</strong> ' + safeCreated +
+                '</div>' +
+                '<div style="margin-top:10px;">' +
+                  '<span class="pill ' + urgencyClass(row.urgency) + '">' + safeUrgency + '</span>' +
+                  '<span class="pill pill-open">Status: ' + safeStatus + '</span>' +
+                  '<span class="pill pill-open">Need: ' + safeNeededRole + '</span>' +
+                  (safeBudget ? '<span class="pill pill-open">Budget: ' + safeBudget + '</span>' : '') +
+                '</div>' +
+                '<p style="margin-top:14px;">' + safeProblem + '</p>' +
+                '<div class="item-actions">' +
+                  '<button class="btn-small btn-neutral" data-action="open" data-id="' + escapeHtml(row.id) + '">Mark Open</button>' +
+                  '<button class="btn-small btn-secondary" data-action="in_review" data-id="' + escapeHtml(row.id) + '">Mark In Review</button>' +
+                  '<button class="btn-small btn-success" data-action="resolved" data-id="' + escapeHtml(row.id) + '">Mark Resolved</button>' +
+                  '<button class="btn-small btn-danger" data-action="closed" data-id="' + escapeHtml(row.id) + '">Mark Closed</button>' +
+                '</div>' +
+              '</div>';
+          }).join('');
+
+          Array.prototype.slice.call(painList.querySelectorAll('button[data-action]')).forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+              var id = this.getAttribute('data-id');
+              var action = this.getAttribute('data-action');
+              await updatePainStatus(id, action);
+            });
+          });
+
+          return rows;
+        }
+
+        async function loadAll() {
+          setBox(adminStatus, 'status', 'Loading admin data...');
+          await loadApplications();
+          await loadPain();
+          setBox(adminStatus, 'success', 'Admin loaded.');
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', async function () {
+          var password = document.getElementById('passwordInput').value;
+          if (password !== ADMIN_PASSWORD) {
+            setBox(loginStatus, 'error', 'Incorrect password.');
+            return;
+          }
+          setBox(loginStatus, 'success', 'Password accepted.');
+          showAdmin();
+          await loadAll();
+        });
+
+        document.getElementById('passwordInput').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('loginBtn').click();
+          }
+        });
+
+        showAppsBtn.addEventListener('click', function () {
+          showTab('apps');
+        });
+
+        showPainBtn.addEventListener('click', function () {
+          showTab('pain');
+        });
+
+        document.getElementById('reloadBtn').addEventListener('click', async function () {
+          await loadAll();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+          showLogin();
+          setBox(loginStatus, 'status', 'Logged out.');
+        });
+
+        if (sessionStorage.getItem('vf_admin_ok') === '1') {
+          showAdmin();
+          loadAll();
+        }
+      } catch (err) {
+        setBox(loginStatus, 'error', 'Page script failed: ' + (err && err.message ? err.message : String(err)));
+      }
+    })();
+  </script>
+</body>
+</html>
