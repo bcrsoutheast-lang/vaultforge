@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge - Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#071844;
+      --panel:#0d1f59;
+      --panel-2:#09153f;
+      --field:#02113f;
+      --text:#ffffff;
+      --muted:#c6d0f2;
+      --gold:#e2c465;
+      --line:rgba(255,255,255,.10);
+      --danger:#351d4f;
+      --success:#163d2c;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1200px;margin:auto;padding:24px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:28px;padding:24px}
+    .login-card{max-width:520px;margin:48px auto 0}
+    h1{margin:0 0 10px;font-size:40px}
+    p{color:var(--muted)}
+    input,button,select{
+      width:100%;padding:16px 18px;border-radius:16px;font-size:18px
+    }
+    input,select{border:1px solid rgba(255,255,255,.12);background:var(--field);color:#fff}
+    button{border:none;background:var(--gold);color:#1e1604;font-weight:900;cursor:pointer}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .tabbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 22px}
+    .tab{
+      width:auto;padding:12px 18px;border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,.16);
+      color:#fff;font-size:15px
+    }
+    .tab.active{background:var(--gold);color:#1e1604;border-color:transparent}
+    .section{display:none}
+    .section.active{display:block}
+    .grid{display:grid;gap:16px}
+    .item{
+      background:var(--panel-2);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+    }
+    .meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+    .label{color:var(--muted);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .value{font-size:16px;line-height:1.45;word-break:break-word}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .small-btn{
+      width:auto;padding:10px 14px;border-radius:999px;font-size:14px;background:var(--gold);color:#1e1604
+    }
+    .ghost-btn{
+      width:auto;padding:10px 14px;border-radius:999px;font-size:14px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.18)
+    }
+    .msg{margin-top:14px;padding:14px 16px;border-radius:16px;display:none;white-space:pre-wrap}
+    .err{display:block;background:var(--danger);border:1px solid #8a3a57;color:#ffd2db}
+    .ok{display:block;background:var(--success);border:1px solid #2e8f61;color:#dbffe9}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:18px}
+    .topbar a{color:var(--muted);text-decoration:none;font-weight:700}
+    .hidden{display:none}
+    @media (max-width:760px){
+      h1{font-size:32px}
+      .meta{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="loginView" class="card login-card">
+      <h1>Admin Login</h1>
+      <p>Enter the current admin password to access VaultForge admin.</p>
+      <input id="passwordInput" type="password" placeholder="Password" />
+      <button id="loginBtn" style="margin-top:14px;">Enter Admin</button>
+      <div id="loginMsg" class="msg"></div>
+    </div>
+
+    <div id="adminView" class="hidden">
+      <div class="topbar">
+        <a href="/">← Back to home</a>
+        <button id="logoutBtn" class="ghost-btn">Logout</button>
+      </div>
+
+      <div class="card">
+        <h1>VaultForge Admin</h1>
+        <p>Applications and Pain Button requests.</p>
+
+        <div class="tabbar">
+          <button class="tab active" data-target="applicationsSection" type="button">Applications</button>
+          <button class="tab" data-target="painSection" type="button">Pain Requests</button>
+        </div>
+
+        <div id="adminMsg" class="msg"></div>
+
+        <div id="applicationsSection" class="section active">
+          <div id="applicationsList" class="grid"></div>
+        </div>
+
+        <div id="painSection" class="section">
+          <div id="painList" class="grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = 'Vault123!';
+    const SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const loginView = document.getElementById('loginView');
+    const adminView = document.getElementById('adminView');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginMsg = document.getElementById('loginMsg');
+    const adminMsg = document.getElementById('adminMsg');
+    const applicationsList = document.getElementById('applicationsList');
+    const painList = document.getElementById('painList');
+    const tabs = document.querySelectorAll('.tab');
+    const sections = document.querySelectorAll('.section');
+
+    function showBox(el, kind, text) {
+      el.className = 'msg ' + kind;
+      el.textContent = text;
+      el.style.display = 'block';
+    }
+
+    function hideBox(el) {
+      el.className = 'msg';
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+
+    function setLoggedIn(isLoggedIn) {
+      if (isLoggedIn) {
+        loginView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        sessionStorage.setItem('vf_admin_ok', '1');
+      } else {
+        adminView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+        sessionStorage.removeItem('vf_admin_ok');
+      }
+    }
+
+    loginBtn.addEventListener('click', async function () {
+      hideBox(loginMsg);
+      if (passwordInput.value !== ADMIN_PASSWORD) {
+        showBox(loginMsg, 'err', 'Incorrect password.');
+        return;
+      }
+      setLoggedIn(true);
+      await loadAll();
+    });
+
+    passwordInput.addEventListener('keydown', async function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        loginBtn.click();
+      }
+    });
+
+    logoutBtn.addEventListener('click', function () {
+      setLoggedIn(false);
+      passwordInput.value = '';
+    });
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(t => t.classList.remove('active'));
+        sections.forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function applicationCard(row) {
+      return `
+        <div class="item">
+          <div class="label">Application</div>
+          <div class="meta">
+            <div><div class="label">Name</div><div class="value">${escapeHtml(row.name || '')}</div></div>
+            <div><div class="label">Email</div><div class="value">${escapeHtml(row.email || '')}</div></div>
+            <div><div class="label">Market</div><div class="value">${escapeHtml(row.market || '')}</div></div>
+            <div><div class="label">Created</div><div class="value">${escapeHtml(row.created_at || '')}</div></div>
+          </div>
+          <div><div class="label">Notes</div><div class="value">${escapeHtml(row.notes || row.problem || '')}</div></div>
+        </div>
+      `;
+    }
+
+    function painCard(row) {
+      const id = Number(row.id);
+      return `
+        <div class="item">
+          <div class="label">Pain Request #${escapeHtml(id)}</div>
+          <div class="meta">
+            <div><div class="label">Name</div><div class="value">${escapeHtml(row.name || '')}</div></div>
+            <div><div class="label">Email</div><div class="value">${escapeHtml(row.email || '')}</div></div>
+            <div><div class="label">Market</div><div class="value">${escapeHtml(row.market || '')}</div></div>
+            <div><div class="label">Urgency</div><div class="value">${escapeHtml(row.urgency || '')}</div></div>
+            <div><div class="label">Need Help From</div><div class="value">${escapeHtml(row.needed_role || '')}</div></div>
+            <div><div class="label">Budget</div><div class="value">${escapeHtml(row.budget || '')}</div></div>
+            <div><div class="label">Status</div><div class="value">${escapeHtml(row.status || '')}</div></div>
+            <div><div class="label">Created</div><div class="value">${escapeHtml(row.created_at || '')}</div></div>
+          </div>
+          <div><div class="label">Problem</div><div class="value">${escapeHtml(row.problem || '')}</div></div>
+          <div class="actions">
+            <button class="small-btn" type="button" onclick="updatePainStatus(${id}, 'open')">Open</button>
+            <button class="small-btn" type="button" onclick="updatePainStatus(${id}, 'in_progress')">In Progress</button>
+            <button class="small-btn" type="button" onclick="updatePainStatus(${id}, 'resolved')">Resolved</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadApplications() {
+      applicationsList.innerHTML = '<div class="item">Loading applications...</div>';
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        applicationsList.innerHTML = '<div class="item">Could not load applications.</div>';
+        throw error;
+      }
+
+      if (!data || !data.length) {
+        applicationsList.innerHTML = '<div class="item">No applications found.</div>';
+        return;
+      }
+
+      applicationsList.innerHTML = data.map(applicationCard).join('');
+    }
+
+    async function loadPain() {
+      painList.innerHTML = '<div class="item">Loading pain requests...</div>';
+      const { data, error } = await supabase
+        .from('pain_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        painList.innerHTML = '<div class="item">Could not load pain requests.</div>';
+        throw error;
+      }
+
+      if (!data || !data.length) {
+        painList.innerHTML = '<div class="item">No pain requests found.</div>';
+        return;
+      }
+
+      painList.innerHTML = data.map(painCard).join('');
+    }
+
+    async function loadAll() {
+      hideBox(adminMsg);
+      try {
+        await Promise.all([loadApplications(), loadPain()]);
+      } catch (error) {
+        showBox(adminMsg, 'err', error.message || 'Admin failed to load.');
+      }
+    }
+
+    async function updatePainStatus(id, status) {
+      hideBox(adminMsg);
+      const { error } = await supabase
+        .from('pain_requests')
+        .update({ status })
+        .eq('id', id);
+
+      if (error) {
+        showBox(adminMsg, 'err', error.message || 'Status update failed.');
+        return;
+      }
+
+      showBox(adminMsg, 'ok', 'Pain request updated.');
+      await loadPain();
+    }
+
+    window.updatePainStatus = updatePainStatus;
+
+    if (sessionStorage.getItem('vf_admin_ok') === '1') {
+      setLoggedIn(true);
+      loadAll();
+    }
+  </script>
+</body>
+</html>
