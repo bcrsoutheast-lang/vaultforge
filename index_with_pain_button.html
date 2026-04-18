@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge</title>
+  <style>
+    :root {
+      --bg: #0b0b0b;
+      --panel: #141414;
+      --soft: #1d1d1d;
+      --text: #ffffff;
+      --muted: #b6b6b6;
+      --accent: #f3c623;
+      --danger: #ff6b6b;
+      --border: rgba(255,255,255,.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    header {
+      padding: 22px 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(11,11,11,.92);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      opacity: .9;
+    }
+    .hero {
+      padding: 80px 0 36px;
+      display: grid;
+      grid-template-columns: 1.4fr .9fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.05;
+      margin: 0 0 16px;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 700px;
+    }
+    .cta-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--soft);
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: #111;
+      border-color: transparent;
+    }
+    .btn.pain {
+      background: #231617;
+      border-color: rgba(255,107,107,.3);
+      color: #ffdede;
+    }
+    .card {
+      background: linear-gradient(180deg, #171717, #111111);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+    }
+    .section {
+      padding: 26px 0 54px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+    .pain-banner {
+      margin: 10px 0 22px;
+      border: 1px solid rgba(255,107,107,.25);
+      background: linear-gradient(135deg, rgba(255,107,107,.14), rgba(243,198,35,.06));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .pain-banner h3 {
+      margin: 6px 0;
+      font-size: 1.4rem;
+    }
+    .pain-banner p { color: #f0d8d8; margin: 0; }
+    footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      padding: 22px 0 38px;
+    }
+    @media (max-width: 840px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">VAULTFORGE</div>
+      <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="/partners.html">Partners</a>
+        <a href="/pain.html">Pain Button</a>
+        <a href="/login.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Deal Access • Partner Network • Fast Problem Routing</div>
+        <h1>Upload the opportunity. Route the problem. Move faster.</h1>
+        <p>
+          VaultForge gives borrowers, operators, and partners one place to submit deals,
+          get reviewed, and get connected to the right next step.
+        </p>
+        <div class="cta-row">
+          <button class="btn primary" id="openApplicationBtn">Apply For Early Access</button>
+          <a class="btn" href="/partners.html">Browse Partners</a>
+          <a class="btn pain" href="/pain.html">Use Pain Button</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">What works now</div>
+        <h3>Live intake system</h3>
+        <p style="color:var(--muted)">
+          Main applications flow into admin review. Approved partners appear in the live directory.
+          Urgent project blockers can now be submitted through the Pain Button.
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card pain-banner">
+        <div>
+          <div class="eyebrow" style="color:#ff9a9a">Need help fast?</div>
+          <h3>Hit a deal problem?</h3>
+          <p>Use the Pain Button to submit urgency, market, role needed, and the actual blocker.</p>
+        </div>
+        <a class="btn primary" href="/pain.html">Open Pain Button</a>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="eyebrow">Step 1</div>
+          <h3>Submit</h3>
+          <p style="color:var(--muted)">Applications and project pain points go into the system with clean intake.</p>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Step 2</div>
+          <h3>Review</h3>
+          <p style="color:var(--muted)">Admin reviews applications and pain requests from one control point.</p>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Step 3</div>
+          <h3>Route</h3>
+          <p style="color:var(--muted)">Approved partners go live. Urgent problems can be assigned and tracked.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">VaultForge</div>
+  </footer>
+
+  <script>
+    // Replace this with your existing application modal launcher if you already have one.
+    document.getElementById('openApplicationBtn')?.addEventListener('click', () => {
+      const existingModalTrigger = document.querySelector('[data-open-application], .join-button, .apply-button');
+      if (existingModalTrigger) {
+        existingModalTrigger.click();
+        return;
+      }
+      alert('Connect this button back to your existing application modal trigger.');
+    });
+  </script>
+</body>
+</html>
