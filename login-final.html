@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge Login</title>
+  <meta name="description" content="VaultForge admin login." />
+  <style>
+    :root {
+      --bg: #08101f;
+      --panel: #121b39;
+      --line: rgba(255,255,255,0.08);
+      --text: #f5f7ff;
+      --muted: #b4bfd9;
+      --gold: #d6b35f;
+      --gold-2: #f1d28a;
+      --red: #ef4444;
+      --green: #22c55e;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 22px;
+      --max: 520px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(214,179,95,0.08), transparent 30%),
+        linear-gradient(180deg, #07101e 0%, #08101f 100%);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .wrap {
+      width: min(var(--max), 100%);
+    }
+
+    .card {
+      background: rgba(18,27,57,0.94);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .head {
+      padding: 26px 26px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(214,179,95,0.22), rgba(37,99,235,0.18));
+      border: 1px solid rgba(214,179,95,0.25);
+      color: var(--gold-2);
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 4vw, 2.3rem);
+      letter-spacing: -0.03em;
+    }
+
+    .head p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .body {
+      padding: 24px 26px 26px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #0b1328;
+      color: var(--text);
+      padding: 13px 14px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(214,179,95,0.55);
+      box-shadow: 0 0 0 3px rgba(214,179,95,0.12);
+    }
+
+    input::placeholder {
+      color: #8e9ab8;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .status {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      display: none;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .status.show { display: block; }
+
+    .status.error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.24);
+      color: #fecaca;
+    }
+
+    .status.success {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.24);
+      color: #bcf5d0;
+    }
+
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      color: #201600;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.72; cursor: not-allowed; transform: none; }
+
+    .foot {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .foot a {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <div class="brand">
+          <div class="brand-mark">VF</div>
+          <div>VaultForge</div>
+        </div>
+        <h1>Admin Login</h1>
+        <p>Use the admin password to access VaultForge private pages.</p>
+      </div>
+
+      <div class="body">
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="email">Admin Email</label>
+            <input id="email" name="email" type="email" placeholder="admin@vaultforge.com" />
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="Enter admin password" required />
+          </div>
+
+          <div class="helper">
+            This is a temporary front-end password gate tied to your VaultForge auth flow.
+          </div>
+
+          <div id="statusBox" class="status" aria-live="polite"></div>
+
+          <button id="loginBtn" class="btn" type="submit">Login</button>
+        </form>
+
+        <div class="foot">
+          <a href="/">Back to homepage</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/auth.js"></script>
+  <script>
+    const ADMIN_PASSWORD = "VaultForge2026!";
+    const form = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    const statusBox = document.getElementById("statusBox");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    function setStatus(type, message) {
+      statusBox.className = "status show " + type;
+      statusBox.textContent = message;
+    }
+
+    function clearStatus() {
+      statusBox.className = "status";
+      statusBox.textContent = "";
+    }
+
+    function handleLoggedOutMessage() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("logged_out") === "1") {
+        setStatus("success", "You have been logged out.");
+      }
+    }
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+      clearStatus();
+
+      const password = passwordInput.value.trim();
+      const email = emailInput.value.trim() || "admin";
+
+      if (!password) {
+        setStatus("error", "Password is required.");
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      try {
+        if (password !== ADMIN_PASSWORD) {
+          setStatus("error", "Incorrect password.");
+          return;
+        }
+
+        if (!window.VaultForgeAuth || typeof window.VaultForgeAuth.login !== "function") {
+          setStatus("error", "Auth system failed to load.");
+          return;
+        }
+
+        window.VaultForgeAuth.login({ email: email });
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
+    });
+
+    handleLoggedOutMessage();
+  </script>
+</body>
+</html>
