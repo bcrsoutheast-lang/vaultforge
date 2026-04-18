@@ -1,0 +1,5 @@
+/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization, apikey, X-Client-Info, Prefer
+  Content-Security-Policy: default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
