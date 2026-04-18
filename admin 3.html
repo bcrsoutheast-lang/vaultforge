@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultForge Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body{margin:0;background:#071844;color:#fff;font-family:Arial,sans-serif}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .card{background:#0d1f59;border-radius:24px;padding:24px}
+    h1{margin:0 0 10px;font-size:36px}
+    p{color:#c6d0f2}
+    input,button{padding:16px;border-radius:16px;font-size:18px}
+    input{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.12);background:#02113f;color:#fff}
+    button{border:none;background:#e2c465;color:#1e1604;font-weight:900;cursor:pointer}
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+    .tab{width:auto}
+    .box{margin-top:18px;padding:16px;border-radius:16px;white-space:pre-wrap}
+    .status{background:#10255f}
+    .error{background:#4a1f37}
+    .success{background:#173d2d}
+    .list{display:grid;gap:14px;margin-top:18px}
+    .item{background:#09153f;border-radius:18px;padding:16px}
+    .hidden{display:none}
+    a{color:#c6d0f2}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p><a href="/">← Home</a></p>
+
+    <div id="loginCard" class="card">
+      <h1>Admin Login</h1>
+      <p>Enter password to access admin.</p>
+      <input id="passwordInput" type="password" placeholder="Password">
+      <button id="loginBtn" style="width:100%;margin-top:14px;">Enter Admin</button>
+      <div id="loginStatus" class="box status">Waiting for password.</div>
+    </div>
+
+    <div id="adminCard" class="card hidden">
+      <h1>VaultForge Admin</h1>
+      <div class="tabs">
+        <button id="showAppsBtn" class="tab">Applications</button>
+        <button id="showPainBtn" class="tab">Pain Requests</button>
+        <button id="reloadBtn" class="tab">Reload</button>
+        <button id="logoutBtn" class="tab">Logout</button>
+      </div>
+      <div id="adminStatus" class="box status">Admin ready.</div>
+      <div id="appsList" class="list"></div>
+      <div id="painList" class="list hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var loginCard = document.getElementById('loginCard');
+      var adminCard = document.getElementById('adminCard');
+      var loginStatus = document.getElementById('loginStatus');
+      var adminStatus = document.getElementById('adminStatus');
+      var appsList = document.getElementById('appsList');
+      var painList = document.getElementById('painList');
+
+      function setBox(el, cls, text) {
+        el.className = 'box ' + cls;
+        el.textContent = text;
+      }
+
+      try {
+        if (!window.supabase || !window.supabase.createClient) {
+          setBox(loginStatus, 'error', 'Supabase library failed to load.');
+          return;
+        }
+
+        var ADMIN_PASSWORD = 'Vault123!';
+        var SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+        var SUPABASE_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function showAdmin() {
+          loginCard.classList.add('hidden');
+          adminCard.classList.remove('hidden');
+          sessionStorage.setItem('vf_admin_ok', '1');
+        }
+
+        function showLogin() {
+          adminCard.classList.add('hidden');
+          loginCard.classList.remove('hidden');
+          sessionStorage.removeItem('vf_admin_ok');
+        }
+
+        async function loadApplications() {
+          appsList.innerHTML = '<div class="item">Loading applications...</div>';
+          var result = await supabase.from('applications').select('*').order('created_at', { ascending: false });
+          if (result.error) {
+            appsList.innerHTML = '<div class="item">Applications error: ' + result.error.message + '</div>';
+            return;
+          }
+          if (!result.data || !result.data.length) {
+            appsList.innerHTML = '<div class="item">No applications found.</div>';
+            return;
+          }
+          appsList.innerHTML = result.data.map(function (row) {
+            return '<div class="item"><strong>' + (row.name || '') + '</strong><br>' +
+              (row.email || '') + '<br>' +
+              (row.market || '') + '<br>' +
+              (row.created_at || '') + '</div>';
+          }).join('');
+        }
+
+        async function loadPain() {
+          painList.innerHTML = '<div class="item">Loading pain requests...</div>';
+          var result = await supabase.from('pain_requests').select('*').order('created_at', { ascending: false });
+          if (result.error) {
+            painList.innerHTML = '<div class="item">Pain requests error: ' + result.error.message + '</div>';
+            return;
+          }
+          if (!result.data || !result.data.length) {
+            painList.innerHTML = '<div class="item">No pain requests found.</div>';
+            return;
+          }
+          painList.innerHTML = result.data.map(function (row) {
+            return '<div class="item"><strong>#' + row.id + ' ' + (row.name || '') + '</strong><br>' +
+              (row.email || '') + '<br>' +
+              'Market: ' + (row.market || '') + '<br>' +
+              'Urgency: ' + (row.urgency || '') + '<br>' +
+              'Role: ' + (row.needed_role || '') + '<br>' +
+              'Budget: ' + (row.budget || '') + '<br>' +
+              'Status: ' + (row.status || '') + '<br><br>' +
+              (row.problem || '') + '</div>';
+          }).join('');
+        }
+
+        async function loadAll() {
+          setBox(adminStatus, 'status', 'Loading admin data...');
+          await loadApplications();
+          await loadPain();
+          setBox(adminStatus, 'success', 'Admin loaded.');
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', async function () {
+          var password = document.getElementById('passwordInput').value;
+          if (password !== ADMIN_PASSWORD) {
+            setBox(loginStatus, 'error', 'Incorrect password.');
+            return;
+          }
+          setBox(loginStatus, 'success', 'Password accepted.');
+          showAdmin();
+          await loadAll();
+        });
+
+        document.getElementById('passwordInput').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('loginBtn').click();
+          }
+        });
+
+        document.getElementById('showAppsBtn').addEventListener('click', function () {
+          appsList.classList.remove('hidden');
+          painList.classList.add('hidden');
+          setBox(adminStatus, 'status', 'Showing applications.');
+        });
+
+        document.getElementById('showPainBtn').addEventListener('click', function () {
+          painList.classList.remove('hidden');
+          appsList.classList.add('hidden');
+          setBox(adminStatus, 'status', 'Showing pain requests.');
+        });
+
+        document.getElementById('reloadBtn').addEventListener('click', async function () {
+          await loadAll();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+          showLogin();
+          setBox(loginStatus, 'status', 'Logged out.');
+        });
+
+        if (sessionStorage.getItem('vf_admin_ok') === '1') {
+          showAdmin();
+          loadAll();
+        }
+      } catch (err) {
+        setBox(loginStatus, 'error', 'Page script failed: ' + (err && err.message ? err.message : String(err)));
+      }
+    })();
+  </script>
+</body>
+</html>
