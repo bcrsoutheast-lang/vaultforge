@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge Admin</title>
+  <meta name="description" content="VaultForge admin dashboard for reviewing applications and promoting approved partners." />
+  <style>
+    :root {
+      --bg: #08101f;
+      --panel: #121b39;
+      --panel-2: #172347;
+      --line: rgba(255,255,255,0.08);
+      --text: #f5f7ff;
+      --muted: #b4bfd9;
+      --gold: #d6b35f;
+      --gold-2: #f1d28a;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #2563eb;
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --max: 1280px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(214,179,95,0.08), transparent 28%),
+        linear-gradient(180deg, #07101e 0%, #08101f 100%);
+      color: var(--text);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .container {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(8,16,31,0.84);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(214,179,95,0.22), rgba(37,99,235,0.18));
+      border: 1px solid rgba(214,179,95,0.25);
+      color: var(--gold-2);
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-2), var(--gold));
+      color: #201600;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn-green {
+      background: rgba(34,197,94,0.14);
+      color: #bcf5d0;
+      border: 1px solid rgba(34,197,94,0.24);
+    }
+
+    .btn-red {
+      background: rgba(239,68,68,0.14);
+      color: #fecaca;
+      border: 1px solid rgba(239,68,68,0.24);
+    }
+
+    .btn-blue {
+      background: rgba(37,99,235,0.14);
+      color: #cfe0ff;
+      border: 1px solid rgba(37,99,235,0.24);
+    }
+
+    main {
+      padding: 28px 0 48px;
+    }
+
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .page-head h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.03em;
+    }
+
+    .page-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 62ch;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: rgba(18,27,57,0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      padding: 18px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .controls {
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #0b1328;
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(214,179,95,0.55);
+      box-shadow: 0 0 0 3px rgba(214,179,95,0.12);
+    }
+
+    .status-box {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      display: none;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .status-box.show {
+      display: block;
+    }
+
+    .status-info {
+      background: rgba(37,99,235,0.1);
+      border: 1px solid rgba(37,99,235,0.24);
+      color: #cfe0ff;
+    }
+
+    .status-success {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.24);
+      color: #bcf5d0;
+    }
+
+    .status-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.24);
+      color: #fecaca;
+    }
+
+    .table-card {
+      overflow: hidden;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1180px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      vertical-align: top;
+      padding: 14px 14px;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.95rem;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(255,255,255,0.02);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .name-cell strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .subtext {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
+
+    .badge-pending {
+      background: rgba(37,99,235,0.14);
+      color: #cfe0ff;
+      border: 1px solid rgba(37,99,235,0.24);
+    }
+
+    .badge-approved {
+      background: rgba(34,197,94,0.14);
+      color: #bcf5d0;
+      border: 1px solid rgba(34,197,94,0.24);
+    }
+
+    .badge-rejected {
+      background: rgba(239,68,68,0.14);
+      color: #fecaca;
+      border: 1px solid rgba(239,68,68,0.24);
+    }
+
+    .badge-contacted {
+      background: rgba(214,179,95,0.14);
+      color: #f8e7b6;
+      border: 1px solid rgba(214,179,95,0.24);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .actions .btn {
+      padding: 10px 12px;
+      font-size: 0.88rem;
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 1100px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .grid,
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        width: min(var(--max), calc(100% - 20px));
+      }
+
+      th, td {
+        padding: 12px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a href="/" class="brand" aria-label="VaultForge home">
+        <div class="brand-mark">VF</div>
+        <div>VaultForge Admin</div>
+      </a>
+
+      <div class="nav-actions">
+        <div class="chip">Applications Review</div>
+        <a class="btn btn-secondary" href="/partners.html">Partners Directory</a>
+        <a class="btn btn-secondary" href="/login.html">Login</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-head">
+      <div>
+        <h1>Applications Dashboard</h1>
+        <p>
+          Review new applications, change status, mark contacted, export CSV, and promote approved operators into the partners table.
+        </p>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-secondary" id="refreshBtn" type="button">Refresh</button>
+        <button class="btn btn-primary" id="exportBtn" type="button">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card stat-card">
+        <div class="stat-label">Total Applications</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" id="statPending">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value" id="statApproved">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Rejected</div>
+        <div class="stat-value" id="statRejected">0</div>
+      </div>
+    </div>
+
+    <div class="card controls">
+      <div class="controls-grid">
+        <input id="searchInput" type="text" placeholder="Search by name, email, company, phone, market, role..." />
+        <select id="statusFilter">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="contacted">Contacted</option>
+        </select>
+        <select id="roleFilter">
+          <option value="all">All roles</option>
+        </select>
+        <button class="btn btn-secondary" id="clearFiltersBtn" type="button">Clear Filters</button>
+        <button class="btn btn-secondary" id="reloadDataBtn" type="button">Reload Data</button>
+      </div>
+      <div class="footer-note">
+        This admin view reads directly from the <code>applications</code> table using the current VaultForge schema.
+      </div>
+    </div>
+
+    <div id="statusBox" class="status-box" aria-live="polite"></div>
+
+    <div class="card table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name / Company</th>
+              <th>Role</th>
+              <th>Market</th>
+              <th>Contact</th>
+              <th>Coverage / Services</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="applicationsTableBody">
+            <tr>
+              <td colspan="8" class="empty">Loading applications...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://mnwwvpuxrzostrplfgmq.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+    const ROLE_OPTIONS = [
+      "Buyer",
+      "Lender",
+      "Title Company",
+      "Real Estate Attorney",
+      "Contractor",
+      "Insurance Provider",
+      "Inspector",
+      "Investor-Friendly Agent",
+      "Vendor"
+    ];
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const roleFilter = document.getElementById("roleFilter");
+    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const reloadDataBtn = document.getElementById("reloadDataBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const tableBody = document.getElementById("applicationsTableBody");
+    const statusBox = document.getElementById("statusBox");
+
+    const statTotal = document.getElementById("statTotal");
+    const statPending = document.getElementById("statPending");
+    const statApproved = document.getElementById("statApproved");
+    const statRejected = document.getElementById("statRejected");
+
+    let applications = [];
+    let filteredApplications = [];
+
+    function populateRoleFilter() {
+      roleFilter.innerHTML = '<option value="all">All roles</option>';
+      ROLE_OPTIONS.forEach((role) => {
+        const option = document.createElement("option");
+        option.value = role;
+        option.textContent = role;
+        roleFilter.appendChild(option);
+      });
+    }
+
+    function showStatus(type, message) {
+      statusBox.className = "status-box show";
+      if (type === "success") statusBox.classList.add("status-success");
+      else if (type === "error") statusBox.classList.add("status-error");
+      else statusBox.classList.add("status-info");
+      statusBox.textContent = message;
+    }
+
+    function clearStatus() {
+      statusBox.className = "status-box";
+      statusBox.textContent = "";
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getStatusBadge(status) {
+      const normalized = (status || "pending").toLowerCase();
+      let cls = "badge badge-pending";
+      if (normalized === "approved") cls = "badge badge-approved";
+      else if (normalized === "rejected") cls = "badge badge-rejected";
+      else if (normalized === "contacted") cls = "badge badge-contacted";
+      return '<span class="' + cls + '">' + escapeHtml(normalized) + "</span>";
+    }
+
+    function updateStats(rows) {
+      const total = rows.length;
+      const pending = rows.filter(r => (r.status || "pending").toLowerCase() === "pending").length;
+      const approved = rows.filter(r => (r.status || "").toLowerCase() === "approved").length;
+      const rejected = rows.filter(r => (r.status || "").toLowerCase() === "rejected").length;
+
+      statTotal.textContent = total;
+      statPending.textContent = pending;
+      statApproved.textContent = approved;
+      statRejected.textContent = rejected;
+    }
+
+    function normalizeRow(row) {
+      return {
+        id: row.id,
+        created_at: row.created_at || null,
+        full_name: row.full_name || "",
+        company_name: row.company_name || row.company || "",
+        email: row.email || "",
+        phone: row.phone || "",
+        role: row.role || "",
+        market: row.market || row.markets || "",
+        website: row.website || "",
+        coverage_area: row.coverage_area || "",
+        services: row.services || "",
+        notes: row.notes || "",
+        consent: row.consent ?? false,
+        status: row.status || "pending"
+      };
+    }
+
+    function renderTable(rows) {
+      if (!rows.length) {
+        tableBody.innerHTML = '<tr><td colspan="8" class="empty">No applications match the current filters.</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = rows.map((row) => {
+        const safeName = escapeHtml(row.full_name || "Unnamed");
+        const safeCompany = escapeHtml(row.company_name || "—");
+        const safeRole = escapeHtml(row.role || "—");
+        const safeMarket = escapeHtml(row.market || "—");
+        const safeEmail = escapeHtml(row.email || "—");
+        const safePhone = escapeHtml(row.phone || "—");
+        const safeCoverage = escapeHtml(row.coverage_area || "—");
+        const safeServices = escapeHtml(row.services || "—");
+        const safeNotes = escapeHtml(row.notes || "");
+        const safeWebsite = row.website ? '<a href="' + escapeHtml(row.website) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(row.website) + "</a>" : "—";
+
+        return `
+          <tr>
+            <td class="name-cell">
+              <strong>${safeName}</strong>
+              <div class="subtext">${safeCompany}</div>
+              ${safeNotes ? '<div class="subtext" style="margin-top:8px;">' + safeNotes + '</div>' : ""}
+            </td>
+            <td>${safeRole}</td>
+            <td>${safeMarket}</td>
+            <td>
+              <div>${safeEmail}</div>
+              <div class="subtext">${safePhone}</div>
+              <div class="subtext" style="margin-top:8px;">${safeWebsite}</div>
+            </td>
+            <td>
+              <div>${safeCoverage}</div>
+              <div class="subtext" style="margin-top:8px;">${safeServices}</div>
+            </td>
+            <td>${getStatusBadge(row.status)}</td>
+            <td>${escapeHtml(formatDate(row.created_at))}</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-green" type="button" onclick="updateApplicationStatus('${row.id}', 'approved')">Approve</button>
+                <button class="btn btn-red" type="button" onclick="updateApplicationStatus('${row.id}', 'rejected')">Reject</button>
+                <button class="btn btn-blue" type="button" onclick="updateApplicationStatus('${row.id}', 'contacted')">Contacted</button>
+                <button class="btn btn-secondary" type="button" onclick="promoteToPartner('${row.id}')">Promote</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function applyFilters() {
+      const search = searchInput.value.trim().toLowerCase();
+      const status = statusFilter.value;
+      const role = roleFilter.value;
+
+      filteredApplications = applications.filter((row) => {
+        const haystack = [
+          row.full_name,
+          row.company_name,
+          row.email,
+          row.phone,
+          row.role,
+          row.market,
+          row.coverage_area,
+          row.services,
+          row.notes
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = !search || haystack.includes(search);
+        const matchesStatus = status === "all" || (row.status || "pending").toLowerCase() === status;
+        const matchesRole = role === "all" || row.role === role;
+
+        return matchesSearch && matchesStatus && matchesRole;
+      });
+
+      renderTable(filteredApplications);
+      updateStats(applications);
+    }
+
+    async function loadApplications() {
+      clearStatus();
+      tableBody.innerHTML = '<tr><td colspan="8" class="empty">Loading applications...</td></tr>';
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("applications")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Load applications error:", error);
+          showStatus("error", "Failed to load applications: " + error.message);
+          tableBody.innerHTML = '<tr><td colspan="8" class="empty">Could not load applications.</td></tr>';
+          return;
+        }
+
+        applications = (data || []).map(normalizeRow);
+        applyFilters();
+        showStatus("success", "Applications loaded successfully.");
+      } catch (err) {
+        console.error("Unexpected load error:", err);
+        showStatus("error", "Unexpected load error: " + (err && err.message ? err.message : "Unknown error"));
+        tableBody.innerHTML = '<tr><td colspan="8" class="empty">Unexpected error loading applications.</td></tr>';
+      }
+    }
+
+    async function updateApplicationStatus(id, status) {
+      clearStatus();
+      showStatus("info", "Updating application status...");
+
+      try {
+        const { error } = await supabaseClient
+          .from("applications")
+          .update({ status: status })
+          .eq("id", id);
+
+        if (error) {
+          console.error("Update status error:", error);
+          showStatus("error", "Failed to update status: " + error.message);
+          return;
+        }
+
+        showStatus("success", "Status updated to " + status + ".");
+        await loadApplications();
+      } catch (err) {
+        console.error("Unexpected update error:", err);
+        showStatus("error", "Unexpected update error: " + (err && err.message ? err.message : "Unknown error"));
+      }
+    }
+
+    async function promoteToPartner(id) {
+      clearStatus();
+
+      const row = applications.find((item) => String(item.id) === String(id));
+      if (!row) {
+        showStatus("error", "Application not found.");
+        return;
+      }
+
+      showStatus("info", "Promoting application into partners...");
+
+      const partnerPayload = {
+        full_name: row.full_name || null,
+        company_name: row.company_name || null,
+        email: row.email || null,
+        phone: row.phone || null,
+        role: row.role || null,
+        market: row.market || null,
+        website: row.website || null,
+        coverage_area: row.coverage_area || null,
+        services: row.services || null,
+        notes: row.notes || null,
+        status: "active"
+      };
+
+      try {
+        const { error: insertError } = await supabaseClient
+          .from("partners")
+          .insert([partnerPayload]);
+
+        if (insertError) {
+          console.error("Promote insert error:", insertError);
+          showStatus("error", "Failed to promote to partners: " + insertError.message);
+          return;
+        }
+
+        const { error: updateError } = await supabaseClient
+          .from("applications")
+          .update({ status: "approved" })
+          .eq("id", id);
+
+        if (updateError) {
+          console.error("Promote update error:", updateError);
+          showStatus("error", "Partner was inserted, but application status could not be updated: " + updateError.message);
+          return;
+        }
+
+        showStatus("success", "Application promoted to partners and marked approved.");
+        await loadApplications();
+      } catch (err) {
+        console.error("Unexpected promote error:", err);
+        showStatus("error", "Unexpected promote error: " + (err && err.message ? err.message : "Unknown error"));
+      }
+    }
+
+    function exportCsv() {
+      const rows = filteredApplications.length ? filteredApplications : applications;
+
+      if (!rows.length) {
+        showStatus("error", "No applications available to export.");
+        return;
+      }
+
+      const headers = [
+        "id",
+        "created_at",
+        "full_name",
+        "company_name",
+        "email",
+        "phone",
+        "role",
+        "market",
+        "website",
+        "coverage_area",
+        "services",
+        "notes",
+        "consent",
+        "status"
+      ];
+
+      const csv = [
+        headers.join(","),
+        ...rows.map((row) =>
+          headers.map((key) => {
+            const value = row[key] ?? "";
+            const safe = String(value).replace(/"/g, '""');
+            return '"' + safe + '"';
+          }).join(",")
+        )
+      ].join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "vaultforge-applications.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showStatus("success", "CSV export downloaded.");
+    }
+
+    searchInput.addEventListener("input", applyFilters);
+    statusFilter.addEventListener("change", applyFilters);
+    roleFilter.addEventListener("change", applyFilters);
+
+    clearFiltersBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      statusFilter.value = "all";
+      roleFilter.value = "all";
+      applyFilters();
+    });
+
+    refreshBtn.addEventListener("click", loadApplications);
+    reloadDataBtn.addEventListener("click", loadApplications);
+    exportBtn.addEventListener("click", exportCsv);
+
+    window.updateApplicationStatus = updateApplicationStatus;
+    window.promoteToPartner = promoteToPartner;
+
+    populateRoleFilter();
+    loadApplications();
+  </script>
+</body>
+</html>
