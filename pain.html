@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge — Pain Button</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#061233;
+      --panel:#0d1b4d;
+      --panel-2:#09153f;
+      --text:#f4f6fb;
+      --muted:#b9c3df;
+      --line:rgba(255,255,255,.12);
+      --gold:#e4c56f;
+      --gold-dark:#cfb05b;
+      --danger-bg:rgba(120, 30, 55, .28);
+      --danger-line:rgba(214, 89, 109, .5);
+      --success-bg:rgba(24, 97, 63, .28);
+      --success-line:rgba(69, 196, 124, .5);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #04102d 0%, #071844 100%);
+      color:var(--text);
+    }
+
+    .wrap{
+      width:min(100%, 860px);
+      margin:0 auto;
+      padding:24px 18px 48px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-decoration:none;
+      color:var(--text);
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .brand-mark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:rgba(228,197,111,.14);
+      color:var(--gold);
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .back-link{
+      text-decoration:none;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .hero{
+      margin-bottom:18px;
+    }
+
+    .eyebrow{
+      display:inline-block;
+      padding:8px 12px;
+      border:1px solid rgba(228,197,111,.28);
+      color:var(--gold);
+      border-radius:999px;
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.2px;
+      margin-bottom:16px;
+      background:rgba(228,197,111,.08);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(34px, 6vw, 58px);
+      line-height:1.02;
+      letter-spacing:-.03em;
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.55;
+      max-width:720px;
+    }
+
+    .panel{
+      margin-top:28px;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:32px;
+      padding:28px;
+      box-shadow:0 24px 70px rgba(0,0,0,.28);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:22px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.1px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:#03103a;
+      color:var(--text);
+      padding:18px 18px;
+      outline:none;
+      font-size:18px;
+      line-height:1.3;
+      transition:border-color .18s ease, box-shadow .18s ease;
+      appearance:none;
+    }
+
+    textarea{
+      min-height:220px;
+      resize:vertical;
+    }
+
+    input::placeholder, textarea::placeholder{
+      color:#91a0c8;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:rgba(228,197,111,.65);
+      box-shadow:0 0 0 4px rgba(228,197,111,.12);
+    }
+
+    .submit{
+      width:100%;
+      margin-top:18px;
+      border:none;
+      border-radius:999px;
+      background:var(--gold);
+      color:#201704;
+      font-size:20px;
+      font-weight:900;
+      padding:22px 28px;
+      cursor:pointer;
+      transition:transform .08s ease, background .18s ease;
+    }
+
+    .submit:hover{ background:var(--gold-dark); }
+    .submit:active{ transform:translateY(1px); }
+    .submit[disabled]{
+      opacity:.7;
+      cursor:wait;
+    }
+
+    .message{
+      margin-top:20px;
+      border-radius:24px;
+      padding:20px 22px;
+      font-size:17px;
+      line-height:1.5;
+      display:none;
+      white-space:pre-wrap;
+    }
+
+    .message.show{ display:block; }
+    .message.error{
+      background:var(--danger-bg);
+      border:1px solid var(--danger-line);
+      color:#ffd4db;
+    }
+
+    .message.success{
+      background:var(--success-bg);
+      border:1px solid var(--success-line);
+      color:#dcffe9;
+    }
+
+    .footnote{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    @media (max-width: 720px){
+      .panel{
+        padding:22px 18px;
+        border-radius:26px;
+      }
+      .grid{
+        grid-template-columns:1fr;
+        gap:18px;
+      }
+      label{
+        font-size:17px;
+      }
+      input, select, textarea{
+        font-size:17px;
+        padding:16px 16px;
+      }
+      .submit{
+        font-size:18px;
+        padding:20px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="brand" href="/">
+        <div class="brand-mark">VF</div>
+        <div>VaultForge</div>
+      </a>
+      <a class="back-link" href="/">← Back to home</a>
+    </div>
+
+    <section class="hero">
+      <div class="eyebrow">Pain Button</div>
+      <h1>Hit a deal problem?<br />Get help fast.</h1>
+      <p class="sub">
+        Submit the issue and route it into VaultForge. Use this when you need help from a lender,
+        attorney, contractor, buyer, or operator partner.
+      </p>
+    </section>
+
+    <section class="panel">
+      <form id="painForm">
+        <div class="grid">
+          <div class="field">
+            <label for="name">Your Name</label>
+            <input id="name" name="name" type="text" placeholder="Jane Smith" required />
+          </div>
+
+          <div class="field">
+            <label for="email">Your Email</label>
+            <input id="email" name="email" type="email" placeholder="jane@company.com" required />
+          </div>
+
+          <div class="field full">
+            <label for="market">Market</label>
+            <input id="market" name="market" type="text" placeholder="Atlanta" required />
+          </div>
+
+          <div class="field">
+            <label for="urgency">Urgency</label>
+            <select id="urgency" name="urgency" required>
+              <option value="">Select urgency</option>
+              <option>Low</option>
+              <option>Medium</option>
+              <option>Urgent</option>
+              <option>Immediate</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="needed_role">Need Help From</label>
+            <select id="needed_role" name="needed_role" required>
+              <option value="">Select role</option>
+              <option>Lender</option>
+              <option>Attorney</option>
+              <option>Contractor</option>
+              <option>Buyer</option>
+              <option>Operator</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="budget">Deal Size / Budget</label>
+            <input id="budget" name="budget" type="text" placeholder="$250K" />
+          </div>
+
+          <div class="field full">
+            <label for="problem">Describe The Problem</label>
+            <textarea id="problem" name="problem" placeholder="Need buyer" required></textarea>
+          </div>
+        </div>
+
+        <button id="submitBtn" class="submit" type="submit">Submit Request</button>
+      </form>
+
+      <div id="message" class="message"></div>
+
+      <div class="footnote">
+        This page writes to your <strong>pain_requests</strong> table in Supabase.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'REPLACE_WITH_YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'REPLACE_WITH_YOUR_SUPABASE_ANON_KEY';
+
+    const form = document.getElementById('painForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const messageBox = document.getElementById('message');
+
+    function showMessage(type, text) {
+      messageBox.className = `message show ${type}`;
+      messageBox.textContent = text;
+    }
+
+    function clearMessage() {
+      messageBox.className = 'message';
+      messageBox.textContent = '';
+    }
+
+    function looksLikeConfigured(value) {
+      return value && !value.startsWith('REPLACE_WITH_YOUR_');
+    }
+
+    function buildFriendlyError(error) {
+      const raw = error?.message || error?.details || JSON.stringify(error || {});
+      const lower = String(raw).toLowerCase();
+
+      if (lower.includes('row-level security') || lower.includes('violates row-level security')) {
+        return 'Submission failed because Supabase Row Level Security is blocking inserts on pain_requests. Add a public INSERT policy for anon users.';
+      }
+
+      if (lower.includes('budget') && lower.includes('column')) {
+        return 'Submission failed because the table is missing the budget column. Add budget as a text column in pain_requests.';
+      }
+
+      if (lower.includes('status') && lower.includes('column')) {
+        return 'Submission failed because the table is missing the status column. Add status as a text column in pain_requests.';
+      }
+
+      if (lower.includes('relation') && lower.includes('pain_requests')) {
+        return 'Submission failed because the pain_requests table could not be found from this project connection.';
+      }
+
+      if (lower.includes('invalid api key') || lower.includes('apikey')) {
+        return 'Submission failed because the Supabase key on this page is invalid.';
+      }
+
+      if (lower.includes('failed to fetch') || lower.includes('networkerror')) {
+        return 'Submission failed because the page could not reach Supabase. Check the project URL, anon key, and network connection.';
+      }
+
+      return `Submission failed.\n\nSupabase says: ${raw}`;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearMessage();
+
+      if (!looksLikeConfigured(SUPABASE_URL) || !looksLikeConfigured(SUPABASE_ANON_KEY)) {
+        showMessage('error', 'This page is not connected yet. Add your Supabase URL and anon key inside pain.html first.');
+        return;
+      }
+
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const payload = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        market: form.market.value.trim(),
+        urgency: form.urgency.value,
+        needed_role: form.needed_role.value,
+        budget: form.budget.value.trim() || null,
+        problem: form.problem.value.trim(),
+        status: 'open'
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        const { error } = await supabase
+          .from('pain_requests')
+          .insert([payload]);
+
+        if (error) throw error;
+
+        form.reset();
+        showMessage('success', 'Request submitted. Your Pain Button entry is now in pain_requests.');
+      } catch (error) {
+        showMessage('error', buildFriendlyError(error));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Request';
+      }
+    });
+  </script>
+</body>
+</html>
