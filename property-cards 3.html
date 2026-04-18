@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge Property Listings</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#08132f;
+      --panel:#0d1b45;
+      --panel-2:#102457;
+      --text:#eef3ff;
+      --muted:#9fb0da;
+      --line:rgba(255,255,255,.12);
+      --accent:#7ee0b7;
+      --accent-dark:#2b7a60;
+      --danger:#c84b4b;
+      --warning:#f5c86a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(180deg,#05102a 0%, #08132f 100%);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:24px 18px 60px;
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+    h1{
+      margin:0;
+      font-size:clamp(28px,4vw,40px);
+      line-height:1.05;
+    }
+    .sub{
+      color:var(--muted);
+      margin-top:6px;
+      font-size:15px;
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:12px 18px;
+      border-radius:14px;
+      border:1px solid transparent;
+      text-decoration:none;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{
+      background:var(--accent);
+      color:#071325;
+    }
+    .btn-secondary{
+      background:transparent;
+      border-color:var(--line);
+      color:var(--text);
+    }
+    .notice{
+      padding:14px 16px;
+      border-radius:14px;
+      margin:0 0 18px;
+      font-weight:700;
+      display:none;
+    }
+    .notice.show{display:block}
+    .notice.success{
+      background:rgba(126,224,183,.12);
+      border:1px solid rgba(126,224,183,.35);
+      color:#b8f2db;
+    }
+    .notice.warn{
+      background:rgba(245,200,106,.12);
+      border:1px solid rgba(245,200,106,.35);
+      color:#ffe7ad;
+    }
+    .toolbar{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr auto;
+      gap:12px;
+      margin:18px 0 22px;
+    }
+    .input, .select{
+      width:100%;
+      min-height:50px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      padding:12px 14px;
+      font-size:16px;
+      outline:none;
+    }
+    .select option{
+      color:#111;
+    }
+    .panel{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:16px;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .stat{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+    }
+    .stat-label{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:8px;
+    }
+    .stat-value{
+      font-size:28px;
+      font-weight:800;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:18px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+    }
+    .cover{
+      aspect-ratio:16/9;
+      background:#091530 center/cover no-repeat;
+      border-bottom:1px solid var(--line);
+      position:relative;
+    }
+    .badge{
+      position:absolute;
+      top:12px;
+      left:12px;
+      background:rgba(8,19,47,.85);
+      border:1px solid rgba(255,255,255,.16);
+      color:var(--text);
+      border-radius:999px;
+      padding:7px 11px;
+      font-size:12px;
+      font-weight:700;
+      backdrop-filter:blur(6px);
+    }
+    .card-body{
+      padding:16px;
+    }
+    .title{
+      font-size:24px;
+      line-height:1.1;
+      margin:0 0 8px;
+    }
+    .location{
+      color:var(--muted);
+      margin-bottom:12px;
+      font-size:15px;
+    }
+    .meta{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-bottom:14px;
+    }
+    .meta-box{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      background:rgba(255,255,255,.02);
+    }
+    .meta-label{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:5px;
+    }
+    .meta-value{
+      font-weight:700;
+      font-size:15px;
+      word-break:break-word;
+    }
+    .summary{
+      color:#dfe7ff;
+      font-size:15px;
+      line-height:1.5;
+      min-height:66px;
+      margin-bottom:14px;
+    }
+    .card-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .small-btn{
+      flex:1 1 140px;
+      min-height:46px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:transparent;
+      color:var(--text);
+      font-weight:700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      cursor:pointer;
+    }
+    .small-btn.primary{
+      background:var(--accent);
+      border-color:transparent;
+      color:#071325;
+    }
+    .small-btn.danger{
+      border-color:rgba(200,75,75,.45);
+      color:#ffd2d2;
+    }
+    .empty{
+      padding:40px 20px;
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.02);
+    }
+    .loading{
+      padding:36px 16px;
+      text-align:center;
+      color:var(--muted);
+    }
+    .footer-note{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:14px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .toolbar{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 640px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr 1fr}
+      .toolbar{grid-template-columns:1fr}
+      .topbar{align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Property Listings</h1>
+        <div class="sub">Browse live VaultForge opportunities from the member property system.</div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-secondary" href="/members.html">Back to Member Area</a>
+        <a class="btn btn-primary" href="/property-create.html">Create Listing</a>
+      </div>
+    </div>
+
+    <div id="deletedNotice" class="notice success">Listing deleted successfully.</div>
+    <div id="loginNotice" class="notice warn">You must be logged in to view member property listings.</div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Listings</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Visible Results</div>
+        <div class="stat-value" id="statVisible">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Markets</div>
+        <div class="stat-value" id="statMarkets">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Statuses</div>
+        <div class="stat-value" id="statStatuses">0</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input id="searchInput" class="input" type="text" placeholder="Search title, city, market, summary..." />
+      <select id="statusFilter" class="select">
+        <option value="">All Statuses</option>
+      </select>
+      <select id="typeFilter" class="select">
+        <option value="">All Asset Types</option>
+      </select>
+      <button id="clearFilters" class="btn btn-secondary" type="button">Clear</button>
+    </div>
+
+    <div class="panel">
+      <div id="results" class="loading">Loading listings...</div>
+      <div class="footer-note">Tap View Listing to open a single property page. Delete actions should happen from the single listing page.</div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const resultsEl = document.getElementById('results');
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const typeFilter = document.getElementById('typeFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+
+    let allListings = [];
+    let filteredListings = [];
+
+    function formatValue(value, fallback = '—') {
+      if (value === null || value === undefined || value === '') return fallback;
+      return value;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function money(value) {
+      if (value === null || value === undefined || value === '') return '—';
+      const num = Number(value);
+      if (Number.isNaN(num)) return value;
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+    }
+
+    function shortText(text, max = 140) {
+      const clean = String(text ?? '').trim();
+      if (!clean) return 'No summary provided.';
+      return clean.length > max ? clean.slice(0, max).trim() + '…' : clean;
+    }
+
+    function updateStats(list) {
+      document.getElementById('statTotal').textContent = allListings.length;
+      document.getElementById('statVisible').textContent = list.length;
+      document.getElementById('statMarkets').textContent = new Set(allListings.map(x => x.market).filter(Boolean)).size;
+      document.getElementById('statStatuses').textContent = new Set(allListings.map(x => x.status).filter(Boolean)).size;
+    }
+
+    function fillFilterOptions() {
+      const statuses = [...new Set(allListings.map(x => x.status).filter(Boolean))].sort();
+      const assetTypes = [...new Set(allListings.map(x => x.asset_type).filter(Boolean))].sort();
+
+      statusFilter.innerHTML = '<option value="">All Statuses</option>' +
+        statuses.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+
+      typeFilter.innerHTML = '<option value="">All Asset Types</option>' +
+        assetTypes.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    }
+
+    function render(list) {
+      updateStats(list);
+
+      if (!list.length) {
+        resultsEl.innerHTML = `
+          <div class="empty">
+            <h3 style="margin-top:0;color:#fff;">No listings found</h3>
+            <div>Try clearing filters or create the first property listing.</div>
+            <div style="margin-top:16px;">
+              <a class="btn btn-primary" href="/property-create.html">Create Listing</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      resultsEl.innerHTML = `
+        <div class="grid">
+          ${list.map(item => {
+            const cover = item.cover_image_url
+              ? `style="background-image:url('${escapeHtml(item.cover_image_url)}')"`
+              : '';
+            return `
+              <article class="card">
+                <div class="cover" ${cover}>
+                  <div class="badge">${escapeHtml(formatValue(item.status, 'Open'))}</div>
+                </div>
+                <div class="card-body">
+                  <h2 class="title">${escapeHtml(formatValue(item.title, 'Untitled Listing'))}</h2>
+                  <div class="location">${escapeHtml([item.city, item.state].filter(Boolean).join(', ') || item.market || 'Location pending')}</div>
+
+                  <div class="meta">
+                    <div class="meta-box">
+                      <div class="meta-label">Asset Type</div>
+                      <div class="meta-value">${escapeHtml(formatValue(item.asset_type))}</div>
+                    </div>
+                    <div class="meta-box">
+                      <div class="meta-label">Deal Type</div>
+                      <div class="meta-value">${escapeHtml(formatValue(item.deal_type))}</div>
+                    </div>
+                    <div class="meta-box">
+                      <div class="meta-label">Asking Price</div>
+                      <div class="meta-value">${escapeHtml(money(item.asking_price))}</div>
+                    </div>
+                    <div class="meta-box">
+                      <div class="meta-label">Units / SF</div>
+                      <div class="meta-value">${escapeHtml(
+                        [item.units ? item.units + ' units' : '', item.square_feet ? item.square_feet + ' sf' : '']
+                        .filter(Boolean).join(' • ') || '—'
+                      )}</div>
+                    </div>
+                  </div>
+
+                  <div class="summary">${escapeHtml(shortText(item.summary || item.description))}</div>
+
+                  <div class="card-actions">
+                    <a class="small-btn primary" href="/property-card.html?id=${encodeURIComponent(item.id)}">View Listing</a>
+                    <a class="small-btn" href="/property-edit.html?id=${encodeURIComponent(item.id)}">Edit</a>
+                  </div>
+                </div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function applyFilters() {
+      const q = searchInput.value.trim().toLowerCase();
+      const status = statusFilter.value.trim().toLowerCase();
+      const assetType = typeFilter.value.trim().toLowerCase();
+
+      filteredListings = allListings.filter(item => {
+        const haystack = [
+          item.title, item.city, item.state, item.market, item.summary, item.description, item.asset_type, item.deal_type, item.status
+        ].join(' ').toLowerCase();
+
+        const matchesSearch = !q || haystack.includes(q);
+        const matchesStatus = !status || String(item.status || '').toLowerCase() === status;
+        const matchesType = !assetType || String(item.asset_type || '').toLowerCase() === assetType;
+
+        return matchesSearch && matchesStatus && matchesType;
+      });
+
+      render(filteredListings);
+    }
+
+    function showDeletedNoticeIfNeeded() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('deleted') === '1') {
+        document.getElementById('deletedNotice').classList.add('show');
+      }
+    }
+
+    function requireMemberSession() {
+      const memberEmail = localStorage.getItem('memberEmail') || sessionStorage.getItem('memberEmail');
+      const memberName = localStorage.getItem('memberName') || sessionStorage.getItem('memberName');
+
+      if (!memberEmail && !memberName) {
+        document.getElementById('loginNotice').classList.add('show');
+        setTimeout(() => {
+          window.location.href = '/member-login.html';
+        }, 900);
+        return false;
+      }
+      return true;
+    }
+
+    async function loadListings() {
+      if (!requireMemberSession()) return;
+
+      showDeletedNoticeIfNeeded();
+
+      const { data, error } = await supabase
+        .from('property_cards')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        resultsEl.innerHTML = `
+          <div class="empty">
+            <h3 style="margin-top:0;color:#fff;">Unable to load listings</h3>
+            <div>${escapeHtml(error.message || 'Supabase read failed.')}</div>
+          </div>
+        `;
+        return;
+      }
+
+      allListings = Array.isArray(data) ? data : [];
+      fillFilterOptions();
+      applyFilters();
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    typeFilter.addEventListener('change', applyFilters);
+
+    clearFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      statusFilter.value = '';
+      typeFilter.value = '';
+      applyFilters();
+    });
+
+    loadListings();
+  </script>
+</body>
+</html>
