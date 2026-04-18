@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultForge Pain Button</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script>
+  <style>
+    body{margin:0;background:#071844;color:#fff;font-family:Arial,sans-serif}
+    .wrap{max-width:760px;margin:0 auto;padding:20px}
+    .card{background:#0d1f59;border-radius:24px;padding:24px}
+    h1{margin:0 0 10px;font-size:36px}
+    p{color:#c6d0f2}
+    label{display:block;margin:16px 0 8px;font-weight:700}
+    input,select,textarea{width:100%;padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:#02113f;color:#fff;font-size:18px;box-sizing:border-box}
+    textarea{min-height:180px;resize:vertical}
+    button{width:100%;margin-top:22px;padding:20px;border:none;border-radius:999px;background:#e2c465;color:#1e1604;font-size:22px;font-weight:900}
+    .box{margin-top:18px;padding:16px;border-radius:16px;white-space:pre-wrap}
+    .status{background:#10255f}
+    .error{background:#4a1f37}
+    .success{background:#173d2d}
+    a{color:#c6d0f2}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p><a href="/members.html">← Members</a> | <a href="/admin.html">Admin</a></p>
+    <div class="card">
+      <h1>Pain Button</h1>
+      <p>Submit a deal problem into VaultForge.</p>
+
+      <form id="painForm">
+        <label for="name">Name</label>
+        <input id="name" required>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" required>
+
+        <label for="market">Market</label>
+        <input id="market" required>
+
+        <label for="urgency">Urgency</label>
+        <select id="urgency" required>
+          <option value="">Select</option>
+          <option>Low</option>
+          <option>Medium</option>
+          <option>Urgent</option>
+          <option>Immediate</option>
+        </select>
+
+        <label for="needed_role">Need Help From</label>
+        <select id="needed_role" required>
+          <option value="">Select</option>
+          <option>Lender</option>
+          <option>Attorney</option>
+          <option>Contractor</option>
+          <option>Buyer</option>
+          <option>Operator</option>
+          <option>Other</option>
+        </select>
+
+        <label for="budget">Deal Size / Budget</label>
+        <input id="budget">
+
+        <label for="problem">Describe The Problem</label>
+        <textarea id="problem" required></textarea>
+
+        <button id="submitBtn" type="submit">Submit Request</button>
+      </form>
+
+      <div id="statusBox" class="box status">Page loaded. Ready to submit.</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      if (!window.VaultForgeAuth) {
+        window.location.href = '/member-login.html';
+        return;
+      }
+
+      var member = window.VaultForgeAuth.requireLogin();
+      var statusBox = document.getElementById('statusBox');
+
+      function setStatus(cls, text) {
+        statusBox.className = 'box ' + cls;
+        statusBox.textContent = text;
+      }
+
+      try {
+        if (!window.supabase || !window.supabase.createClient) {
+          setStatus('error', 'Supabase library failed to load.');
+          return;
+        }
+
+        var SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+        var SUPABASE_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        var form = document.getElementById('painForm');
+        var submitBtn = document.getElementById('submitBtn');
+        var emailInput = document.getElementById('email');
+
+        if (member && member.email && emailInput) {
+          emailInput.value = member.email;
+        }
+
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          setStatus('status', 'Submitting...');
+          submitBtn.disabled = true;
+
+          var payload = {
+            name: document.getElementById('name').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            market: document.getElementById('market').value.trim(),
+            urgency: document.getElementById('urgency').value,
+            needed_role: document.getElementById('needed_role').value,
+            budget: document.getElementById('budget').value.trim() || null,
+            problem: document.getElementById('problem').value.trim(),
+            status: 'open'
+          };
+
+          if (!payload.name || !payload.email || !payload.market || !payload.urgency || !payload.needed_role || !payload.problem) {
+            setStatus('error', 'Please complete all required fields.');
+            submitBtn.disabled = false;
+            return;
+          }
+
+          try {
+            var result = await supabase.from('pain_requests').insert([payload]);
+            if (result.error) {
+              setStatus('error', 'Supabase error: ' + result.error.message);
+            } else {
+              form.reset();
+              if (member && member.email) {
+                emailInput.value = member.email;
+              }
+              setStatus('success', 'Request submitted successfully.');
+            }
+          } catch (err) {
+            setStatus('error', 'Browser error: ' + (err && err.message ? err.message : String(err)));
+          }
+
+          submitBtn.disabled = false;
+        });
+      } catch (err) {
+        setStatus('error', 'Page script failed: ' + (err && err.message ? err.message : String(err)));
+      }
+    })();
+  </script>
+</body>
+</html>
