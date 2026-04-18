@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VaultForge Pain Button</title>
+<style>
+:root{
+--bg:#08101f;--panel:#121b39;--line:rgba(255,255,255,.08);
+--text:#f5f7ff;--muted:#b4bfd9;--gold:#d6b35f;--gold2:#f1d28a;
+}
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial,sans-serif;
+color:var(--text);
+background:linear-gradient(180deg,#07101e 0%,#08101f 100%);
+}
+.container{
+width:min(900px,calc(100% - 24px));
+margin:auto;
+padding:28px 0 40px;
+}
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+flex-wrap:wrap;
+margin-bottom:18px;
+}
+.brand{
+font-weight:700;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:var(--gold2);
+}
+.btn{
+padding:12px 16px;
+border-radius:999px;
+border:1px solid var(--line);
+background:rgba(255,255,255,.04);
+color:#fff;
+text-decoration:none;
+font-weight:700;
+}
+.card{
+background:rgba(18,27,57,.95);
+border:1px solid var(--line);
+border-radius:22px;
+padding:24px;
+}
+h1{margin:0 0 10px;font-size:2rem;}
+.sub{margin:0 0 20px;color:var(--muted);line-height:1.7;}
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:16px;
+}
+.field{display:flex;flex-direction:column;gap:8px;}
+.full{grid-column:1/-1;}
+label{font-weight:700;font-size:.94rem;}
+input,select,textarea{
+width:100%;
+padding:14px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,.1);
+background:#0b1328;
+color:#fff;
+}
+textarea{min-height:140px;resize:vertical;}
+button{
+padding:14px 18px;
+border:0;
+border-radius:999px;
+font-weight:700;
+cursor:pointer;
+background:linear-gradient(135deg,var(--gold2),var(--gold));
+color:#201600;
+}
+.status{
+display:none;
+margin-top:18px;
+padding:14px 16px;
+border-radius:14px;
+}
+.show{display:block;}
+.ok{
+background:rgba(34,197,94,.12);
+border:1px solid rgba(34,197,94,.25);
+color:#bcf5d0;
+}
+.bad{
+background:rgba(239,68,68,.12);
+border:1px solid rgba(239,68,68,.25);
+color:#fecaca;
+}
+@media(max-width:760px){
+.grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="top">
+<div class="brand">VaultForge</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<a class="btn" href="/">Home</a>
+<a class="btn" href="/partners.html">Partners</a>
+</div>
+</div>
+
+<div class="card">
+<h1>Pain Button</h1>
+<p class="sub">
+Hit a wall on a deal? Need a lender, title help, attorney, contractor, buyer, or another operator fast?
+Submit the issue and VaultForge can route support.
+</p>
+
+<form id="painForm">
+<div class="grid">
+
+<div class="field">
+<label>Name</label>
+<input id="name" required>
+</div>
+
+<div class="field">
+<label>Email</label>
+<input id="email" type="email" required>
+</div>
+
+<div class="field">
+<label>Market</label>
+<input id="market" placeholder="Dallas, Tampa, Atlanta..." required>
+</div>
+
+<div class="field">
+<label>Urgency</label>
+<select id="urgency">
+<option>Normal</option>
+<option>Urgent</option>
+<option>ASAP</option>
+</select>
+</div>
+
+<div class="field">
+<label>Need Help From</label>
+<select id="need_role">
+<option>Lender</option>
+<option>Title Company</option>
+<option>Attorney</option>
+<option>Contractor</option>
+<option>Insurance</option>
+<option>Buyer</option>
+<option>Agent</option>
+<option>Vendor</option>
+<option>Other</option>
+</select>
+</div>
+
+<div class="field">
+<label>Deal Size / Budget</label>
+<input id="budget" placeholder="$250k / $1.2M / Unknown">
+</div>
+
+<div class="field full">
+<label>Describe The Problem</label>
+<textarea id="problem" required placeholder="What happened? What do you need solved?"></textarea>
+</div>
+
+<div class="field full">
+<button type="submit" id="submitBtn">Submit Request</button>
+</div>
+
+</div>
+</form>
+
+<div id="status" class="status"></div>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://mnwwvpuxrzostrplfgmq.supabase.co";
+const SUPABASE_KEY="sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const form=document.getElementById("painForm");
+const box=document.getElementById("status");
+const btn=document.getElementById("submitBtn");
+
+function show(type,msg){
+box.className="status show "+type;
+box.textContent=msg;
+}
+
+form.addEventListener("submit",async function(e){
+e.preventDefault();
+
+btn.disabled=true;
+btn.textContent="Submitting...";
+
+const payload={
+name:document.getElementById("name").value.trim(),
+email:document.getElementById("email").value.trim(),
+market:document.getElementById("market").value.trim(),
+urgency:document.getElementById("urgency").value,
+need_role:document.getElementById("need_role").value,
+budget:document.getElementById("budget").value.trim(),
+problem:document.getElementById("problem").value.trim(),
+status:"new"
+};
+
+const {error}=await db.from("pain_requests").insert([payload]);
+
+if(error){
+show("bad","Submission failed. Create table pain_requests in Supabase first.");
+btn.disabled=false;
+btn.textContent="Submit Request";
+return;
+}
+
+show("ok","Request submitted. VaultForge received your Pain Button request.");
+form.reset();
+btn.disabled=false;
+btn.textContent="Submit Request";
+});
+</script>
+</body>
+</html>
