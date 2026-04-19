@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge | Pain</title>
+  <style>
+    :root{
+      --bg:#07111f;--panel:#101c35;--text:#f4f7ff;--muted:#9fb0d2;
+      --blue:#4f8cff;--green:#18c37e;--gold:#d8b15d;--red:#ff6b7a;
+      --line:rgba(255,255,255,.10);--radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#07111f,#081426);color:var(--text)}
+    a{text-decoration:none;color:inherit}
+    .wrap{max-width:1180px;margin:auto;padding:18px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    .brand{font-size:26px;font-weight:900;letter-spacing:.08em}
+    .sub{color:var(--muted);font-size:14px}
+    .btn{border:none;cursor:pointer;padding:12px 16px;border-radius:14px;font-weight:800;min-height:46px;-webkit-appearance:none;appearance:none}
+    .btn-blue{background:var(--blue);color:#fff}
+    .btn-green{background:var(--green);color:#07111f}
+    .btn-gold{background:var(--gold);color:#07111f}
+    .btn-ghost{background:rgba(255,255,255,.03);border:1px solid var(--line);color:#fff}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .card{background:linear-gradient(180deg,var(--panel),#0c1730);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+    .notice{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line);margin-bottom:14px;color:var(--muted);line-height:1.55}
+    .fieldset{border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,.02)}
+    .fieldset h3{margin:0 0 10px}
+    label{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 7px;font-weight:700}
+    input,select,textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:#fff;outline:none;-webkit-appearance:none;appearance:none}
+    textarea{min-height:110px;resize:vertical}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .statusbar{margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#cfe0ff}
+    .statusbar.success{color:#9ff0cc}
+    .statusbar.error{color:#ffbdc7}
+    .pill-list{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px;color:#dbe5ff}
+    .analysis{white-space:pre-wrap;line-height:1.5}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    @media(max-width:760px){.row2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="brand">VAULTFORGE PAIN</div>
+        <div class="sub" id="memberLine">Checking member session...</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="/members.html" class="btn btn-ghost">Dashboard</a>
+        <a href="/member-profile.html" class="btn btn-ghost">Profile</a>
+        <button id="logoutBtn" class="btn btn-blue" type="button">Logout</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Pain Intake</h2>
+        <div class="notice">
+          For this rollout, only Georgia, Tennessee, and Florida are accepted. Saving a submission will also run the Pain matcher.
+        </div>
+
+        <div class="fieldset">
+          <h3>Property</h3>
+          <div class="row2" style="margin-bottom:12px;">
+            <div>
+              <label for="state">State</label>
+              <select id="state">
+                <option value="">Select state</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Tennessee">Tennessee</option>
+                <option value="Florida">Florida</option>
+              </select>
+            </div>
+            <div>
+              <label for="property_type">Property Type</label>
+              <select id="property_type">
+                <option value="">Select type</option>
+                <option value="Residential">Residential</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Land">Land</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row2" style="margin-bottom:12px;">
+            <div>
+              <label for="strategy">Strategy</label>
+              <select id="strategy">
+                <option value="">Select strategy</option>
+                <option value="distressed">Distressed</option>
+                <option value="value-add">Value-Add</option>
+                <option value="stabilized">Stabilized</option>
+                <option value="land-development">Land Development</option>
+                <option value="redevelopment">Redevelopment</option>
+                <option value="advisory">Advisory</option>
+              </select>
+            </div>
+            <div>
+              <label for="price">Price</label>
+              <input id="price" type="number" min="0" placeholder="250000" />
+            </div>
+          </div>
+
+          <div class="row2">
+            <div>
+              <label for="distress">Distress</label>
+              <select id="distress">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div>
+              <label for="title">Deal Title</label>
+              <input id="title" type="text" placeholder="Atlanta Residential Opportunity" />
+            </div>
+          </div>
+        </div>
+
+        <div class="fieldset">
+          <h3>Description</h3>
+          <label for="pain_text">Describe the situation</label>
+          <textarea id="pain_text" placeholder="Explain the pain point, seller situation, property issue, timing, and what kind of buyer you need."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-gold" id="analyzeBtn" type="button">Analyze</button>
+          <button class="btn btn-green" id="saveBtn" type="button">Save Submission</button>
+        </div>
+
+        <div class="statusbar" id="statusBar">Ready.</div>
+      </div>
+
+      <div class="card">
+        <h2>Analysis</h2>
+        <div class="notice">
+          Analyze gives a fast structured read on the submission before saving. Save writes to Supabase and then runs matching.
+        </div>
+
+        <div class="fieldset">
+          <h3>Summary</h3>
+          <div class="pill-list" id="summaryPills">
+            <div class="pill">No analysis yet</div>
+          </div>
+        </div>
+
+        <div class="fieldset">
+          <h3>Output</h3>
+          <div id="analysisOutput" class="analysis">Nothing analyzed yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { runPainMatcher } from './pain-matcher.js';
+
+    const SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const ROLLOUT_STATES = ['Georgia', 'Tennessee', 'Florida'];
+
+    let currentUser = null;
+
+    function setStatus(message, kind = '') {
+      const el = document.getElementById('statusBar');
+      el.textContent = message;
+      el.className = 'statusbar';
+      if (kind) el.classList.add(kind);
+    }
+
+    function getValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function getPayload() {
+      return {
+        user_id: currentUser.id,
+        title: getValue('title'),
+        state: getValue('state'),
+        property_type: getValue('property_type'),
+        strategy: getValue('strategy'),
+        price: getValue('price') === '' ? null : Number(getValue('price')),
+        distress: getValue('distress') === 'true',
+        pain_text: getValue('pain_text')
+      };
+    }
+
+    function validate(payload) {
+      if (!payload.state) return 'State is required.';
+      if (!ROLLOUT_STATES.includes(payload.state)) return 'This rollout only supports Georgia, Tennessee, and Florida.';
+      if (!payload.property_type) return 'Property type is required.';
+      if (!payload.strategy) return 'Strategy is required.';
+      if (payload.price === null || Number.isNaN(payload.price)) return 'Price is required.';
+      if (!payload.pain_text) return 'Pain description is required.';
+      return '';
+    }
+
+    function renderPills(payload) {
+      const pills = [
+        payload.state || 'No state',
+        payload.property_type || 'No property type',
+        payload.strategy || 'No strategy',
+        payload.price !== null ? `Price ${payload.price}` : 'No price',
+        payload.distress ? 'Distress Yes' : 'Distress No'
+      ];
+      document.getElementById('summaryPills').innerHTML = pills.map(p => `<div class="pill">${p}</div>`).join('');
+    }
+
+    function analyzePayload(payload) {
+      const lines = [];
+      lines.push(`State: ${payload.state || 'Missing'}`);
+      lines.push(`Property Type: ${payload.property_type || 'Missing'}`);
+      lines.push(`Strategy: ${payload.strategy || 'Missing'}`);
+      lines.push(`Price: ${payload.price !== null ? payload.price : 'Missing'}`);
+      lines.push(`Distress: ${payload.distress ? 'Yes' : 'No'}`);
+      lines.push('');
+      lines.push('Quick Read:');
+      if (payload.state && payload.property_type && payload.strategy && payload.price !== null) {
+        lines.push('- Submission has the minimum fields needed for matching.');
+      } else {
+        lines.push('- Submission is missing one or more matching fields.');
+      }
+      if (!ROLLOUT_STATES.includes(payload.state)) {
+        lines.push('- State is outside the current rollout.');
+      } else {
+        lines.push('- State is inside the current rollout.');
+      }
+      if ((payload.pain_text || '').length < 30) {
+        lines.push('- Description is short. Add more detail for better ops review.');
+      } else {
+        lines.push('- Description length is solid.');
+      }
+      return lines.join('\n');
+    }
+
+    async function handleAnalyze() {
+      try {
+        const payload = getPayload();
+        renderPills(payload);
+        const output = analyzePayload(payload);
+        document.getElementById('analysisOutput').textContent = output;
+        setStatus('Analysis complete.', 'success');
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || 'Analyze failed.', 'error');
+      }
+    }
+
+    async function handleSave() {
+      try {
+        const payload = getPayload();
+        const validationError = validate(payload);
+        if (validationError) {
+          setStatus(validationError, 'error');
+          return;
+        }
+
+        renderPills(payload);
+        document.getElementById('analysisOutput').textContent = analyzePayload(payload);
+        setStatus('Saving submission...', '');
+
+        const { data, error } = await supabase
+          .from('pain_projects')
+          .insert([payload])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const matchResult = await runPainMatcher(supabase, data.id);
+
+        if ((matchResult?.matchesCreated || 0) > 0) {
+          setStatus(`Saved successfully. ${matchResult.matchesCreated} match(es) created.`, 'success');
+        } else {
+          setStatus('Saved successfully. No matches created yet.', 'success');
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(`Save failed: ${error.message || 'Unknown error'}`, 'error');
+      }
+    }
+
+    async function boot() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+
+        const session = data?.session;
+        if (!session) {
+          window.location.href = '/member-login.html';
+          return;
+        }
+
+        currentUser = session.user;
+        document.getElementById('memberLine').textContent = 'Logged in as ' + (currentUser.email || 'Member');
+        setStatus('Ready.');
+      } catch (error) {
+        console.error(error);
+        setStatus('Session check failed.', 'error');
+      }
+    }
+
+    document.getElementById('analyzeBtn').addEventListener('click', handleAnalyze);
+    document.getElementById('saveBtn').addEventListener('click', handleSave);
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/member-login.html';
+    });
+
+    boot();
+  </script>
+</body>
+</html>
