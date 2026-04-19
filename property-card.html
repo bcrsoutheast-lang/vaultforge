@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VaultForge Property Card</title>
+
+<style>
+:root{
+  --bg:#08132f;
+  --panel:#0d1b45;
+  --text:#eef3ff;
+  --muted:#9fb0da;
+  --line:rgba(255,255,255,.12);
+  --accent:#7ee0b7;
+  --accent2:#7ab8ff;
+  --danger:#d96b6b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:linear-gradient(180deg,#05102a 0%, #08132f 100%);
+  color:var(--text);
+  min-height:100vh;
+}
+.wrap{
+  max-width:920px;
+  margin:0 auto;
+  padding:24px 18px 48px;
+}
+h1{
+  margin:0 0 8px;
+  font-size:clamp(30px,4vw,42px);
+}
+.sub{
+  color:var(--muted);
+  margin-bottom:18px;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+.btn{
+  min-height:48px;
+  padding:12px 18px;
+  border-radius:14px;
+  border:1px solid transparent;
+  text-decoration:none;
+  font-weight:800;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:var(--text);
+  background:transparent;
+}
+.btn-secondary{border-color:var(--line)}
+.btn-blue{background:var(--accent2);color:#071325}
+.btn-danger{border-color:rgba(217,107,107,.35);color:#ffd4d4}
+.panel{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:20px;
+}
+.notice{
+  display:none;
+  margin-bottom:16px;
+  border-radius:14px;
+  padding:14px 16px;
+  font-weight:700;
+}
+.notice.show{display:block}
+.notice.info{
+  display:block;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+}
+.notice.error{
+  background:rgba(217,107,107,.12);
+  border:1px solid rgba(217,107,107,.35);
+  color:#ffd4d4;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+.box{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+}
+.label{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:6px;
+}
+.value{
+  font-size:16px;
+  font-weight:700;
+}
+.section{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.debug{
+  margin-top:18px;
+  font-size:12px;
+  color:var(--muted);
+  border-top:1px solid var(--line);
+  padding-top:12px;
+}
+@media (max-width:680px){
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<h1>Property Card</h1>
+<div class="sub">Single property detail page for VaultForge opportunities.</div>
+
+<div class="actions">
+  <a class="btn btn-secondary" href="/members.html">Back to Member Area</a>
+  <a class="btn btn-secondary" href="/property-cards.html">Back to Listings</a>
+  <a id="editBtn" class="btn btn-blue" href="#">Edit Listing</a>
+  <button id="deleteBtn" class="btn btn-danger" type="button">Delete Listing</button>
+</div>
+
+<div class="notice info">This page loads the property by the ?id= in the URL.</div>
+<div id="errorNotice" class="notice error"></div>
+
+<div class="panel">
+
+<div id="statusBadge">Loading...</div>
+
+<h2 id="title">Loading property...</h2>
+
+<div id="location" class="sub">Please wait...</div>
+
+<div class="grid">
+  <div class="box">
+    <div class="label">Market</div>
+    <div id="market" class="value">—</div>
+  </div>
+
+  <div class="box">
+    <div class="label">Asking Price</div>
+    <div id="asking_price" class="value">—</div>
+  </div>
+
+  <div class="box">
+    <div class="label">Visibility</div>
+    <div id="visibility" class="value">—</div>
+  </div>
+
+  <div class="box">
+    <div class="label">Member</div>
+    <div id="member" class="value">—</div>
+  </div>
+</div>
+
+<div class="section">
+  <strong>Summary</strong>
+  <div id="summary">—</div>
+</div>
+
+<div class="section">
+  <strong>Description</strong>
+  <div id="description">—</div>
+</div>
+
+<div id="debugLog" class="debug">Page ready.</div>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+
+<script>
+const SUPABASE_URL='https://mnwwvpuxrzostrplfgmq.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+
+const params = new URLSearchParams(window.location.search);
+const propertyId = params.get('id');
+
+const errorNotice = document.getElementById('errorNotice');
+const debugLog = document.getElementById('debugLog');
+
+function logDebug(msg){
+  debugLog.textContent='['+new Date().toLocaleTimeString()+'] '+msg;
+}
+
+function showError(msg){
+  errorNotice.textContent=msg;
+  errorNotice.classList.add('show');
+  logDebug('ERROR: '+msg);
+}
+
+function money(v){
+  if(!v) return '—';
+  return new Intl.NumberFormat('en-US',{
+    style:'currency',
+    currency:'USD',
+    maximumFractionDigits:0
+  }).format(v);
+}
+
+function fillCard(row){
+  document.getElementById('statusBadge').textContent=row.status || 'Active';
+  document.getElementById('title').textContent=row.title || 'Untitled';
+  document.getElementById('location').textContent =
+    [row.city,row.state].filter(Boolean).join(', ') || row.market || '—';
+
+  document.getElementById('market').textContent=row.market || '—';
+  document.getElementById('asking_price').textContent=money(row.asking_price);
+  document.getElementById('visibility').textContent=row.visibility || '—';
+  document.getElementById('member').textContent=row.member_name || row.member_email || '—';
+  document.getElementById('summary').textContent=row.summary || '—';
+  document.getElementById('description').textContent=row.description || '—';
+
+  document.getElementById('editBtn').href =
+    '/property-edit.html?id=' + encodeURIComponent(row.id);
+
+  logDebug('Property loaded: '+row.id);
+}
+
+async function loadProperty(){
+
+  if(!propertyId){
+    showError('Missing property id.');
+    return;
+  }
+
+  try{
+    const session = await VaultForgeAuth.requireLogin();
+    if(!session) return;
+
+    const url =
+      SUPABASE_URL +
+      '/rest/v1/property_cards?id=eq.' +
+      encodeURIComponent(propertyId) +
+      '&select=*';
+
+    const response = await fetch(url,{
+      headers:{
+        apikey:SUPABASE_ANON_KEY,
+        Authorization:'Bearer '+session.access_token,
+        'Content-Type':'application/json'
+      }
+    });
+
+    const rows = await response.json();
+
+    if(!response.ok){
+      throw new Error(JSON.stringify(rows));
+    }
+
+    if(!rows || !rows.length){
+      showError('Property not found.');
+      return;
+    }
+
+    fillCard(rows[0]);
+
+  }catch(err){
+    showError('Load failed: '+err.message);
+  }
+}
+
+async function deleteProperty(){
+
+  const ok = confirm('Delete this listing permanently?');
+  if(!ok) return;
+
+  try{
+    const session = await VaultForgeAuth.requireLogin();
+    if(!session) return;
+
+    const response = await fetch(
+      SUPABASE_URL +
+      '/rest/v1/property_cards?id=eq.' +
+      encodeURIComponent(propertyId),
+      {
+        method:'DELETE',
+        headers:{
+          apikey:SUPABASE_ANON_KEY,
+          Authorization:'Bearer '+session.access_token,
+          'Content-Type':'application/json'
+        }
+      }
+    );
+
+    if(!response.ok){
+      const txt = await response.text();
+      throw new Error(txt);
+    }
+
+    window.location.href='/property-cards.html?deleted=1';
+
+  }catch(err){
+    showError('Delete failed: '+err.message);
+  }
+}
+
+document.getElementById('deleteBtn')
+.addEventListener('click',deleteProperty);
+
+loadProperty();
+</script>
+
+</body>
+</html>
