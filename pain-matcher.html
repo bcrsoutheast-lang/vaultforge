@@ -1,0 +1,214 @@
+const ROLLOUT_STATES = ['Georgia', 'Tennessee', 'Florida'];
+
+function normalizeArray(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function normalizeText(value) {
+  return String(value || '').trim();
+}
+
+function normalizeNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function overlaps(a, b) {
+  const setB = new Set(normalizeArray(b));
+  return normalizeArray(a).some(v => setB.has(v));
+}
+
+function includesValue(arr, value) {
+  return normalizeArray(arr).includes(normalizeText(value));
+}
+
+function buildReasons(project, pref, profile) {
+  const reasons = [];
+
+  if (includesValue(pref.target_states, project.state)) {
+    reasons.push(`Targets ${project.state}`);
+  }
+
+  if (includesValue(pref.property_types, project.property_type)) {
+    reasons.push(`Matches ${project.property_type}`);
+  }
+
+  if (overlaps(pref.strategies, [project.strategy])) {
+    reasons.push(`Strategy includes ${project.strategy}`);
+  }
+
+  const minPrice = normalizeNumber(pref.min_price);
+  const maxPrice = normalizeNumber(pref.max_price);
+  const projectPrice = normalizeNumber(project.price);
+
+  const minOk = minPrice === null || (projectPrice !== null && projectPrice >= minPrice);
+  const maxOk = maxPrice === null || (projectPrice !== null && projectPrice <= maxPrice);
+
+  if (minOk && maxOk && projectPrice !== null) {
+    reasons.push('Price fits member range');
+  }
+
+  if (pref.distress === true && project.distress === true) {
+    reasons.push('Distress preference matched');
+  }
+
+  if (pref.notify_enabled === true) {
+    reasons.push('Notifications enabled');
+  }
+
+  if (profile?.full_name) {
+    reasons.push(`Matched profile: ${profile.full_name}`);
+  }
+
+  return reasons;
+}
+
+function computeScore(project, pref) {
+  let score = 70; // base score for a qualified match
+
+  if (pref.distress === true && project.distress === true) {
+    score += 15;
+  }
+
+  if (pref.notify_enabled === true) {
+    score += 5;
+  }
+
+  return score;
+}
+
+function isQualified(project, pref) {
+  if (!ROLLOUT_STATES.includes(project.state)) return false;
+  if (!includesValue(pref.target_states, project.state)) return false;
+  if (!includesValue(pref.property_types, project.property_type)) return false;
+  if (!overlaps(pref.strategies, [project.strategy])) return false;
+
+  const projectPrice = normalizeNumber(project.price);
+  const minPrice = normalizeNumber(pref.min_price);
+  const maxPrice = normalizeNumber(pref.max_price);
+
+  const minOk = minPrice === null || (projectPrice !== null && projectPrice >= minPrice);
+  const maxOk = maxPrice === null || (projectPrice !== null && projectPrice <= maxPrice);
+
+  if (!minOk || !maxOk) return false;
+
+  return true;
+}
+
+/**
+ * Expected project shape:
+ * {
+ *   id,
+ *   state,
+ *   property_type,
+ *   strategy,
+ *   price,
+ *   distress
+ * }
+ */
+export async function runPainMatcher(supabase, painProjectId) {
+  if (!painProjectId) {
+    throw new Error('runPainMatcher requires painProjectId');
+  }
+
+  // 1) Load project
+  const { data: project, error: projectError } = await supabase
+    .from('pain_projects')
+    .select('id, state, property_type, strategy, price, distress')
+    .eq('id', painProjectId)
+    .single();
+
+  if (projectError) throw projectError;
+  if (!project) throw new Error('Pain project not found');
+
+  if (!ROLLOUT_STATES.includes(project.state)) {
+    return {
+      project,
+      matchesCreated: 0,
+      skipped: true,
+      reason: `Project state ${project.state} is outside rollout states`
+    };
+  }
+
+  // 2) Load member preferences + profile info
+  // Assumes member_match_preferences.member_id links to member_profiles.member_id
+  const { data: prefs, error: prefsError } = await supabase
+    .from('member_match_preferences')
+    .select(`
+      id,
+      member_id,
+      target_states,
+      property_types,
+      strategies,
+      min_price,
+      max_price,
+      distress,
+      notify_enabled,
+      member_profiles (
+        member_id,
+        full_name,
+        email
+      )
+    `);
+
+  if (prefsError) throw prefsError;
+
+  const qualifiedMatches = [];
+
+  for (const pref of prefs || []) {
+    const profile = Array.isArray(pref.member_profiles)
+      ? pref.member_profiles[0]
+      : pref.member_profiles;
+
+    if (!isQualified(project, pref)) continue;
+
+    qualifiedMatches.push({
+      pain_project_id: project.id,
+      member_id: pref.member_id,
+      match_score: computeScore(project, pref),
+      match_reasons: buildReasons(project, pref, profile),
+      status: 'new'
+    });
+  }
+
+  // 3) Clear old matches for re-run safety
+  const { error: deleteError } = await supabase
+    .from('pain_matches')
+    .delete()
+    .eq('pain_project_id', project.id);
+
+  if (deleteError) throw deleteError;
+
+  // 4) Insert fresh matches
+  if (!qualifiedMatches.length) {
+    return {
+      project,
+      matchesCreated: 0,
+      skipped: false,
+      reason: 'No qualified members found'
+    };
+  }
+
+  const { data: insertedMatches, error: insertError } = await supabase
+    .from('pain_matches')
+    .insert(qualifiedMatches)
+    .select();
+
+  if (insertError) throw insertError;
+
+  return {
+    project,
+    matchesCreated: insertedMatches?.length || 0,
+    skipped: false,
+    matches: insertedMatches || []
+  };
+}
