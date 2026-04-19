@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VaultForge | Property Listings</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:#101c35;
+      --panel2:#142443;
+      --text:#f4f7ff;
+      --muted:#9fb0d2;
+      --blue:#4f8cff;
+      --blue2:#7aa7ff;
+      --green:#18c37e;
+      --red:#ff5f73;
+      --gold:#d8b15d;
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:linear-gradient(180deg,var(--bg) 0%, #09152a 45%, #08111f 100%);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif
+    }
+    a{text-decoration:none;color:inherit}
+    button,input,select{font:inherit}
+    img{max-width:100%;display:block}
+
+    .shell{width:min(1240px,calc(100% - 28px));margin:0 auto}
+    .topbar{
+      position:sticky;top:0;z-index:20;backdrop-filter:blur(16px);
+      background:rgba(7,17,31,.75);border-bottom:1px solid rgba(122,167,255,.12)
+    }
+    .topbar-inner{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:42px;height:42px;border-radius:14px;
+      background:linear-gradient(135deg,#15305f,#0a1630);
+      border:1px solid rgba(122,167,255,.2);
+      display:grid;place-items:center;box-shadow:var(--shadow);
+      font-weight:800;color:var(--blue2)
+    }
+    .brand-text strong{display:block;letter-spacing:.12em;font-size:.92rem}
+    .brand-text span{
+      display:block;color:var(--muted);font-size:.86rem;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis;max-width:50vw
+    }
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+    .btn{
+      appearance:none;border:none;cursor:pointer;border-radius:14px;padding:12px 16px;
+      transition:.18s ease;font-weight:700
+    }
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn-primary{
+      background:linear-gradient(135deg,var(--blue),#2f6df2);
+      color:#fff;box-shadow:0 12px 24px rgba(79,140,255,.24)
+    }
+    .btn-primary:hover{transform:translateY(-1px)}
+    .btn-ghost{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(122,167,255,.16);color:var(--text)
+    }
+    .btn-ghost:hover{
+      border-color:rgba(122,167,255,.34);background:rgba(255,255,255,.05)
+    }
+
+    .hero{padding:28px 0 14px}
+    .hero-grid{display:grid;grid-template-columns:1.35fr .95fr;gap:18px;align-items:stretch}
+    .hero-card,.side-card{
+      border:1px solid rgba(122,167,255,.12);
+      background:
+        radial-gradient(circle at top right, rgba(122,167,255,.12), transparent 28%),
+        linear-gradient(180deg,var(--panel) 0%, #0c1730 100%);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow)
+    }
+    .hero-card{padding:24px}
+    .eyebrow{
+      color:var(--gold);text-transform:uppercase;letter-spacing:.16em;
+      font-size:.78rem;font-weight:800;margin-bottom:12px
+    }
+    h1{
+      margin:0 0 10px;font-size:clamp(2rem,5vw,3.2rem);
+      line-height:1.02;letter-spacing:-.04em;max-width:12ch
+    }
+    .hero-copy{
+      color:var(--muted);font-size:1.02rem;line-height:1.65;
+      max-width:60ch;margin:0 0 18px
+    }
+    .hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .metric{
+      background:rgba(255,255,255,.025);
+      border:1px solid rgba(122,167,255,.1);
+      border-radius:18px;padding:16px
+    }
+    .metric strong{display:block;font-size:1.45rem;margin-bottom:4px}
+    .metric span{color:var(--muted);font-size:.88rem}
+    .side-card{padding:20px;display:flex;flex-direction:column;gap:14px}
+    .side-card h2{margin:0;font-size:1.2rem;letter-spacing:-.02em}
+    .side-card p{margin:0;color:var(--muted);line-height:1.65}
+    .status-chip{
+      display:inline-flex;align-items:center;gap:8px;width:max-content;border-radius:999px;
+      padding:8px 12px;background:rgba(24,195,126,.12);color:#9ff0cc;
+      border:1px solid rgba(24,195,126,.24);font-size:.88rem;font-weight:700
+    }
+    .status-chip.warn{
+      background:rgba(216,177,93,.12);color:#f2db9f;border-color:rgba(216,177,93,.22)
+    }
+
+    .type-nav{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+    .type-link{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 14px;border-radius:999px;border:1px solid rgba(122,167,255,.16);
+      background:rgba(255,255,255,.03);color:var(--text);font-size:.9rem;font-weight:700
+    }
+    .type-link.active{background:rgba(79,140,255,.16);border-color:rgba(79,140,255,.34)}
+    .type-link:hover{border-color:rgba(122,167,255,.34);background:rgba(255,255,255,.05)}
+
+    .controls{padding:8px 0 18px}
+    .controls-grid{display:grid;grid-template-columns:1.25fr 1fr 1fr auto;gap:12px;align-items:end}
+    label{
+      display:block;font-size:.82rem;text-transform:uppercase;letter-spacing:.12em;
+      color:var(--muted);font-weight:700;margin:0 0 8px
+    }
+    .input,.select{
+      width:100%;border-radius:14px;border:1px solid rgba(122,167,255,.15);
+      background:rgba(255,255,255,.03);color:var(--text);padding:14px 15px;outline:none
+    }
+    .input::placeholder{color:#8292b5}
+    .input:focus,.select:focus{
+      border-color:rgba(122,167,255,.42);box-shadow:0 0 0 4px rgba(79,140,255,.1)
+    }
+
+    .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0 16px}
+    .toolbar .meta{color:var(--muted);font-size:.95rem}
+    .pill-row{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{
+      border-radius:999px;padding:8px 12px;border:1px solid rgba(122,167,255,.15);
+      background:rgba(255,255,255,.03);color:var(--text);font-size:.86rem
+    }
+
+    .section{padding:6px 0 48px}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:16px}
+    .section-head h3{margin:0;font-size:1.3rem;letter-spacing:-.02em}
+    .section-head p{margin:6px 0 0;color:var(--muted)}
+
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .card{
+      overflow:hidden;position:relative;border-radius:24px;
+      border:1px solid rgba(122,167,255,.12);
+      background:linear-gradient(180deg,var(--panel2) 0%, #0c1630 100%);
+      box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:100%
+    }
+    .thumb{
+      aspect-ratio:16/10;
+      background:linear-gradient(135deg, rgba(79,140,255,.22), rgba(13,24,47,.3)), linear-gradient(180deg,#132449,#0d1730);
+      display:flex;align-items:flex-end;justify-content:space-between;padding:14px;gap:10px;
+      border-bottom:1px solid rgba(122,167,255,.08)
+    }
+    .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+    .thumb-overlay{
+      position:relative;z-index:1;width:100%;display:flex;justify-content:space-between;align-items:flex-end;gap:8px
+    }
+    .thumb-badge{
+      display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:800;
+      letter-spacing:.08em;text-transform:uppercase;color:#f7fbff;background:rgba(4,10,23,.55);
+      border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);
+      border-radius:999px;padding:8px 10px
+    }
+
+    .card-body{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1}
+    .card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .card-top h4{margin:0;font-size:1.18rem;letter-spacing:-.02em;line-height:1.15}
+    .price{text-align:right;white-space:nowrap}
+    .price strong{display:block;font-size:1.08rem}
+    .price span{display:block;color:var(--muted);font-size:.82rem;margin-top:3px}
+    .sub{color:var(--muted);font-size:.94rem}
+    .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .fact{
+      border:1px solid rgba(122,167,255,.1);background:rgba(255,255,255,.025);
+      border-radius:16px;padding:12px
+    }
+    .fact strong{display:block;font-size:1rem;margin-bottom:4px}
+    .fact span{display:block;color:var(--muted);font-size:.8rem}
+    .desc{
+      color:var(--muted);line-height:1.62;font-size:.94rem;display:-webkit-box;
+      -webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:4.6em
+    }
+    .card-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+    .chip{
+      display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:8px 10px;
+      font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+      background:rgba(255,255,255,.04);border:1px solid rgba(122,167,255,.12);color:#dce7ff
+    }
+    .chip.private{background:rgba(255,95,115,.1);border-color:rgba(255,95,115,.2);color:#ffbdc7}
+    .chip.public{background:rgba(24,195,126,.1);border-color:rgba(24,195,126,.2);color:#9ff0cc}
+    .chip.type{background:rgba(79,140,255,.1);border-color:rgba(79,140,255,.2);color:#cfe0ff}
+
+    .notice,.empty,.error{
+      border-radius:20px;padding:18px;border:1px solid rgba(122,167,255,.12);
+      background:linear-gradient(180deg,#111e3a,#0c1730);color:var(--text);box-shadow:var(--shadow)
+    }
+    .notice p,.empty p,.error p{margin:8px 0 0;color:var(--muted);line-height:1.65}
+    .notice strong,.empty strong,.error strong{display:block;font-size:1.02rem}
+    .hidden{display:none!important}
+    .footer-space{height:40px}
+
+    @media (max-width:1080px){
+      .hero-grid{grid-template-columns:1fr}
+      .controls-grid{grid-template-columns:1fr 1fr}
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (max-width:700px){
+      .topbar-inner{align-items:flex-start;flex-direction:column}
+      .top-actions{width:100%;justify-content:stretch}
+      .top-actions .btn{flex:1}
+      .hero-card,.side-card{padding:20px}
+      .hero-metrics{grid-template-columns:1fr}
+      .controls-grid{grid-template-columns:1fr}
+      .toolbar,.section-head{flex-direction:column;align-items:flex-start}
+      .grid{grid-template-columns:1fr}
+      .facts{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">VF</div>
+        <div class="brand-text">
+          <strong>VAULTFORGE</strong>
+          <span id="memberEmail">Private member infrastructure</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn btn-ghost" href="/members.html">Member Dashboard</a>
+        <a class="btn btn-primary" href="/property-create.html">Create Listing</a>
+        <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-card">
+          <div class="eyebrow">Member Listing Control</div>
+          <h1 id="heroTitle">All Listings</h1>
+          <p id="heroCopy" class="hero-copy">
+            This listings page is tied to your real member session. Your properties load under authenticated access,
+            ownership stays protected by row-level security, and inventory can be separated by residential, commercial,
+            or land without changing the working create, edit, or detail flow.
+          </p>
+
+          <div class="type-nav">
+            <a id="typeAll" class="type-link" href="/property-cards.html">All</a>
+            <a id="typeResidential" class="type-link" href="/property-cards.html?type=residential">Residential</a>
+            <a id="typeCommercial" class="type-link" href="/property-cards.html?type=commercial">Commercial</a>
+            <a id="typeLand" class="type-link" href="/property-cards.html?type=land">Land</a>
+          </div>
+
+          <div class="hero-metrics">
+            <div class="metric">
+              <strong id="metricTotal">0</strong>
+              <span>Total listings loaded</span>
+            </div>
+            <div class="metric">
+              <strong id="metricMine">0</strong>
+              <span>Your listings</span>
+            </div>
+            <div class="metric">
+              <strong id="metricVisible">0</strong>
+              <span>Visible after filters</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <div class="status-chip" id="authStatus">Session verified</div>
+          <h2>How this page behaves now</h2>
+          <p>
+            You must be logged in to use this page. It reads listings through your live Supabase session and respects
+            RLS rules. Type separation is handled by a safe filter on the same listings page, so the working member flow stays intact.
+          </p>
+          <div class="status-chip warn" id="policyStatus">RLS-aware loading enabled</div>
+          <p id="summaryText">Loading secure listings…</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="controls-grid">
+        <div>
+          <label for="searchInput">Search listings</label>
+          <input id="searchInput" class="input" type="text" placeholder="Search title, city, state, type, status">
+        </div>
+        <div>
+          <label for="scopeFilter">Listing scope</label>
+          <select id="scopeFilter" class="select">
+            <option value="all">All loaded listings</option>
+            <option value="mine">Only my listings</option>
+            <option value="public">Only public listings</option>
+            <option value="private">Only private listings</option>
+          </select>
+        </div>
+        <div>
+          <label for="sortFilter">Sort order</label>
+          <select id="sortFilter" class="select">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="price_high">Highest price first</option>
+            <option value="price_low">Lowest price first</option>
+            <option value="title_az">Title A → Z</option>
+          </select>
+        </div>
+        <div>
+          <button id="refreshBtn" class="btn btn-primary" type="button" style="width:100%">Refresh</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="meta" id="resultsMeta">Checking your session…</div>
+      <div class="pill-row">
+        <div class="pill" id="viewerPill">Viewer: —</div>
+        <div class="pill" id="policyPill">Policy: RLS live</div>
+        <div class="pill" id="activeTypePill">Type: All</div>
+      </div>
+    </section>
+
+    <div id="messageBox" class="notice hidden">
+      <strong>Loading secure listings</strong>
+      <p>Please hold while VaultForge verifies your member session and reads your permitted records.</p>
+    </div>
+
+    <div id="errorBox" class="error hidden">
+      <strong>Could not load listings</strong>
+      <p id="errorText">Something interrupted the secure listings request.</p>
+    </div>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3>Listings</h3>
+          <p>Your owned inventory plus any other listings your current policies allow this member session to read.</p>
+        </div>
+      </div>
+
+      <div id="emptyState" class="empty hidden">
+        <strong>No listings matched this view.</strong>
+        <p>
+          You may not have created any listings yet, or your current filters may be hiding them.
+          Create a property or widen the filters above.
+        </p>
+      </div>
+
+      <div id="cardsGrid" class="grid"></div>
+    </section>
+
+    <div class="footer-space"></div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const params = new URLSearchParams(window.location.search);
+    const urlType = String(params.get('type') || '').toLowerCase();
+    const activeType = ['residential','commercial','land'].includes(urlType) ? urlType : 'all';
+
+    const els = {
+      memberEmail: document.getElementById('memberEmail'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      authStatus: document.getElementById('authStatus'),
+      policyStatus: document.getElementById('policyStatus'),
+      summaryText: document.getElementById('summaryText'),
+      metricTotal: document.getElementById('metricTotal'),
+      metricMine: document.getElementById('metricMine'),
+      metricVisible: document.getElementById('metricVisible'),
+      searchInput: document.getElementById('searchInput'),
+      scopeFilter: document.getElementById('scopeFilter'),
+      sortFilter: document.getElementById('sortFilter'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      resultsMeta: document.getElementById('resultsMeta'),
+      viewerPill: document.getElementById('viewerPill'),
+      policyPill: document.getElementById('policyPill'),
+      activeTypePill: document.getElementById('activeTypePill'),
+      messageBox: document.getElementById('messageBox'),
+      errorBox: document.getElementById('errorBox'),
+      errorText: document.getElementById('errorText'),
+      emptyState: document.getElementById('emptyState'),
+      cardsGrid: document.getElementById('cardsGrid'),
+      heroTitle: document.getElementById('heroTitle'),
+      heroCopy: document.getElementById('heroCopy'),
+      typeAll: document.getElementById('typeAll'),
+      typeResidential: document.getElementById('typeResidential'),
+      typeCommercial: document.getElementById('typeCommercial'),
+      typeLand: document.getElementById('typeLand')
+    };
+
+    let currentUser = null;
+    let allListings = [];
+
+    function showLoading(message){
+      els.messageBox.classList.remove('hidden');
+      els.errorBox.classList.add('hidden');
+      if (message) els.messageBox.querySelector('p').textContent = message;
+    }
+
+    function hideLoading(){ els.messageBox.classList.add('hidden'); }
+
+    function showError(message){
+      els.errorText.textContent = message || 'Something interrupted the secure listings request.';
+      els.errorBox.classList.remove('hidden');
+    }
+
+    function hideError(){ els.errorBox.classList.add('hidden'); }
+
+    function escapeHtml(value){
+      return String(value ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function money(value){
+      const n = Number(value);
+      if (!Number.isFinite(n) || n <= 0) return 'Price on request';
+      return new Intl.NumberFormat('en-US',{
+        style:'currency',
+        currency:'USD',
+        maximumFractionDigits:0
+      }).format(n);
+    }
+
+    function firstValue(row, keys, fallback=''){
+      for (const key of keys) {
+        if (row && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {
+          return row[key];
+        }
+      }
+      return fallback;
+    }
+
+    function numericValue(row, keys, fallback=0){
+      const raw = firstValue(row, keys, null);
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function formatDate(value){
+      if (!value) return 'Unknown date';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'Unknown date';
+      return date.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+    }
+
+    function formatNumber(value){
+      if (value === null || value === undefined || value === '') return '—';
+      const n = Number(value);
+      if (!Number.isFinite(n)) return String(value);
+      if (Number.isInteger(n)) return n.toLocaleString();
+      return String(n);
+    }
+
+    function normalizeVisibility(row){
+      const raw = String(firstValue(row, ['visibility','listing_visibility','access_level','privacy'], 'private')).trim().toLowerCase();
+      if (['public','network','visible','open','members'].includes(raw)) return 'public';
+      return 'private';
+    }
+
+    function normalizeStatus(row){
+      const raw = String(firstValue(row, ['status','deal_status','property_status'], 'active')).trim();
+      return raw || 'Active';
+    }
+
+    function normalizeTitle(row){
+      return firstValue(row, ['title','property_title','name','headline'], 'Untitled Listing');
+    }
+
+    function normalizeLocation(row){
+      const city = firstValue(row, ['city'], '');
+      const state = firstValue(row, ['state'], '');
+      const zip = firstValue(row, ['zip','zipcode','postal_code'], '');
+      const county = firstValue(row, ['county'], '');
+      const pieces = [city, state].filter(Boolean);
+      if (pieces.length) return pieces.join(', ');
+      if (county) return county;
+      if (zip) return zip;
+      return 'Location not provided';
+    }
+
+    function normalizePrice(row){
+      return numericValue(row, ['price','asking_price','ask','purchase_price','list_price'], 0);
+    }
+
+    function normalizeImage(row){
+      return firstValue(row, ['image_url','cover_image','photo_url','thumbnail_url'], '');
+    }
+
+    function normalizeCreatedAt(row){
+      return firstValue(row, ['created_at','inserted_at','date_created'], '');
+    }
+
+    function normalizeDescription(row){
+      return firstValue(row, ['description','summary','teaser','notes'], 'No description added yet.');
+    }
+
+    function normalizeType(row){
+      const raw = String(firstValue(row, ['property_type','asset_type','type','property_category'], 'residential')).trim().toLowerCase();
+      if (raw === 'commercial' || raw === 'land') return raw;
+      return 'residential';
+    }
+
+    function typeLabel(type){
+      if (type === 'commercial') return 'Commercial';
+      if (type === 'land') return 'Land';
+      return 'Residential';
+    }
+
+    function factsForType(row, type){
+      if (type === 'commercial') {
+        return [
+          { value: formatNumber(firstValue(row, ['sqft','square_feet','building_sqft'], '—')), label: 'Sq Ft' },
+          { value: firstValue(row, ['market'], '—'), label: 'Market' },
+          { value: normalizeStatus(row), label: 'Status' },
+          { value: typeLabel(type), label: 'Type' }
+        ];
+      }
+      if (type === 'land') {
+        return [
+          { value: formatNumber(firstValue(row, ['sqft','land_sqft','square_feet'], '—')), label: 'Land Sq Ft' },
+          { value: firstValue(row, ['market'], '—'), label: 'Market' },
+          { value: normalizeStatus(row), label: 'Status' },
+          { value: typeLabel(type), label: 'Type' }
+        ];
+      }
+      return [
+        { value: formatNumber(firstValue(row, ['beds','bedrooms'], '—')), label: 'Beds' },
+        { value: formatNumber(firstValue(row, ['baths','bathrooms'], '—')), label: 'Baths' },
+        { value: formatNumber(firstValue(row, ['rooms'], '—')), label: 'Rooms' },
+        { value: formatNumber(firstValue(row, ['sqft','square_feet'], '—')), label: 'Sq Ft' }
+      ];
+    }
+
+    function normalizeListing(row){
+      const type = normalizeType(row);
+      const visibility = normalizeVisibility(row);
+      const priceNumber = normalizePrice(row);
+
+      return {
+        raw: row,
+        id: firstValue(row, ['id']),
+        ownerId: firstValue(row, ['user_id','owner_id','member_id'], ''),
+        title: normalizeTitle(row),
+        location: normalizeLocation(row),
+        type,
+        typeLabel: typeLabel(type),
+        status: normalizeStatus(row),
+        visibility,
+        imageUrl: normalizeImage(row),
+        priceNumber,
+        priceLabel: money(priceNumber),
+        description: normalizeDescription(row),
+        createdAt: normalizeCreatedAt(row),
+        facts: factsForType(row, type)
+      };
+    }
+
+    function sortListings(listings){
+      const mode = els.sortFilter.value;
+      const copy = [...listings];
+
+      copy.sort((a,b) => {
+        if (mode === 'oldest') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        if (mode === 'price_high') return (b.priceNumber || 0) - (a.priceNumber || 0);
+        if (mode === 'price_low') return (a.priceNumber || 0) - (b.priceNumber || 0);
+        if (mode === 'title_az') return String(a.title).localeCompare(String(b.title));
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+
+      return copy;
+    }
+
+    function setActiveTypeUi(){
+      els.typeAll.classList.toggle('active', activeType === 'all');
+      els.typeResidential.classList.toggle('active', activeType === 'residential');
+      els.typeCommercial.classList.toggle('active', activeType === 'commercial');
+      els.typeLand.classList.toggle('active', activeType === 'land');
+
+      els.activeTypePill.textContent = 'Type: ' + (activeType === 'all' ? 'All' : typeLabel(activeType));
+
+      if (activeType === 'residential') {
+        els.heroTitle.textContent = 'Residential Listings';
+        els.heroCopy.textContent = 'Residential listings only. This keeps the live member flow intact while separating houses and multifamily-style inventory from commercial and land.';
+      } else if (activeType === 'commercial') {
+        els.heroTitle.textContent = 'Commercial Listings';
+        els.heroCopy.textContent = 'Commercial listings only. This safe filter sits on the same authenticated listings page, so working edit, view, and owner protections remain unchanged.';
+      } else if (activeType === 'land') {
+        els.heroTitle.textContent = 'Land Listings';
+        els.heroCopy.textContent = 'Land listings only. The page filters land inventory without changing the working create, edit, or detail path.';
+      } else {
+        els.heroTitle.textContent = 'All Listings';
+        els.heroCopy.textContent = 'This listings page is tied to your real member session. Your properties load under authenticated access, ownership stays protected by row-level security, and inventory can be separated by residential, commercial, or land without changing the working create, edit, or detail flow.';
+      }
+    }
+
+    function filterListings(){
+      const q = els.searchInput.value.trim().toLowerCase();
+      const scope = els.scopeFilter.value;
+
+      let filtered = allListings.filter((item) => {
+        const isMine = currentUser && item.ownerId === currentUser.id;
+
+        if (activeType !== 'all' && item.type !== activeType) return false;
+        if (scope === 'mine' && !isMine) return false;
+        if (scope === 'public' && item.visibility !== 'public') return false;
+        if (scope === 'private' && item.visibility !== 'private') return false;
+
+        if (!q) return true;
+
+        const haystack = [
+          item.title,
+          item.location,
+          item.type,
+          item.typeLabel,
+          item.status,
+          item.visibility,
+          item.description
+        ].join(' ').toLowerCase();
+
+        return haystack.includes(q);
+      });
+
+      filtered = sortListings(filtered);
+      renderListings(filtered);
+    }
+
+    function renderListings(listings){
+      els.cardsGrid.innerHTML = '';
+      els.metricVisible.textContent = String(listings.length);
+      els.resultsMeta.textContent = listings.length === 1
+        ? '1 listing visible in the current view.'
+        : `${listings.length} listings visible in the current view.`;
+
+      if (!listings.length){
+        els.emptyState.classList.remove('hidden');
+        return;
+      }
+
+      els.emptyState.classList.add('hidden');
+
+      for (const item of listings){
+        const isMine = currentUser && item.ownerId === currentUser.id;
+        const imageHtml = item.imageUrl
+          ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title)}">`
+          : '';
+
+        const factsHtml = item.facts.map(f => `
+          <div class="fact">
+            <strong>${escapeHtml(String(f.value))}</strong>
+            <span>${escapeHtml(f.label)}</span>
+          </div>
+        `).join('');
+
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="thumb">
+            ${imageHtml}
+            <div class="thumb-overlay">
+              <div class="thumb-badge">${escapeHtml(item.typeLabel)}</div>
+              <div class="chip ${item.visibility === 'public' ? 'public' : 'private'}">
+                ${item.visibility === 'public' ? 'Public' : 'Private'}
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="card-top">
+              <div>
+                <h4>${escapeHtml(item.title)}</h4>
+                <div class="sub">${escapeHtml(item.location)}</div>
+              </div>
+              <div class="price">
+                <strong>${escapeHtml(item.priceLabel)}</strong>
+                <span>${escapeHtml(item.status)}</span>
+              </div>
+            </div>
+
+            <div class="facts">${factsHtml}</div>
+
+            <div class="desc">${escapeHtml(item.description)}</div>
+
+            <div class="pill-row">
+              <div class="chip type">${escapeHtml(item.typeLabel)}</div>
+              <div class="chip">${isMine ? 'Your Listing' : 'Network Listing'}</div>
+              <div class="chip">Created ${escapeHtml(formatDate(item.createdAt))}</div>
+            </div>
+
+            <div class="card-actions">
+              <a class="btn btn-primary" href="/property-card.html?id=${encodeURIComponent(item.id)}">View</a>
+              ${isMine ? `<a class="btn btn-ghost" href="/property-edit.html?id=${encodeURIComponent(item.id)}">Edit</a>` : ''}
+            </div>
+          </div>
+        `;
+        els.cardsGrid.appendChild(card);
+      }
+    }
+
+    async function requireSession(){
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+
+      const session = data?.session;
+      if (!session || !session.user) {
+        window.location.href = '/member-login.html';
+        return null;
+      }
+      return session;
+    }
+
+    async function loadListings(){
+      showLoading('VaultForge is verifying your member session and loading listings through authenticated access.');
+      hideError();
+      els.emptyState.classList.add('hidden');
+      els.cardsGrid.innerHTML = '';
+      els.refreshBtn.disabled = true;
+
+      try {
+        const session = await requireSession();
+        if (!session) return;
+
+        currentUser = session.user;
+        els.memberEmail.textContent = currentUser.email || 'Member session active';
+        els.viewerPill.textContent = `Viewer: ${currentUser.email || 'Authenticated member'}`;
+        els.authStatus.textContent = 'Session verified';
+        els.summaryText.textContent = 'Authenticated member detected. Loading records allowed by your current policies.';
+
+        const { data, error } = await supabaseClient
+          .from('property_cards')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        allListings = (data || []).map(normalizeListing).filter(item => item.id);
+
+        const myCount = allListings.filter(item => currentUser && item.ownerId === currentUser.id).length;
+        els.metricTotal.textContent = String(allListings.length);
+        els.metricMine.textContent = String(myCount);
+        els.metricVisible.textContent = String(allListings.length);
+
+        if (allListings.length) {
+          els.policyStatus.textContent = 'RLS-aware loading enabled';
+          if (activeType === 'all') {
+            els.summaryText.textContent = 'Your listings plus any network-visible records allowed by policy were returned.';
+          } else {
+            els.summaryText.textContent = `Showing only ${typeLabel(activeType).toLowerCase()} listings allowed by your current policies.`;
+          }
+        } else {
+          els.summaryText.textContent = 'No permitted listings were returned for this member session yet.';
+        }
+
+        filterListings();
+      } catch (err) {
+        console.error(err);
+        const message = err?.message || 'The secure property query failed.';
+        showError(message.includes('JWT') || message.includes('session')
+          ? 'Your login session appears invalid or expired. Log in again and retry.'
+          : message
+        );
+        els.resultsMeta.textContent = 'Listings could not be loaded.';
+        els.metricTotal.textContent = '0';
+        els.metricMine.textContent = '0';
+        els.metricVisible.textContent = '0';
+      } finally {
+        hideLoading();
+        els.refreshBtn.disabled = false;
+      }
+    }
+
+    async function logout(){
+      try {
+        await supabaseClient.auth.signOut();
+      } finally {
+        window.location.href = '/member-login.html';
+      }
+    }
+
+    els.logoutBtn.addEventListener('click', logout);
+    els.refreshBtn.addEventListener('click', loadListings);
+    els.searchInput.addEventListener('input', filterListings);
+    els.scopeFilter.addEventListener('change', filterListings);
+    els.sortFilter.addEventListener('change', filterListings);
+
+    supabaseClient.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        window.location.href = '/member-login.html';
+      }
+    });
+
+    setActiveTypeUi();
+    loadListings();
+  </script>
+</body>
+</html>
