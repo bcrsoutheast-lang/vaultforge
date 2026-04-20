@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Founding Access</title>
+<meta name="description" content="Join VaultForge Founding Access. $10 today, then $49/month starting day 15. Founding access ends May 10 or when the first 50 members join.">
+<style>
+:root{
+  --bg:#050c1a;
+  --bg2:#08142d;
+  --panel:#0c1832;
+  --panel2:#102043;
+  --text:#f7f8fc;
+  --muted:#a6b2d1;
+  --line:rgba(255,255,255,.10);
+  --gold:#d6ab4e;
+  --gold2:#f0c96a;
+  --green:#18c37e;
+  --blue:#4f8cff;
+  --shadow:0 30px 90px rgba(0,0,0,.42);
+  --radius:26px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(214,171,78,.12), transparent 18%),
+    radial-gradient(circle at 88% 12%, rgba(79,140,255,.12), transparent 18%),
+    radial-gradient(circle at 50% 50%, rgba(214,171,78,.06), transparent 24%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+button,input,textarea,select{font:inherit}
+.shell{width:min(1320px,calc(100% - 28px));margin:0 auto}
+
+.topbar{
+  position:sticky;top:0;z-index:40;
+  backdrop-filter:blur(16px);
+  background:rgba(5,12,26,.80);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.topbar-inner{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;
+}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand-mark{
+  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+  background:
+    linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),
+    linear-gradient(180deg,#15191f,#0c1018);
+  border:1px solid rgba(214,171,78,.28);
+  box-shadow:var(--shadow);
+  color:var(--gold2);font-weight:900;font-size:1.25rem;letter-spacing:.06em;
+}
+.brand-copy strong{display:block;font-size:1.04rem;letter-spacing:.16em;color:var(--gold2)}
+.brand-copy span{display:block;color:var(--muted);font-size:.9rem}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;
+  min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;
+  transition:.18s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold2),#b7852d);
+  color:#111;box-shadow:0 18px 34px rgba(214,171,78,.20);
+}
+.btn-blue{
+  background:linear-gradient(135deg,var(--blue),#2f6bf2);
+  color:#fff;box-shadow:0 16px 30px rgba(79,140,255,.24);
+}
+.btn-dark{
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line);
+  color:#fff;
+}
+
+.page{padding:26px 0 46px}
+.hero-grid{display:grid;grid-template-columns:1.06fr .94fr;gap:18px;align-items:stretch}
+.card,.panel,.count-card,.who-card,.pricing-card,.faq-card{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:
+    radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),
+    linear-gradient(180deg,var(--panel),#091327);
+  box-shadow:var(--shadow);
+}
+.card,.panel,.count-card,.who-card,.pricing-card,.faq-card{padding:24px}
+.eyebrow{
+  color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px;
+}
+h1{
+  margin:0 0 12px;font-size:clamp(2.35rem,5vw,4.8rem);line-height:.95;letter-spacing:-.06em;max-width:12ch;
+}
+.hero-copy{
+  margin:0 0 18px;color:var(--muted);font-size:1.05rem;line-height:1.72;max-width:64ch;
+}
+.badge-row,.pill-row,.who-grid,.stats-grid,.benefits-grid,.timeline-grid,.faq-list{display:flex;flex-wrap:wrap;gap:10px}
+.badge,.pill{
+  border-radius:999px;padding:8px 11px;font-size:.8rem;font-weight:800;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#e6eeff;
+}
+.badge.gold{background:rgba(214,171,78,.12);border-color:rgba(214,171,78,.28);color:#f3d898}
+.badge.green{background:rgba(24,195,126,.12);border-color:rgba(24,195,126,.28);color:#bef4da}
+.badge.blue{background:rgba(79,140,255,.12);border-color:rgba(79,140,255,.28);color:#dce8ff}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+.stats-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px;
+}
+.stat{
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;background:rgba(255,255,255,.025);
+}
+.stat strong{display:block;font-size:2rem;margin-bottom:7px}
+.stat span{display:block;color:var(--muted);line-height:1.35;font-size:.92rem}
+
+.price{
+  font-size:3rem;font-weight:900;letter-spacing:-.05em;margin:4px 0 4px;
+}
+.small{color:var(--muted);font-size:.96rem;line-height:1.6}
+.disclaimer{
+  margin-top:16px;padding:14px;border-radius:16px;
+  background:rgba(214,171,78,.10);border:1px solid rgba(214,171,78,.24);
+  color:#f5dfad;line-height:1.6;font-size:.94rem;
+}
+.section{padding:18px 0 0}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:18px}
+.section-head h3{margin:0;font-size:1.38rem;letter-spacing:-.02em}
+.section-head p{margin:6px 0 0;color:var(--muted);line-height:1.6}
+.who-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;
+}
+.who-card h4,.pricing-card h4,.faq-card h4{margin:0 0 8px;font-size:1.08rem}
+.who-card p,.pricing-card p,.faq-card p{margin:0;color:var(--muted);line-height:1.62}
+.list{
+  display:grid;gap:10px;margin-top:14px;
+}
+.list div{color:var(--muted);line-height:1.55}
+.countdown-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px;
+}
+.count-box{
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;background:rgba(255,255,255,.025);text-align:center;
+}
+.count-box strong{display:block;font-size:2rem;margin-bottom:6px}
+.count-box span{display:block;color:var(--muted);font-size:.88rem}
+.spots-bar{
+  height:14px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid rgba(255,255,255,.08);margin:12px 0 8px;
+}
+.spots-fill{
+  height:100%;width:0%;
+  background:linear-gradient(135deg,var(--gold2),#c98f30);
+}
+.note{
+  color:var(--muted);font-size:.92rem;line-height:1.6;
+}
+.timeline-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;
+}
+.timeline-item{
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;background:rgba(255,255,255,.025);
+}
+.timeline-item strong{display:block;margin-bottom:8px}
+.faq-list{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;
+}
+.join-box{
+  text-align:center;
+  border:1px solid rgba(214,171,78,.18);
+  border-radius:30px;
+  background:
+    radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),
+    linear-gradient(180deg,var(--panel2),#091327);
+  box-shadow:var(--shadow);
+  padding:28px;
+}
+.join-box h3{margin:0 0 10px;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-.03em}
+.join-box p{margin:0 auto 18px;color:var(--muted);line-height:1.7;max-width:70ch}
+.footer-space{height:24px}
+@media(max-width:1180px){
+  .who-grid,.timeline-grid,.faq-list{grid-template-columns:1fr 1fr}
+}
+@media(max-width:1020px){
+  .hero-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .topbar-inner{flex-direction:column;align-items:flex-start}
+  .top-actions{width:100%}
+  .top-actions .btn{flex:1}
+  .stats-grid,.countdown-grid,.who-grid,.timeline-grid,.faq-list{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <a class="brand" href="/index.html" aria-label="VaultForge home">
+      <div class="brand-mark">VF</div>
+      <div class="brand-copy">
+        <strong>VAULTFORGE</strong>
+        <span>Founding Access • First 50 Members</span>
+      </div>
+    </a>
+    <div class="top-actions">
+      <a class="btn btn-dark" href="/index.html">Back Home</a>
+      <a class="btn btn-dark" href="/member-login.html">Member Login</a>
+      <a class="btn btn-gold" href="#joinNow">Join Founding Access</a>
+    </div>
+  </div>
+</div>
+
+<main class="shell page">
+  <section class="hero-grid">
+    <div class="card">
+      <div class="eyebrow">Founding Access • May 10 Deadline • First 50 Members</div>
+      <h1>Get in before VaultForge opens wider.</h1>
+      <p class="hero-copy">
+        VaultForge is building the first 50 founding members with the right mix of buyers, lenders, operators, wholesalers, developers, brokers, capital partners, and select real estate service professionals. This is paid access from day one.
+      </p>
+      <div class="badge-row">
+        <div class="badge gold">$10 today</div>
+        <div class="badge green">$49/month on day 15</div>
+        <div class="badge blue">Locked pricing while active</div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href="#joinNow">Apply / Join Founding Access</a>
+        <a class="btn btn-dark" href="/member-login.html">Existing Member Login</a>
+      </div>
+      <div class="stats-grid">
+        <div class="stat">
+          <strong id="daysLeftHero">--</strong>
+          <span>Days left until May 10</span>
+        </div>
+        <div class="stat">
+          <strong id="spotsRemainingHero">50</strong>
+          <span>Founding spots remaining</span>
+        </div>
+        <div class="stat">
+          <strong>50</strong>
+          <span>Total founding seats available</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pricing-card">
+      <h4>Founding Member Access</h4>
+      <div class="price">$10</div>
+      <div class="small">today • then $49/month beginning day 15</div>
+      <div class="list">
+        <div>Listings access</div>
+        <div>Buyer alerts</div>
+        <div>Lender alerts</div>
+        <div>Pain opportunities</div>
+        <div>Dashboard access</div>
+        <div>Future capital matching</div>
+        <div>Locked founding pricing while active</div>
+      </div>
+      <div class="disclaimer">
+        Founding Access closes May 10th or when the first 50 members join, whichever comes first. Your founding access begins immediately for $10 and your membership automatically renews at $49/month starting on day 15 unless canceled before renewal. If canceled, reactivation is at current pricing.
+      </div>
+      <div class="hero-actions" style="margin-top:16px;">
+        <a class="btn btn-blue" href="#joinNow">Continue to Founder Join</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Clock + Founding Spots</h3>
+        <p>Use this section to create urgency and show the remaining member count.</p>
+      </div>
+    </div>
+    <div class="count-card">
+      <div class="countdown-grid">
+        <div class="count-box">
+          <strong id="daysLeft">--</strong>
+          <span>Days</span>
+        </div>
+        <div class="count-box">
+          <strong id="hoursLeft">--</strong>
+          <span>Hours</span>
+        </div>
+        <div class="count-box">
+          <strong id="minutesLeft">--</strong>
+          <span>Minutes</span>
+        </div>
+        <div class="count-box">
+          <strong id="secondsLeft">--</strong>
+          <span>Seconds</span>
+        </div>
+      </div>
+      <div class="spots-bar"><div id="spotsFill" class="spots-fill"></div></div>
+      <div class="note"><strong id="spotsRemainingText">50</strong> founding spots remaining out of 50 total.</div>
+      <div class="note" style="margin-top:10px;">You can manually update the remaining spots number in this file until you connect live checkout/member counting later.</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Who VaultForge wants inside first</h3>
+        <p>The first 50 should have variety so the network has real business movement.</p>
+      </div>
+    </div>
+    <div class="who-grid">
+      <div class="who-card">
+        <h4>Deal Makers</h4>
+        <p>Buyers, investors, operators, wholesalers, and brokers who can move opportunities and create activity inside the network.</p>
+      </div>
+      <div class="who-card">
+        <h4>Capital</h4>
+        <p>Lenders and capital partners who bring debt, equity, and JV capability to real opportunities.</p>
+      </div>
+      <div class="who-card">
+        <h4>Execution</h4>
+        <p>Developers, title and closing professionals, and select service operators who help get deals across the finish line.</p>
+      </div>
+    </div>
+    <div class="pill-row" style="margin-top:16px;">
+      <div class="pill">Investors</div>
+      <div class="pill">Buyers</div>
+      <div class="pill">Lenders</div>
+      <div class="pill">Operators</div>
+      <div class="pill">Wholesalers</div>
+      <div class="pill">Developers</div>
+      <div class="pill">Brokers</div>
+      <div class="pill">Capital Partners</div>
+      <div class="pill">Title / Closing</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>What founding members get now</h3>
+        <p>Lead with what is real today, then what is rolling out next.</p>
+      </div>
+    </div>
+    <div class="timeline-grid">
+      <div class="timeline-item">
+        <strong>Live Now</strong>
+        <div class="small">Member dashboard, profile setup, listings access, pain submissions, pain matching, role-aware alerts, and private network entry.</div>
+      </div>
+      <div class="timeline-item">
+        <strong>Building Now</strong>
+        <div class="small">Capital matching, stronger dashboards, cleaner alert routing, direct intro logic, and weekly deal drop structure.</div>
+      </div>
+      <div class="timeline-item">
+        <strong>Future</strong>
+        <div class="small">Multi-user company accounts, AI routing, national rollout, and deeper operating system features for real estate businesses.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Founding access timeline</h3>
+        <p>Keep the billing path clear and direct.</p>
+      </div>
+    </div>
+    <div class="timeline-grid">
+      <div class="timeline-item">
+        <strong>Step 1</strong>
+        <div class="small">Join founding access for $10 and secure your place before May 10 or before the first 50 seats are filled.</div>
+      </div>
+      <div class="timeline-item">
+        <strong>Step 2</strong>
+        <div class="small">Get immediate access to the private member network, dashboard, listings, and current matching system.</div>
+      </div>
+      <div class="timeline-item">
+        <strong>Step 3</strong>
+        <div class="small">On day 15, membership renews at $49/month unless canceled before renewal. Founding pricing stays locked while active.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="faq-list">
+      <div class="faq-card">
+        <h4>Is there a free tier?</h4>
+        <p>No. Founding access is paid from day one so the network is built with serious members only.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Do founding members keep the lower rate?</h4>
+        <p>Yes. Founding members keep $49/month pricing while membership remains active. If canceled, rejoining is at current pricing.</p>
+      </div>
+      <div class="faq-card">
+        <h4>Why first 50?</h4>
+        <p>The first 50 creates enough network variety for real business to happen between operators, capital, and deal flow.</p>
+      </div>
+      <div class="faq-card">
+        <h4>What happens after May 10?</h4>
+        <p>Founding access closes. Later public pricing can open at a higher rate once the platform expands.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="joinNow">
+    <div class="join-box">
+      <h3>Join Founding Access</h3>
+      <p>
+        This button is the correct place to connect your future founders application or Stripe checkout. New members should pay first, then create or unlock account access.
+      </p>
+      <div class="hero-actions" style="justify-content:center;">
+        <a class="btn btn-gold" href="/member-login.html">Temporary Join Path</a>
+        <a class="btn btn-dark" href="/member-login.html">Existing Member Login</a>
+      </div>
+      <div class="disclaimer" style="text-align:left;max-width:820px;margin:18px auto 0;">
+        Recommended next hookup: replace the Temporary Join Path button with your founders application or Stripe checkout page so payment happens before account creation.
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-space"></div>
+</main>
+
+<script>
+(function(){
+  const foundingDeadline = new Date('2026-05-10T23:59:59');
+  const totalFoundingSpots = 50;
+  const remainingFoundingSpots = 50; // update this manually until live counting is connected
+
+  function updateCountdown(){
+    const now = new Date();
+    const diff = foundingDeadline.getTime() - now.getTime();
+    const safe = Math.max(diff, 0);
+
+    const days = Math.floor(safe / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((safe / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((safe / (1000 * 60)) % 60);
+    const seconds = Math.floor((safe / 1000) % 60);
+
+    const byId = (id) => document.getElementById(id);
+    byId('daysLeft').textContent = String(days);
+    byId('hoursLeft').textContent = String(hours).padStart(2,'0');
+    byId('minutesLeft').textContent = String(minutes).padStart(2,'0');
+    byId('secondsLeft').textContent = String(seconds).padStart(2,'0');
+    byId('daysLeftHero').textContent = String(days);
+  }
+
+  function updateSpots(){
+    const used = totalFoundingSpots - remainingFoundingSpots;
+    const fill = totalFoundingSpots > 0 ? (used / totalFoundingSpots) * 100 : 0;
+
+    document.getElementById('spotsRemainingHero').textContent = String(remainingFoundingSpots);
+    document.getElementById('spotsRemainingText').textContent = String(remainingFoundingSpots);
+    document.getElementById('spotsFill').style.width = fill + '%';
+  }
+
+  updateCountdown();
+  updateSpots();
+  setInterval(updateCountdown, 1000);
+})();
+</script>
+</body>
+</html>
