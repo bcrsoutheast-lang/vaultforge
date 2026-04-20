@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultForge | Private Deal Flow. Real Execution.</title>
+  <meta name="description" content="VaultForge is a private real estate network for deals, capital, property matching alerts, buyer alerts, lender alerts, and private execution across Georgia, Tennessee, and Florida.">
+  <style>
+    :root{
+      --bg:#06090f;
+      --bg2:#0b1220;
+      --panel:#0d1526;
+      --panel-2:#111d34;
+      --line:rgba(255,255,255,.10);
+      --line-2:rgba(212,170,74,.30);
+      --text:#f5f7fb;
+      --muted:#a6afc3;
+      --gold:#d6a735;
+      --gold-2:#f3d06a;
+      --silver:#cfd4dc;
+      --silver-2:#8f97a6;
+      --blue:#2f6dff;
+      --success:#1ab97e;
+      --danger:#ffcc66;
+      --shadow:0 28px 80px rgba(0,0,0,.45);
+      --radius:28px;
+      --radius-sm:18px;
+      --max:1240px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(214,167,53,.14), transparent 24%),
+        radial-gradient(circle at 84% 12%, rgba(255,255,255,.06), transparent 18%),
+        radial-gradient(circle at 50% 30%, rgba(47,109,255,.12), transparent 24%),
+        linear-gradient(180deg, #040608 0%, var(--bg) 28%, var(--bg2) 100%);
+      min-height:100vh;
+    }
+
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+
+    .shell{
+      width:min(var(--max), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:40;
+      backdrop-filter:blur(16px);
+      background:rgba(4,6,8,.78);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .topbar-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      padding:14px 0;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:62px;
+      height:62px;
+      border-radius:18px;
+      overflow:hidden;
+      background:#05070c;
+      border:1px solid rgba(214,167,53,.28);
+      box-shadow:0 14px 30px rgba(0,0,0,.35);
+      flex:0 0 auto;
+    }
+
+    .brand-copy strong{
+      display:block;
+      letter-spacing:.18em;
+      font-size:1rem;
+    }
+
+    .brand-copy span{
+      display:block;
+      color:var(--muted);
+      font-size:.88rem;
+      margin-top:4px;
+    }
+
+    .nav{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:10px;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      min-height:50px;
+      padding:13px 18px;
+      border-radius:16px;
+      font-weight:800;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+
+    .btn-gold{
+      color:#181308;
+      background:linear-gradient(135deg, var(--gold-2), var(--gold));
+      box-shadow:0 18px 34px rgba(214,167,53,.22);
+    }
+
+    .btn-dark{
+      color:#fff;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .btn-blue{
+      color:#fff;
+      background:linear-gradient(135deg, #4d86ff, #2357d8);
+      box-shadow:0 18px 34px rgba(47,109,255,.22);
+    }
+
+    .hero{
+      padding:26px 0 26px;
+    }
+
+    .hero-wrap{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .hero-card,
+    .panel,
+    .price-card,
+    .feature-card,
+    .future-card,
+    .action-card,
+    .notice-card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:
+        radial-gradient(circle at top right, rgba(214,167,53,.10), transparent 22%),
+        radial-gradient(circle at bottom left, rgba(47,109,255,.10), transparent 24%),
+        linear-gradient(180deg, rgba(17,29,52,.96), rgba(9,14,23,.98));
+      box-shadow:var(--shadow);
+    }
+
+    .hero-card{
+      padding:34px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .eyebrow{
+      color:var(--gold-2);
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-size:.78rem;
+      font-weight:900;
+      margin-bottom:14px;
+    }
+
+    .hero-title{
+      margin:0 0 14px;
+      font-size:clamp(2.5rem, 6vw, 4.9rem);
+      line-height:.95;
+      letter-spacing:-.06em;
+      max-width:12ch;
+    }
+
+    .hero-title .gold{color:var(--gold-2)}
+
+    .hero-copy{
+      margin:0 0 20px;
+      max-width:62ch;
+      color:var(--muted);
+      font-size:1.08rem;
+      line-height:1.72;
+    }
+
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:22px;
+    }
+
+    .hero-points{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:12px;
+    }
+
+    .point{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:15px;
+      background:rgba(255,255,255,.02);
+    }
+
+    .point strong{
+      display:block;
+      font-size:1rem;
+      margin-bottom:6px;
+    }
+
+    .point span{
+      display:block;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:.92rem;
+    }
+
+    .hero-side{
+      display:grid;
+      gap:18px;
+    }
+
+    .logo-panel{
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      min-height:250px;
+      text-align:center;
+    }
+
+    .logo-panel img{
+      width:min(100%, 520px);
+      object-fit:contain;
+      filter:drop-shadow(0 12px 26px rgba(0,0,0,.35));
+    }
+
+    .logo-panel p{
+      margin:14px 0 0;
+      color:var(--muted);
+      line-height:1.7;
+      max-width:44ch;
+    }
+
+    .price-card{
+      padding:24px;
+    }
+
+    .chip-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:800;
+      border:1px solid rgba(214,167,53,.24);
+      background:rgba(214,167,53,.10);
+      color:#f3d06a;
+    }
+
+    .chip.alt{
+      border-color:rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      color:#e7ebf3;
+    }
+
+    .price-title{
+      margin:0 0 8px;
+      font-size:1.5rem;
+      letter-spacing:-.02em;
+    }
+
+    .price-main{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:baseline;
+      margin:0 0 10px;
+    }
+
+    .price-main strong{
+      font-size:3rem;
+      letter-spacing:-.06em;
+      color:var(--gold-2);
+    }
+
+    .price-main span{
+      font-size:1.35rem;
+      color:#edf1f9;
+      font-weight:800;
+    }
+
+    .price-copy,
+    .price-note{
+      color:var(--muted);
+      line-height:1.7;
+      margin:0;
+    }
+
+    .price-note{
+      margin-top:10px;
+      font-size:.94rem;
+    }
+
+    .price-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .mini-item{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:14px;
+      background:rgba(255,255,255,.025);
+    }
+
+    .mini-item strong{display:block;margin-bottom:6px}
+    .mini-item span{display:block;color:var(--muted);font-size:.9rem;line-height:1.45}
+
+    section.block{padding:10px 0 24px}
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .section-head h2,
+    .section-head h3{
+      margin:0;
+      font-size:1.5rem;
+      letter-spacing:-.03em;
+    }
+
+    .section-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+      line-height:1.6;
+      max-width:70ch;
+    }
+
+    .grid-3,
+    .grid-4,
+    .grid-2{
+      display:grid;
+      gap:16px;
+    }
+
+    .grid-2{grid-template-columns:repeat(2, minmax(0, 1fr))}
+    .grid-3{grid-template-columns:repeat(3, minmax(0, 1fr))}
+    .grid-4{grid-template-columns:repeat(4, minmax(0, 1fr))}
+
+    .feature-card,
+    .future-card,
+    .action-card,
+    .notice-card,
+    .panel{
+      padding:22px;
+    }
+
+    .icon{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-size:1.3rem;
+      color:#fff;
+      background:linear-gradient(135deg, rgba(214,167,53,.26), rgba(255,255,255,.08));
+      border:1px solid rgba(214,167,53,.24);
+      margin-bottom:14px;
+      box-shadow:0 12px 24px rgba(0,0,0,.25);
+    }
+
+    .feature-card h3,
+    .future-card h3,
+    .action-card h3,
+    .notice-card h3,
+    .panel h3{
+      margin:0 0 8px;
+      font-size:1.08rem;
+    }
+
+    .feature-card p,
+    .future-card p,
+    .action-card p,
+    .notice-card p,
+    .panel p,
+    .panel li{
+      margin:0;
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    .feature-list,
+    .notice-list{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .feature-list div,
+    .notice-list div{
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(255,255,255,.02);
+    }
+
+    .check{
+      color:#f3d06a;
+      font-weight:900;
+      margin-right:8px;
+    }
+
+    .future-card{
+      min-height:100%;
+    }
+
+    .future-badge{
+      display:inline-block;
+      margin-top:14px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#e7ebf3;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.03em;
+    }
+
+    .split-panel{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+
+    .cta-wrap{
+      padding:12px 0 46px;
+    }
+
+    .cta-box{
+      padding:30px;
+      border-radius:32px;
+      border:1px solid var(--line-2);
+      background:
+        radial-gradient(circle at center top, rgba(214,167,53,.18), transparent 30%),
+        linear-gradient(180deg, rgba(18,28,48,.98), rgba(7,11,18,.99));
+      box-shadow:var(--shadow);
+      text-align:center;
+    }
+
+    .cta-box h2{
+      margin:0 0 10px;
+      font-size:clamp(1.9rem, 4.5vw, 3rem);
+      letter-spacing:-.03em;
+    }
+
+    .cta-box p{
+      margin:0 auto 18px;
+      max-width:72ch;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .cta-note{
+      display:block;
+      margin-top:12px;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .footer{
+      padding:0 0 34px;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .footer-links{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 16px;
+      justify-content:center;
+      margin-top:12px;
+    }
+
+    .divider{
+      height:1px;
+      background:linear-gradient(90deg, transparent, rgba(214,167,53,.28), transparent);
+      margin:6px 0 0;
+    }
+
+    @media (max-width: 1100px){
+      .hero-wrap{grid-template-columns:1fr}
+      .grid-4{grid-template-columns:repeat(2, minmax(0, 1fr))}
+    }
+
+    @media (max-width: 860px){
+      .grid-3,
+      .grid-2,
+      .split-panel,
+      .mini-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 720px){
+      .topbar-inner{flex-direction:column;align-items:flex-start}
+      .nav{width:100%;justify-content:stretch}
+      .nav .btn{flex:1 1 calc(50% - 10px)}
+      .hero-card,
+      .feature-card,
+      .future-card,
+      .action-card,
+      .notice-card,
+      .price-card,
+      .panel,
+      .logo-panel,
+      .cta-box{padding:20px}
+      .hero-points,
+      .grid-4{grid-template-columns:1fr}
+      .section-head{flex-direction:column;align-items:flex-start}
+      .hero-title{max-width:100%}
+      .price-main strong{font-size:2.35rem}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="/index.html">
+        <div class="brand-logo">
+          <img src="vaultforge-logo.png" alt="VaultForge logo">
+        </div>
+        <div class="brand-copy">
+          <strong>VAULTFORGE</strong>
+          <span>Private Deal Flow. Real Execution.</span>
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a class="btn btn-dark" href="/property-cards.html">Listings</a>
+        <a class="btn btn-dark" href="/member-login.html">Member Login</a>
+        <a class="btn btn-dark" href="/member-login.html#forgot-password">Forgot Password</a>
+        <a class="btn btn-gold" href="/member-login.html#signup">Join Founding Access</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-wrap">
+        <div class="hero-card">
+          <div class="eyebrow">Georgia • Tennessee • Florida • Private Network Access</div>
+          <h1 class="hero-title">Private Real Estate Network for <span class="gold">Deals, Capital &amp; Alerts</span></h1>
+          <p class="hero-copy">
+            VaultForge is a private real estate member network built for investors, buyers, lenders, operators, wholesalers, developers, and capital partners.
+            Access listings, property matching alerts, buyer alerts, lender alerts, pain opportunities, and a member dashboard today — with capital matching,
+            deeper alerts, and business-wide multi-user tools being built next.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-gold" href="#founding-access">Get Founding Access</a>
+            <a class="btn btn-blue" href="/member-login.html">Member Login</a>
+            <a class="btn btn-dark" href="/property-cards.html">View Listings</a>
+          </div>
+
+          <div class="hero-points">
+            <div class="point">
+              <strong>What works today</strong>
+              <span>Listings, member login, pain submissions, profile-based matching, property alerts, buyer alerts, and lender alerts.</span>
+            </div>
+            <div class="point">
+              <strong>What is being built now</strong>
+              <span>Capital matching, cleaner role-based dashboards, better alerts, and founding member monetization.</span>
+            </div>
+            <div class="point">
+              <strong>Why join early</strong>
+              <span>Lock in founding pricing, get early visibility in the network, and get first access as VaultForge expands.</span>
+            </div>
+            <div class="point">
+              <strong>Where this is going</strong>
+              <span>Future multi-user business accounts, AI-enhanced routing, and private infrastructure for serious real estate firms.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="panel logo-panel">
+            <img src="vaultforge-logo.png" alt="VaultForge brand mark">
+            <p>
+              Premium private deal flow for real execution — not noise, not mass-blasted lists, and not generic public marketplace traffic.
+            </p>
+          </div>
+
+          <div class="price-card" id="founding-access">
+            <div class="chip-row">
+              <span class="chip">Founding Access</span>
+              <span class="chip alt">First members lock pricing</span>
+            </div>
+            <h2 class="price-title">Join now for immediate access</h2>
+            <div class="price-main">
+              <strong>$10</strong>
+              <span>today • $49/mo after 14 days</span>
+            </div>
+            <p class="price-copy">
+              Start now at a low-entry founding rate, secure your spot, and lock into early pricing while VaultForge expands its listings, alerts, capital matching, and private network value.
+            </p>
+            <p class="price-note">
+              Secure checkout. Card on file. Subscription renews at $49/month after 14 days unless canceled before renewal. Price stays locked while active.
+            </p>
+            <div class="price-actions">
+              <a class="btn btn-gold" href="/member-login.html#signup">Claim Founding Access</a>
+              <a class="btn btn-dark" href="/member-login.html#forgot-password">Forgot Password</a>
+            </div>
+            <div class="mini-grid">
+              <div class="mini-item">
+                <strong>Includes right now</strong>
+                <span>Member dashboard, listings access, pain opportunities, property match alerts, buyer alerts, and lender alerts.</span>
+              </div>
+              <div class="mini-item">
+                <strong>Rolling out next</strong>
+                <span>Capital matching, direct intro pathways, deeper alerts, and role-aware dashboards for cleaner execution.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <div>
+          <h2>What you get today</h2>
+          <p>Lead with what is real and working now so people know VaultForge already has live value.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="feature-card">
+          <div class="icon">🏘️</div>
+          <h3>Property listings</h3>
+          <p>Members can create, view, and work listings inside a private real estate environment instead of depending only on scattered messages and random blasts.</p>
+          <div class="feature-list">
+            <div><span class="check">✓</span> Private listing access</div>
+            <div><span class="check">✓</span> Residential, commercial, and land direction</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔔</div>
+          <h3>Matching alerts</h3>
+          <p>VaultForge is built around relevant routing. Property matching alerts, buyer alerts, and lender alerts are part of the value proposition now.</p>
+          <div class="feature-list">
+            <div><span class="check">✓</span> Property match alerts</div>
+            <div><span class="check">✓</span> Buyer alerts and lender alerts</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⚠️</div>
+          <h3>Pain opportunities</h3>
+          <p>Submit real-world pain points and opportunities into the system so members can surface distress, rescue, off-market, and execution-based situations.</p>
+          <div class="feature-list">
+            <div><span class="check">✓</span> Pain submission workflow</div>
+            <div><span class="check">✓</span> Private opportunity intake</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="grid-2 split-panel">
+        <div class="panel">
+          <div class="section-head" style="margin-bottom:14px;">
+            <div>
+              <h3>Who VaultForge is built for</h3>
+              <p>Keep this broad enough to attract the whole ecosystem without clutter.</p>
+            </div>
+          </div>
+          <div class="notice-list">
+            <div><span class="check">✓</span> Investors and buyers looking for real opportunities</div>
+            <div><span class="check">✓</span> Lenders and capital partners looking for deployment</div>
+            <div><span class="check">✓</span> Operators, developers, and wholesalers building local advantage</div>
+            <div><span class="check">✓</span> Teams that need better private execution over time</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-head" style="margin-bottom:14px;">
+            <div>
+              <h3>Launch market focus</h3>
+              <p>Start where your network can win first, then expand outward.</p>
+            </div>
+          </div>
+          <div class="notice-list">
+            <div><span class="check">✓</span> Georgia deal flow and private member routing</div>
+            <div><span class="check">✓</span> Tennessee opportunities and alert expansion</div>
+            <div><span class="check">✓</span> Florida investor, capital, and acquisition activity</div>
+            <div><span class="check">✓</span> Southeast-first focus before broader rollout</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <div>
+          <h2>What is being built now</h2>
+          <p>These are not vague someday ideas. These are the next growth layers that increase member value fast.</p>
+        </div>
+      </div>
+      <div class="grid-4">
+        <div class="future-card">
+          <div class="icon">💰</div>
+          <h3>Capital matching</h3>
+          <p>Need Capital and Have Capital workflows so deals and capital can find each other faster inside the network.</p>
+          <span class="future-badge">Building now</span>
+        </div>
+        <div class="future-card">
+          <div class="icon">🧭</div>
+          <h3>Role-based dashboards</h3>
+          <p>Cleaner member dashboards with separate areas for listings alerts, capital alerts, pain alerts, and network alerts.</p>
+          <span class="future-badge">Building now</span>
+        </div>
+        <div class="future-card">
+          <div class="icon">📬</div>
+          <h3>Weekly deal drops</h3>
+          <p>Recurring member value through curated opportunities, distress signals, capital needs, and market notes.</p>
+          <span class="future-badge">Building now</span>
+        </div>
+        <div class="future-card">
+          <div class="icon">⭐</div>
+          <h3>Founding member priority</h3>
+          <p>Early members get locked pricing, better visibility, and first access as VaultForge expands features and markets.</p>
+          <span class="future-badge">Rolling out</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <div>
+          <h2>Future VaultForge vision</h2>
+          <p>Show the bigger upside without downgrading the fact that the product already has real value today.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="action-card">
+          <div class="icon">🏢</div>
+          <h3>Multi-user business accounts</h3>
+          <p>Future company access for owners, acquisitions, dispositions, analysts, and assistants to work from one private system.</p>
+        </div>
+        <div class="action-card">
+          <div class="icon">🤖</div>
+          <h3>AI-enhanced matching</h3>
+          <p>Smarter routing across opportunities, investor roles, market filters, and capital relationships as the data grows.</p>
+        </div>
+        <div class="action-card">
+          <div class="icon">🌎</div>
+          <h3>National growth</h3>
+          <p>Launch with Southeast focus, then expand the network, deal flow, capital reach, and premium member value over time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-wrap">
+      <div class="cta-box">
+        <h2>Secure founding access before pricing climbs</h2>
+        <p>
+          Get in now for $10 today, access what VaultForge already offers, and lock into founding pricing before the next wave of capital matching,
+          deeper alerts, and business-scale tools rolls out.
+        </p>
+        <div class="hero-actions" style="justify-content:center; margin-bottom:0;">
+          <a class="btn btn-gold" href="/member-login.html#signup">Join Founding Access</a>
+          <a class="btn btn-blue" href="/member-login.html">Member Login</a>
+          <a class="btn btn-dark" href="/member-login.html#forgot-password">Forgot Password</a>
+        </div>
+        <span class="cta-note">Secure checkout • Card on file • Cancel before renewal • Price locked while active</span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="divider"></div>
+      <div class="shell" style="width:100%; text-align:center; padding-top:18px;">
+        VaultForge — Private deal flow. Real execution.
+        <div class="footer-links">
+          <a href="/member-login.html">Member Login</a>
+          <a href="/member-login.html#signup">Join</a>
+          <a href="/member-login.html#forgot-password">Forgot Password</a>
+          <a href="#founding-access">Founding Access</a>
+          <a href="/property-cards.html">Listings</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
