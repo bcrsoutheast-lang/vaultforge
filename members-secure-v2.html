@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Members</title>
+<meta name="description" content="VaultForge member dashboard with private alerts, listings, matches, and admin-only controls.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<style>
+:root{
+  --bg:#050c1a;
+  --bg2:#08142d;
+  --panel:#0c1832;
+  --panel2:#102043;
+  --text:#f7f8fc;
+  --muted:#a6b2d1;
+  --line:rgba(255,255,255,.10);
+  --gold:#d6ab4e;
+  --gold2:#f0c96a;
+  --green:#18c37e;
+  --blue:#4f8cff;
+  --danger:#e27d7d;
+  --shadow:0 30px 90px rgba(0,0,0,.42);
+  --radius:26px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;scroll-behavior:smooth}
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(214,171,78,.12), transparent 18%),
+    radial-gradient(circle at 88% 12%, rgba(79,140,255,.12), transparent 18%),
+    radial-gradient(circle at 50% 50%, rgba(214,171,78,.06), transparent 24%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+button,input,textarea,select{font:inherit}
+.shell{width:min(1320px,calc(100% - 28px));margin:0 auto}
+.hidden{display:none !important}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(16px);
+  background:rgba(5,12,26,.80);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.topbar-inner{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;
+}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand-mark{
+  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+  background:
+    linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),
+    linear-gradient(180deg,#15191f,#0c1018);
+  border:1px solid rgba(214,171,78,.28);
+  box-shadow:var(--shadow);
+  color:var(--gold2);font-weight:900;font-size:1.25rem;letter-spacing:.06em;
+}
+.brand-copy strong{display:block;font-size:1.04rem;letter-spacing:.16em;color:var(--gold2)}
+.brand-copy span{display:block;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:54vw}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;
+  min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;
+  transition:.18s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold2),#b7852d);
+  color:#111;box-shadow:0 18px 34px rgba(214,171,78,.20);
+}
+.btn-blue{
+  background:linear-gradient(135deg,var(--blue),#2f6bf2);
+  color:#fff;box-shadow:0 16px 30px rgba(79,140,255,.24);
+}
+.btn-dark{
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line);
+  color:#fff;
+}
+.btn-green{
+  background:linear-gradient(135deg,#1dd48a,#10a96d);
+  color:#fff;
+  box-shadow:0 18px 34px rgba(24,195,126,.18);
+}
+.btn-danger{
+  background:linear-gradient(135deg,#df7a7a,#c55757);
+  color:#fff;
+}
+
+.hero{padding:26px 0 18px}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.hero-card,.side-card,.alert-card,.project-card,.match-card,.admin-card,.mini-card,.upgrade-card{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:
+    radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),
+    linear-gradient(180deg,var(--panel),#091327);
+  box-shadow:var(--shadow);
+}
+.hero-card{padding:30px}
+.eyebrow{
+  color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px;
+}
+.hero-title{
+  margin:0 0 12px;font-size:clamp(2.2rem,5vw,4.4rem);line-height:.96;letter-spacing:-.06em;max-width:12ch;
+}
+.hero-copy{
+  margin:0 0 18px;color:var(--muted);font-size:1.05rem;line-height:1.72;max-width:64ch;
+}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.badge-row,.detail-pills,.tag-row,.match-tags,.role-row{display:flex;flex-wrap:wrap;gap:8px}
+.badge,.detail-pill,.tag,.match-tag,.role-pill{
+  border-radius:999px;padding:8px 11px;font-size:.8rem;font-weight:800;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#e6eeff;
+}
+.badge.gold,.role-pill.admin{background:rgba(214,171,78,.12);border-color:rgba(214,171,78,.28);color:#f3d898}
+.badge.green{background:rgba(24,195,126,.12);border-color:rgba(24,195,126,.28);color:#bef4da}
+.badge.blue{background:rgba(79,140,255,.12);border-color:rgba(79,140,255,.28);color:#dce8ff}
+
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.metric{
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;
+  background:rgba(255,255,255,.025);display:block;min-height:114px;
+}
+.metric strong{display:block;font-size:1.9rem;margin-bottom:7px}
+.metric span{display:block;color:var(--muted);line-height:1.35;font-size:.92rem}
+
+.side-card{padding:22px;display:flex;flex-direction:column;gap:14px}
+.side-card h2{margin:0;font-size:1.24rem}
+.side-card p{margin:0;color:var(--muted);line-height:1.66}
+
+.section{padding:10px 0 24px}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:18px}
+.section-head h3{margin:0;font-size:1.38rem;letter-spacing:-.02em}
+.section-head p{margin:6px 0 0;color:var(--muted);line-height:1.6}
+.alert-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.alert-card{padding:20px}
+.alert-card h4{margin:0 0 8px;font-size:1.04rem}
+.alert-card p{margin:0 0 14px;color:var(--muted);line-height:1.55;font-size:.94rem}
+.alert-count{font-size:2rem;font-weight:900;letter-spacing:-.04em;margin-bottom:10px}
+
+.projects-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.project-card,.match-card,.admin-card,.upgrade-card{padding:20px}
+.project-head,.match-head,.admin-head{
+  display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px
+}
+.project-title,.match-title,.admin-title{margin:0;font-size:1.12rem;line-height:1.2}
+.project-meta,.match-meta,.admin-meta{color:var(--muted);font-size:.92rem;line-height:1.55}
+.score-badge{
+  min-width:88px;text-align:center;border-radius:999px;padding:12px 14px;font-weight:900;font-size:1.02rem;
+  border:1px solid rgba(214,171,78,.18);background:rgba(214,171,78,.12);color:#f7e4b9;
+}
+.project-copy,.match-reasons,.detail-copy,.admin-copy,.upgrade-copy{
+  color:var(--muted);line-height:1.64;font-size:.96rem;white-space:pre-wrap;word-break:break-word
+}
+.match-actions,.card-actions,.admin-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.action-btn{
+  appearance:none;border:none;cursor:pointer;min-height:44px;padding:10px 15px;border-radius:999px;
+  font-weight:800;letter-spacing:.01em;color:#eef3ff;background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 24px rgba(0,0,0,.18);transition:.18s ease;
+}
+.action-btn:hover{transform:translateY(-1px)}
+.action-btn.view{background:linear-gradient(135deg,rgba(79,140,255,.22),rgba(44,89,194,.18));border-color:rgba(79,140,255,.36)}
+.action-btn.green{background:linear-gradient(135deg,rgba(24,195,126,.22),rgba(24,195,126,.10));border-color:rgba(24,195,126,.35);color:#cdf8e1}
+.action-btn.gold{background:linear-gradient(135deg,rgba(214,171,78,.22),rgba(214,171,78,.10));border-color:rgba(214,171,78,.35);color:#f3ddab}
+.action-btn.red{background:linear-gradient(135deg,rgba(226,125,125,.22),rgba(226,125,125,.10));border-color:rgba(226,125,125,.35);color:#ffd4d4}
+.action-btn.active-interested{background:linear-gradient(135deg,rgba(24,195,126,.22),rgba(24,195,126,.10));border-color:rgba(24,195,126,.35);color:#cdf8e1}
+.action-btn.active-passed{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
+.action-btn.active-contacted{background:linear-gradient(135deg,rgba(214,171,78,.22),rgba(214,171,78,.12));border-color:rgba(214,171,78,.32);color:#f7e4b9}
+
+.deal-details{
+  margin-top:16px;padding:16px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+}
+.core-grid,.mini-grid,.admin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mini-card{padding:20px}
+.mini-card h4,.upgrade-card h4{margin:0 0 8px;font-size:1.08rem}
+.mini-card p{margin:0 0 14px;color:var(--muted);line-height:1.62}
+.upgrade-card .price{font-size:2.2rem;font-weight:900;letter-spacing:-.04em;margin:8px 0}
+.upgrade-card .small{font-size:.92rem;color:var(--muted)}
+.empty-box{
+  border:1px dashed rgba(255,255,255,.12);border-radius:20px;padding:22px;color:var(--muted);background:rgba(255,255,255,.02);
+}
+.statusbar{
+  margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff;
+}
+.statusbar.success{color:#aaf2ce}
+.statusbar.error{color:#ffc3cc}
+.footer-space{height:42px}
+
+@media(max-width:1220px){
+  .alert-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1040px){
+  .hero-grid,.projects-grid,.core-grid,.mini-grid,.admin-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .topbar-inner{flex-direction:column;align-items:flex-start}
+  .top-actions{width:100%}
+  .top-actions .btn{flex:1}
+  .alert-grid,.metrics{grid-template-columns:1fr}
+  .section-head{flex-direction:column;align-items:flex-start}
+  .hero-card,.side-card,.project-card,.match-card,.admin-card,.mini-card,.upgrade-card{padding:18px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">VF</div>
+      <div class="brand-copy">
+        <strong>VAULTFORGE</strong>
+        <span id="memberLine">Checking member session...</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn btn-dark" href="/property-cards.html">Listings</a>
+      <a class="btn btn-dark" href="/pain.html">Pain AI</a>
+      <a class="btn btn-gold" href="/member-profile.html">My Profile</a>
+      <a id="adminNavBtn" class="btn btn-dark hidden" href="#adminSection">Admin Console</a>
+      <button id="logoutBtn" class="btn btn-blue" type="button">Logout</button>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-card">
+        <div class="eyebrow">Private Network • Alerts • Role-Based Access</div>
+        <h1 class="hero-title">VaultForge command center.</h1>
+        <p class="hero-copy">
+          Work the platform from one place. Members only see member tools. Admins get a discreet admin console. Clean alerts, clean actions, no clutter.
+        </p>
+
+        <div class="badge-row" id="topBadges">
+          <div class="badge green">Session verified</div>
+          <div class="badge gold" id="membershipBadge">Founding path active</div>
+          <div class="badge blue" id="profileBadge">Profile loading</div>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-blue" href="/pain.html">Open Pain AI</a>
+          <a class="btn btn-dark" href="/property-create.html">Create Listing</a>
+          <a class="btn btn-dark" href="/member-profile.html">Update Profile</a>
+        </div>
+
+        <div class="metrics">
+          <a class="metric" href="/member-profile.html">
+            <strong id="metricProfile">—</strong>
+            <span>Profile status</span>
+          </a>
+          <a class="metric" href="#dealInbox">
+            <strong id="metricMatchCount">0</strong>
+            <span>Pain matches</span>
+          </a>
+          <a class="metric" href="#myPainProjects">
+            <strong id="metricPainCount">0</strong>
+            <span>My pain projects</span>
+          </a>
+          <a class="metric" href="#recommendedListings">
+            <strong id="metricListingCount">0</strong>
+            <span>Listing alerts</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="side-card">
+        <div class="role-row" id="roleRow">
+          <div class="role-pill">Member</div>
+        </div>
+        <h2>Built for what is live now and what is next.</h2>
+        <p id="profileSummaryCopy">Loading your profile, role tags, and match readiness...</p>
+        <div class="mini-grid" style="grid-template-columns:1fr;">
+          <div class="mini-card">
+            <h4>Live Now</h4>
+            <p>Member accounts, profile setup, pain projects, deal inbox, listings access, and dashboard actions.</p>
+          </div>
+          <div class="mini-card">
+            <h4>Rolling Out</h4>
+            <p>Capital matching, cleaner alert routing, stronger dashboard sections, founding upgrades, and more automation.</p>
+          </div>
+          <div class="mini-card">
+            <h4>Future Vision</h4>
+            <p>Multi-user business accounts, team workflows, capital intros, AI routing, and national expansion.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="alertsSection">
+    <div class="section-head">
+      <div>
+        <h3>Alerts</h3>
+        <p>Separate alert buttons, no clutter. Click the category you want to work.</p>
+      </div>
+    </div>
+    <div class="alert-grid">
+      <div class="alert-card">
+        <div class="alert-count" id="listingAlertsCount">0</div>
+        <h4>Listings Alerts</h4>
+        <p>Listings in your markets and property types.</p>
+        <a class="btn btn-dark" href="#recommendedListings">View Listings Alerts</a>
+      </div>
+      <div class="alert-card">
+        <div class="alert-count" id="painAlertsCount">0</div>
+        <h4>Pain Alerts</h4>
+        <p>Matched pain opportunities and distress-driven deals.</p>
+        <a class="btn btn-dark" href="#dealInbox">View Pain Alerts</a>
+      </div>
+      <div class="alert-card">
+        <div class="alert-count" id="buyerAlertsCount">0</div>
+        <h4>Buyer Alerts</h4>
+        <p>Buyer-side routing and deal visibility as your profile improves.</p>
+        <a class="btn btn-dark" href="/member-profile.html">View Buyer Alerts</a>
+      </div>
+      <div class="alert-card">
+        <div class="alert-count" id="lenderAlertsCount">0</div>
+        <h4>Lender Alerts</h4>
+        <p>Lender-side matching and capital visibility as the network expands.</p>
+        <a class="btn btn-dark" href="/member-profile.html">View Lender Alerts</a>
+      </div>
+      <div class="alert-card">
+        <div class="alert-count" id="capitalAlertsCount">0</div>
+        <h4>Capital Alerts</h4>
+        <p>Need capital / have capital matching is staged here.</p>
+        <a class="btn btn-dark" href="#roadmapSection">View Capital Alerts</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="recommendedListings">
+    <div class="section-head">
+      <div>
+        <h3>Recommended Listings</h3>
+        <p>Recent listings based on your current match profile where possible.</p>
+      </div>
+      <a class="btn btn-dark" href="/property-cards.html">Browse All Listings</a>
+    </div>
+    <div id="listingsWrap" class="projects-grid"></div>
+  </section>
+
+  <section id="dealInbox" class="section">
+    <div class="section-head">
+      <div>
+        <h3>Deal Inbox</h3>
+        <p>Matched opportunities routed to you by VaultForge.</p>
+      </div>
+      <a class="btn btn-dark" href="/member-profile.html">Improve Match Profile</a>
+    </div>
+    <div id="matchesWrap"></div>
+  </section>
+
+  <section id="myPainProjects" class="section">
+    <div class="section-head">
+      <div>
+        <h3>My Pain Projects</h3>
+        <p>Your submitted pain opportunities and actions.</p>
+      </div>
+      <a class="btn btn-blue" href="/pain.html">Create New Pain Project</a>
+    </div>
+    <div id="painProjectsWrap" class="projects-grid"></div>
+  </section>
+
+  <section id="upgradeSection" class="section">
+    <div class="section-head">
+      <div>
+        <h3>Founding Access</h3>
+        <p>Show the offer inside the member area too.</p>
+      </div>
+    </div>
+    <div class="projects-grid">
+      <div class="upgrade-card">
+        <h4>Founding Member Access</h4>
+        <div class="price">$10</div>
+        <div class="small">today • then $49/mo after 14 days</div>
+        <div class="upgrade-copy" style="margin-top:12px;">Listings, buyer alerts, lender alerts, pain visibility, dashboard access, and better routing as the network expands.</div>
+        <div class="card-actions">
+          <button class="btn btn-gold" type="button">Upgrade Access</button>
+        </div>
+      </div>
+      <div class="upgrade-card">
+        <h4>What Expands Next</h4>
+        <div class="upgrade-copy">Capital matching, direct intros, stronger role-based alerts, weekly deal drops, and broader market visibility.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="adminSection" class="section hidden">
+    <div class="section-head">
+      <div>
+        <h3>Admin Console</h3>
+        <p>Only admins should ever see this.</p>
+      </div>
+      <div class="badge gold">Admin only</div>
+    </div>
+
+    <div class="metrics" style="margin-top:0;">
+      <div class="metric"><strong id="adminMembersCount">0</strong><span>Total member profiles</span></div>
+      <div class="metric"><strong id="adminPainCount">0</strong><span>Total pain projects</span></div>
+      <div class="metric"><strong id="adminListingsCount">0</strong><span>Total listings</span></div>
+      <div class="metric"><strong id="adminMatchesCount">0</strong><span>Total pain matches</span></div>
+    </div>
+
+    <div class="admin-grid" style="margin-top:16px;">
+      <div class="admin-card">
+        <div class="admin-head">
+          <div>
+            <h4 class="admin-title">Recent Member Profiles</h4>
+            <div class="admin-meta">Delete profile rows only.</div>
+          </div>
+        </div>
+        <div id="adminProfilesWrap"></div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-head">
+          <div>
+            <h4 class="admin-title">Recent Pain Projects</h4>
+            <div class="admin-meta">Approve, deny, or delete.</div>
+          </div>
+        </div>
+        <div id="adminPainWrap"></div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-head">
+          <div>
+            <h4 class="admin-title">Recent Listings</h4>
+            <div class="admin-meta">Approve, deny, or delete.</div>
+          </div>
+        </div>
+        <div id="adminListingsWrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="roadmapSection">
+    <div class="section-head">
+      <div>
+        <h3>What VaultForge is doing now and next</h3>
+        <p>Keep the product story visible right inside the member area.</p>
+      </div>
+    </div>
+    <div class="core-grid">
+      <div class="mini-card">
+        <h4>Working Today</h4>
+        <p>Member login, profile setup, listings access, pain submissions, pain matching, dashboard visibility, and alert-ready profile logic.</p>
+      </div>
+      <div class="mini-card">
+        <h4>Building Now</h4>
+        <p>Capital matching, cleaner role-based dashboards, stronger alert sections, founding member flow, and better network routing.</p>
+      </div>
+      <div class="mini-card">
+        <h4>Coming Later</h4>
+        <p>Multi-user company accounts, shared pipelines, direct capital intros, AI matching, and broader geographic rollout.</p>
+      </div>
+    </div>
+    <div class="statusbar" id="statusBar">Ready.</div>
+  </section>
+
+  <div class="footer-space"></div>
+</main>
+
+<script>
+(function(){
+  const SUPABASE_URL = 'https://mnwwvpuxrzostrplfgmq.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+  const supabase = window.VaultForgeAuth && window.VaultForgeAuth.supabase
+    ? window.VaultForgeAuth.supabase
+    : window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let adminMode = false;
+
+  function setStatus(msg, kind=''){
+    const el = document.getElementById('statusBar');
+    if(!el) return;
+    el.textContent = msg;
+    el.className = 'statusbar';
+    if(kind) el.classList.add(kind);
+  }
+
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function fmtMoney(v){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return '—';
+    return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+  }
+
+  function fmtDate(v){
+    if(!v) return 'Unknown date';
+    const d = new Date(v);
+    if(Number.isNaN(d.getTime())) return 'Unknown date';
+    return d.toLocaleDateString(undefined,{month:'short', day:'numeric', year:'numeric'});
+  }
+
+  function labelize(key){
+    return String(key || '').replaceAll('_',' ').replace(/\b\w/g,function(c){ return c.toUpperCase(); });
+  }
+
+  function getProfileStates(prefs){
+    if(Array.isArray(prefs?.target_states)) return prefs.target_states.filter(Boolean);
+    if(Array.isArray(prefs?.states_active)) return prefs.states_active.filter(Boolean);
+    return [];
+  }
+
+  function getProfileTypes(prefs){
+    if(Array.isArray(prefs?.property_types)) return prefs.property_types.filter(Boolean);
+    if(Array.isArray(prefs?.asset_types)) return prefs.asset_types.filter(Boolean);
+    return [];
+  }
+
+  function getRoleTags(profile, prefs){
+    const tags = [];
+    const pushUnique = (v) => {
+      const text = String(v || '').trim();
+      if(text && !tags.includes(text)) tags.push(text);
+    };
+
+    ['primary_role','role','account_type','member_type','title'].forEach(function(key){
+      if(profile && profile[key]) pushUnique(profile[key]);
+    });
+
+    ['services','notes'].forEach(function(key){
+      if(profile && profile[key]){
+        String(profile[key]).split(',').map(function(v){ return v.trim(); }).forEach(pushUnique);
+      }
+    });
+
+    if(!tags.length) pushUnique('Member');
+    return tags.slice(0, 6);
+  }
+
+  function profilePillText(profile, prefs){
+    if(!profile && !prefs){
+      return {
+        metric:'Start',
+        copy:'Your member profile is not set yet. Build it now so listings, pain deals, buyer alerts, lender alerts, and future capital matches can route correctly.'
+      };
+    }
+    const hasStates = getProfileStates(prefs).length || (profile && profile.primary_market ? 1 : 0);
+    const hasTypes = getProfileTypes(prefs).length || (profile && profile.services ? 1 : 0);
+    if(hasStates && hasTypes){
+      return {
+        metric:'Ready',
+        copy:'Your match profile is active. VaultForge can use your states, property types, and role data to route better opportunities and alert categories.'
+      };
+    }
+    return {
+      metric:'Partial',
+      copy:'Your profile is started but not fully match-ready yet. Add your states, property types, and roles to improve listings, alerts, and future capital routing.'
+    };
+  }
+
+  function cleanDescription(text){
+    const raw = String(text || '').trim();
+    if(!raw) return 'No additional description available.';
+    const marker = 'Structured Details:';
+    if(raw.includes(marker)){
+      return raw.split(marker)[0].trim() || 'No narrative description provided.';
+    }
+    return raw;
+  }
+
+  function detailPills(details){
+    if(!details || typeof details !== 'object') return '';
+    const entries = Object.entries(details)
+      .filter(function(entry){
+        const value = entry[1];
+        return value !== null && value !== '' && value !== undefined;
+      })
+      .slice(0, 8);
+
+    if(!entries.length) return '';
+
+    return '<div class="detail-pills" style="margin:0 0 12px;">' + entries.map(function(entry){
+      return '<div class="detail-pill">' + esc(labelize(entry[0]) + ': ' + entry[1]) + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function setTopProfile(profile, prefs){
+    const summary = profilePillText(profile, prefs);
+    document.getElementById('metricProfile').textContent = summary.metric;
+    document.getElementById('profileBadge').textContent = 'Profile ' + summary.metric;
+    document.getElementById('profileSummaryCopy').textContent = summary.copy;
+
+    const roles = getRoleTags(profile, prefs);
+    const roleRow = document.getElementById('roleRow');
+    roleRow.innerHTML = roles.map(function(role){
+      const lower = String(role).toLowerCase();
+      const cls = lower === 'admin' ? 'role-pill admin' : 'role-pill';
+      return '<div class="' + cls + '">' + esc(labelize(role)) + '</div>';
+    }).join('');
+
+    if(adminMode){
+      roleRow.innerHTML += '<div class="role-pill admin">Admin Access</div>';
+      document.getElementById('adminNavBtn').classList.remove('hidden');
+    } else {
+      document.getElementById('adminNavBtn').classList.add('hidden');
+    }
+  }
+
+  function renderListings(rows){
+    const wrap = document.getElementById('listingsWrap');
+    document.getElementById('metricListingCount').textContent = String(rows.length);
+    document.getElementById('listingAlertsCount').textContent = String(rows.length);
+
+    if(!rows.length){
+      wrap.innerHTML = '<div class="empty-box">No listing alerts yet. As more listings are added and your profile gets tighter, this section will improve.</div>';
+      return;
+    }
+
+    wrap.innerHTML = rows.map(function(row){
+      const state = row.state || row.property_state || row.location_state || '—';
+      const title = row.title || row.property_title || row.name || 'Listing';
+      const type = row.property_type || row.asset_type || row.deal_type || '—';
+      const price = row.asking_price ?? row.price ?? row.list_price ?? null;
+      const description = cleanDescription(row.description || row.notes || row.summary || '');
+
+      return `
+        <article class="project-card">
+          <div class="project-head">
+            <div>
+              <h4 class="project-title">${esc(title)}</h4>
+              <div class="project-meta">Updated ${esc(fmtDate(row.created_at || row.updated_at))}</div>
+            </div>
+            <div class="score-badge">${esc(price != null ? fmtMoney(price) : '—')}</div>
+          </div>
+          <div class="tag-row" style="margin-bottom:12px;">
+            <div class="tag">${esc(state)}</div>
+            <div class="tag">${esc(type)}</div>
+            <div class="tag">${esc(row.strategy || row.listing_type || 'Listing')}</div>
+          </div>
+          <div class="project-copy">${esc(description)}</div>
+          <div class="card-actions">
+            <a class="action-btn view" href="/property-cards.html">Open Listings</a>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  function renderPainProjects(rows){
+    const wrap = document.getElementById('painProjectsWrap');
+    document.getElementById('metricPainCount').textContent = String(rows.length);
+
+    if(!rows.length){
+      wrap.innerHTML = '<div class="empty-box">No pain projects yet. Submit your first one from the Pain AI page and it will show up here.</div>';
+      return;
+    }
+
+    wrap.innerHTML = rows.map(function(row){
+      return `
+        <article class="project-card">
+          <div class="project-head">
+            <div>
+              <h4 class="project-title">${esc(row.title || 'Untitled Pain Project')}</h4>
+              <div class="project-meta">Created ${esc(fmtDate(row.created_at))}</div>
+            </div>
+            <div class="score-badge">${esc(row.price != null ? fmtMoney(row.price) : '—')}</div>
+          </div>
+          <div class="tag-row" style="margin-bottom:12px;">
+            <div class="tag">${esc(row.state || '—')}</div>
+            <div class="tag">${esc(row.property_type || '—')}</div>
+            <div class="tag">${esc(row.strategy || '—')}</div>
+            <div class="tag">${row.distress ? 'Distress' : 'Standard'}</div>
+          </div>
+          <div class="project-copy">${esc(cleanDescription(row.pain_text || row.description || ''))}</div>
+          <div class="card-actions">
+            <a class="action-btn view" href="/pain.html">Open Pain AI</a>
+            <button class="action-btn red delete-own-project-btn" type="button" data-id="${esc(row.id)}">Delete Project</button>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.delete-own-project-btn').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const id = btn.getAttribute('data-id');
+        if(!id) return;
+        if(!confirm('Delete this pain project? This cannot be undone.')) return;
+        try{
+          setStatus('Deleting project...');
+          const { error } = await supabase.from('pain_projects').delete().eq('id', id);
+          if(error) throw error;
+          setStatus('Project deleted.', 'success');
+          await boot();
+        }catch(err){
+          console.error(err);
+          setStatus('Could not delete project.', 'error');
+        }
+      });
+    });
+  }
+
+  function renderMatches(rows){
+    const wrap = document.getElementById('matchesWrap');
+    document.getElementById('metricMatchCount').textContent = String(rows.length);
+    document.getElementById('painAlertsCount').textContent = String(rows.length);
+
+    if(!rows.length){
+      wrap.innerHTML = '<div class="empty-box">No matches yet. Complete your profile and wait for new pain submissions.</div>';
+      return;
+    }
+
+    const grouped = { new: [], interested: [], contacted: [], passed: [] };
+
+    rows.forEach(function(row){
+      const status = String(row.status || 'new').toLowerCase();
+      if(grouped[status]) grouped[status].push(row);
+      else grouped.new.push(row);
+    });
+
+    function cardHtml(row){
+      const p = row.pain_projects || {};
+      const reasons = Array.isArray(row.match_reasons) ? row.match_reasons.slice(0,4).join(' • ') : '';
+      const status = String(row.status || 'new').toLowerCase();
+      const detailId = 'deal-details-' + String(row.id);
+      const description = cleanDescription(p.pain_text || p.description || '');
+
+      return `
+        <article class="match-card">
+          <div class="match-head">
+            <div>
+              <h4 class="match-title">${esc(p.title || 'Matched Opportunity')}</h4>
+              <div class="match-meta">Matched ${esc(fmtDate(row.created_at))}</div>
+            </div>
+            <div class="score-badge">${esc(String(row.match_score || 0))}</div>
+          </div>
+          <div class="match-tags" style="margin-bottom:12px;">
+            <div class="match-tag">${esc(p.state || '—')}</div>
+            <div class="match-tag">${esc(p.property_type || '—')}</div>
+            <div class="match-tag">${esc(p.strategy || '—')}</div>
+            <div class="match-tag">${esc(p.price != null ? fmtMoney(p.price) : '—')}</div>
+          </div>
+          <div class="match-reasons">${esc(reasons || 'New match')}</div>
+          <div class="match-actions">
+            <button class="action-btn view view-btn" type="button" data-detail-id="${esc(detailId)}">View Deal</button>
+            <button class="action-btn ${status === 'interested' ? 'active-interested' : ''}" type="button" data-match-id="${esc(row.id)}" data-status="interested">Interested</button>
+            <button class="action-btn ${status === 'passed' ? 'active-passed' : ''}" type="button" data-match-id="${esc(row.id)}" data-status="passed">Pass</button>
+            <button class="action-btn ${status === 'contacted' ? 'active-contacted' : ''}" type="button" data-match-id="${esc(row.id)}" data-status="contacted">Contact Seller</button>
+          </div>
+          <div id="${esc(detailId)}" class="deal-details hidden">
+            <h5 style="margin:0 0 10px;">Deal Details</h5>
+            ${detailPills(p.details_json)}
+            <div class="detail-copy">${esc(description)}</div>
+          </div>
+        </article>
+      `;
+    }
+
+    function sectionHtml(title, key){
+      const items = grouped[key] || [];
+      if(!items.length) return '';
+      return `
+        <div style="margin-bottom:20px;">
+          <h4 style="margin:0 0 12px;font-size:1.02rem;color:#dce8ff;">${title}</h4>
+          <div class="projects-grid">
+            ${items.map(cardHtml).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    wrap.innerHTML =
+      sectionHtml('New Matches', 'new') +
+      sectionHtml('Interested', 'interested') +
+      sectionHtml('Contacted', 'contacted') +
+      sectionHtml('Passed', 'passed');
+
+    document.querySelectorAll('.view-btn[data-detail-id]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const detailId = btn.getAttribute('data-detail-id');
+        const panel = document.getElementById(detailId);
+        if(!panel) return;
+        const isHidden = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden', !isHidden);
+        btn.textContent = isHidden ? 'Hide Deal' : 'View Deal';
+      });
+    });
+
+    document.querySelectorAll('.action-btn[data-match-id]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const matchId = btn.getAttribute('data-match-id');
+        const status = btn.getAttribute('data-status');
+        if(!matchId || !status) return;
+        try{
+          setStatus('Updating match status...');
+          const { error } = await supabase.from('pain_matches').update({ status: status }).eq('id', matchId);
+          if(error) throw error;
+          setStatus('Match status updated.', 'success');
+          await boot();
+        }catch(err){
+          console.error(err);
+          setStatus('Match status update failed.', 'error');
+        }
+      });
+    });
+  }
+
+  function setAlertCounts(profile, prefs, matches, listings){
+    const roles = getRoleTags(profile, prefs).map(function(v){ return String(v).toLowerCase(); }).join(' ');
+    document.getElementById('buyerAlertsCount').textContent =
+      (roles.includes('buyer') || roles.includes('investor')) ? String(listings.length) : '0';
+    document.getElementById('lenderAlertsCount').textContent =
+      (roles.includes('lender') || roles.includes('capital')) ? '1' : '0';
+    document.getElementById('capitalAlertsCount').textContent = '0';
+  }
+
+  async function maybeFilterListings(rows, prefs, profile){
+    const states = getProfileStates(prefs).map(function(v){ return String(v).toLowerCase(); });
+    if(profile && profile.primary_market) states.push(String(profile.primary_market).toLowerCase());
+
+    let filtered = rows || [];
+    if(states.length){
+      filtered = filtered.filter(function(row){
+        const state = String(row.state || row.property_state || row.location_state || row.city || '').toLowerCase();
+        return states.some(function(s){ return state.includes(s); });
+      });
+    }
+
+    return filtered.slice(0, 6);
+  }
+
+  async function detectAdmin(){
+    if(window.VaultForgeAuth && typeof window.VaultForgeAuth.isAdmin === 'function'){
+      try{
+        return await window.VaultForgeAuth.isAdmin();
+      }catch(e){}
+    }
+    return false;
+  }
+
+  function renderAdminProfiles(rows){
+    const wrap = document.getElementById('adminProfilesWrap');
+    if(!rows.length){
+      wrap.innerHTML = '<div class="empty-box">No member profiles found.</div>';
+      return;
+    }
+
+    wrap.innerHTML = rows.map(function(row){
+      const name = row.full_name || 'Member';
+      return `
+        <div class="mini-card" style="margin-bottom:12px;padding:16px;">
+          <div class="admin-title" style="margin-bottom:6px;">${esc(name)}</div>
+          <div class="admin-copy">${esc(row.company_name || row.user_id || row.id || '')}</div>
+          <div class="admin-actions">
+            <button class="action-btn red delete-profile-btn" type="button" data-id="${esc(row.id)}">Delete Profile</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.delete-profile-btn').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const id = btn.getAttribute('data-id');
+        if(!id) return;
+        if(!confirm('Delete this member profile row? This does not delete the auth user.')) return;
+        try{
+          setStatus('Deleting profile record...');
+          const { error } = await supabase.from('member_profiles').delete().eq('id', id);
+          if(error) throw error;
+          setStatus('Profile record deleted.', 'success');
+          await loadAdmin();
+        }catch(err){
+          console.error(err);
+          setStatus('Could not delete profile record.', 'error');
+        }
+      });
+    });
+  }
+
+  function renderAdminPain(rows){
+    const wrap = document.getElementById('adminPainWrap');
+    if(!rows.length){
+      wrap.innerHTML = '<div class="empty-box">No pain projects found.</div>';
+      return;
+    }
+
+    wrap.innerHTML = rows.map(function(row){
+      return `
+        <div class="mini-card" style="margin-bottom:12px;padding:16px;">
+          <div class="admin-title" style="margin-bottom:6px;">${esc(row.title || 'Pain Project')}</div>
+          <div class="admin-copy">${esc((row.state || '—') + ' • ' + (row.property_type || '—'))}</div>
+          <div class="admin-actions">
+            <button class="action-btn green admin-pain-status-btn" type="button" data-id="${esc(row.id)}" data-status="approved">Approve</button>
+            <button class="action-btn gold admin-pain-status-btn" type="button" data-id="${esc(row.id)}" data-status="denied">Deny</button>
+            <button class="action-btn red admin-delete-pain-btn" type="button" data-id="${esc(row.id)}">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.admin-pain-status-btn').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const id = btn.getAttribute('data-id');
+        const status = btn.getAttribute('data-status');
+        try{
+          setStatus('Updating pain project status...');
+          const { error } = await supabase.from('pain_projects').update({ status: status }).eq('id', id);
+          if(error) throw error;
+          setStatus('Pain project status updated.', 'success');
+          await loadAdmin();
+        }catch(err){
+          console.error(err);
+          setStatus('Could not update pain project status. Add a status column if needed.', 'error');
+        }
+      });
+    });
+
+    document.querySelectorAll('.admin-delete-pain-btn').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const id = btn.getAttribute('data-id');
+        if(!confirm('Delete this pain project?')) return;
+        try{
+          setStatus('Deleting pain project...');
+          const { error } = await supabase.from('pain_projects').delete().eq('id', id);
+          if(error) throw error;
+          setStatus('Pain project deleted.', 'success');
+          await Promise.all([loadAdmin(), boot()]);
+        }catch(err){
+          console.error(err);
+          setStatus('Could not delete pain project.', 'error');
+        }
+      });
+    });
+  }
+
+  function renderAdminListings(rows){
+    const wrap = document.getElementById('adminListingsWrap');
+    if(!rows.length){
+      wrap.innerHTML = '<div class="empty-box">No listings found.</div>';
+      return;
+    }
+
+    wrap.innerHTML = rows.map(function(row){
+      const title = row.title || row.property_title || row.name || 'Listing';
+      return `
+        <div class="mini-card" style="margin-bottom:12px;padding:16px;">
+          <div class="admin-title" style="margin-bottom:6px;">${esc(title)}</div>
+          <div class="admin-copy">${esc((row.state || row.property_state || '—') + ' • ' + (row.property_type || row.asset_type || '—'))}</div>
+          <div class="admin-actions">
+            <button class="action-btn green admin-listing-status-btn" type="button" data-id="${esc(row.id)}" data-status="approved">Approve</button>
+            <button class="action-btn gold admin-listing-status-btn" type="button" data-id="${esc(row.id)}" data-status="denied">Deny</button>
+            <button class="action-btn red admin-delete-listing-btn" type="button" data-id="${esc(row.id)}">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.admin-listing-status-btn').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const id = btn.getAttribute('data-id');
+        const status = btn.getAttribute('data-status');
+        try{
+          setStatus('Updating listing status...');
+          const { error } = await supabase.from('property_cards').update({ status: status }).eq('id', id);
+          if(error) throw error;
+          setStatus('Listing status updated.', 'success');
+          await loadAdmin();
+        }catch(err){
+          console.error(err);
+          setStatus('Could not update listing status. Add a status column if needed.', 'error');
+        }
+      });
+    });
+
+    document.querySelectorAll('.admin-delete-listing-btn').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        const id = btn.getAttribute('data-id');
+        if(!confirm('Delete this listing?')) return;
+        try{
+          setStatus('Deleting listing...');
+          const { error } = await supabase.from('property_cards').delete().eq('id', id);
+          if(error) throw error;
+          setStatus('Listing deleted.', 'success');
+          await Promise.all([loadAdmin(), boot()]);
+        }catch(err){
+          console.error(err);
+          setStatus('Could not delete listing.', 'error');
+        }
+      });
+    });
+  }
+
+  async function loadAdmin(){
+    if(!adminMode) return;
+
+    document.getElementById('adminSection').classList.remove('hidden');
+
+    try{
+      const [
+        { data: profiles, error: profilesError, count: profilesCount },
+        { data: painRows, error: painError, count: painCount },
+        { data: listingRows, error: listingError, count: listingsCount },
+        { data: matchesRows, error: matchesError, count: matchesCount }
+      ] = await Promise.all([
+        supabase.from('member_profiles').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(6),
+        supabase.from('pain_projects').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(6),
+        supabase.from('property_cards').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(6),
+        supabase.from('pain_matches').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(6)
+      ]);
+
+      if(profilesError) throw profilesError;
+      if(painError) throw painError;
+      if(listingError) throw listingError;
+      if(matchesError) throw matchesError;
+
+      document.getElementById('adminMembersCount').textContent = String(profilesCount || 0);
+      document.getElementById('adminPainCount').textContent = String(painCount || 0);
+      document.getElementById('adminListingsCount').textContent = String(listingsCount || 0);
+      document.getElementById('adminMatchesCount').textContent = String(matchesCount || 0);
+
+      renderAdminProfiles(profiles || []);
+      renderAdminPain(painRows || []);
+      renderAdminListings(listingRows || []);
+    }catch(err){
+      console.error(err);
+      setStatus('Admin data failed to load.', 'error');
+    }
+  }
+
+  async function boot(){
+    try{
+      const session = window.VaultForgeAuth && typeof window.VaultForgeAuth.requireLogin === 'function'
+        ? await window.VaultForgeAuth.requireLogin()
+        : (await supabase.auth.getSession()).data.session;
+
+      if(!session){
+        window.location.href = '/member-login.html';
+        return;
+      }
+
+      document.getElementById('memberLine').textContent = 'Logged in as ' + (session.user.email || 'Member');
+
+      const userId = session.user.id;
+
+      const [
+        profileResult,
+        prefsResult,
+        painProjectsResult,
+        matchesResult,
+        listingsResult
+      ] = await Promise.all([
+        supabase.from('member_profiles').select('*').eq('user_id', userId).maybeSingle(),
+        supabase.from('member_match_preferences').select('*').eq('user_id', userId).maybeSingle(),
+        supabase.from('pain_projects').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+        supabase.from('pain_matches').select('id, pain_project_id, match_score, match_reasons, status, created_at, pain_projects(*)').eq('user_id', userId).order('match_score', { ascending: false }),
+        supabase.from('property_cards').select('*').order('created_at', { ascending: false }).limit(12)
+      ]);
+
+      if(profileResult.error) throw profileResult.error;
+      if(prefsResult.error) throw prefsResult.error;
+      if(painProjectsResult.error) throw painProjectsResult.error;
+      if(matchesResult.error) throw matchesResult.error;
+      if(listingsResult.error) throw listingsResult.error;
+
+      adminMode = await detectAdmin();
+
+      setTopProfile(profileResult.data, prefsResult.data);
+
+      const filteredListings = await maybeFilterListings(listingsResult.data || [], prefsResult.data, profileResult.data);
+      renderListings(filteredListings);
+      renderPainProjects(painProjectsResult.data || []);
+      renderMatches(matchesResult.data || []);
+      setAlertCounts(profileResult.data, prefsResult.data, matchesResult.data || [], filteredListings || []);
+
+      if(adminMode){
+        document.getElementById('membershipBadge').textContent = 'Admin access active';
+        await loadAdmin();
+      } else {
+        document.getElementById('membershipBadge').textContent = 'Founding member path';
+        document.getElementById('adminSection').classList.add('hidden');
+        document.getElementById('adminNavBtn').classList.add('hidden');
+      }
+
+      setStatus('Dashboard ready.', 'success');
+    }catch(err){
+      console.error(err);
+      setStatus('Dashboard load failed.', 'error');
+      document.getElementById('metricProfile').textContent = 'Check';
+      document.getElementById('metricPainCount').textContent = '0';
+      document.getElementById('metricMatchCount').textContent = '0';
+      document.getElementById('metricListingCount').textContent = '0';
+      document.getElementById('profileSummaryCopy').textContent = 'We could not load your current member data yet. Refresh your session and try again.';
+      document.getElementById('painProjectsWrap').innerHTML = '<div class="empty-box">We could not load your pain projects yet.</div>';
+      document.getElementById('matchesWrap').innerHTML = '<div class="empty-box">We could not load your deal inbox yet.</div>';
+      document.getElementById('listingsWrap').innerHTML = '<div class="empty-box">We could not load recommended listings yet.</div>';
+    }
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', async function(){
+    try{
+      if(window.VaultForgeAuth && typeof window.VaultForgeAuth.logout === 'function'){
+        await window.VaultForgeAuth.logout();
+      } else {
+        await supabase.auth.signOut();
+        window.location.href = '/member-login.html';
+      }
+    }catch(err){
+      console.error(err);
+      window.location.href = '/member-login.html';
+    }
+  });
+
+  boot();
+})();
+</script>
+</body>
+</html>
