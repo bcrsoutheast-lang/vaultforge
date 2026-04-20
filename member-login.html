@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VaultForge | Member Access</title>
+<meta name="description" content="Join VaultForge, sign in, or reset your password. Private real estate network for deals, capital, and opportunities.">
+<style>
+  :root{
+    --bg:#050c1a;
+    --bg2:#08142d;
+    --panel:#0c1832;
+    --panel2:#102043;
+    --line:rgba(255,255,255,.10);
+    --line-strong:rgba(214,171,78,.35);
+    --text:#f7f8fc;
+    --muted:#a6b2d1;
+    --gold:#d6ab4e;
+    --gold2:#f0c96a;
+    --green:#18c37e;
+    --danger:#e27d7d;
+    --shadow:0 30px 90px rgba(0,0,0,.42);
+    --radius:26px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 12% 12%, rgba(214,171,78,.14), transparent 20%),
+      radial-gradient(circle at 84% 10%, rgba(255,255,255,.05), transparent 18%),
+      radial-gradient(circle at 50% 55%, rgba(214,171,78,.08), transparent 24%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+  }
+
+  a{color:inherit;text-decoration:none}
+  .shell{width:min(1240px,calc(100% - 28px));margin:0 auto}
+
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    backdrop-filter:blur(14px);
+    background:rgba(5,12,26,.78);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .topbar-inner{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+    padding:16px 0;
+  }
+  .brand{
+    display:flex;align-items:center;gap:14px;min-width:0;
+  }
+  .brand-mark{
+    width:56px;height:56px;border-radius:18px;
+    display:grid;place-items:center;
+    background:
+      linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),
+      linear-gradient(180deg,#15191f,#0c1018);
+    border:1px solid rgba(214,171,78,.28);
+    box-shadow:var(--shadow);
+    color:var(--gold2);
+    font-weight:900;
+    letter-spacing:.06em;
+    font-size:1.2rem;
+  }
+  .brand-copy strong{
+    display:block;
+    font-size:1.25rem;
+    letter-spacing:.12em;
+    color:var(--gold2);
+  }
+  .brand-copy span{
+    display:block;
+    color:var(--muted);
+    font-size:.9rem;
+  }
+
+  .nav{
+    display:flex;gap:10px;flex-wrap:wrap;
+  }
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    min-height:50px;padding:13px 18px;border-radius:16px;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-weight:800;transition:.18s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn-gold{
+    background:linear-gradient(135deg,var(--gold2),#b7852d);
+    color:#111;
+    box-shadow:0 18px 34px rgba(214,171,78,.20);
+  }
+  .btn-dark{
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+    color:#fff;
+  }
+  .btn-green{
+    background:linear-gradient(135deg,#1dd48a,#10a96d);
+    color:#fff;
+    box-shadow:0 18px 34px rgba(24,195,126,.18);
+  }
+
+  .hero{
+    padding:28px 0 22px;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.02fr .98fr;
+    gap:18px;
+    align-items:stretch;
+  }
+  .panel{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:
+      radial-gradient(circle at top right, rgba(214,171,78,.12), transparent 28%),
+      linear-gradient(180deg,var(--panel),#091327);
+    box-shadow:var(--shadow);
+  }
+  .hero-copy{
+    padding:30px;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:9px 13px;border-radius:999px;
+    background:rgba(214,171,78,.10);
+    border:1px solid rgba(214,171,78,.24);
+    color:#f1d18c;
+    font-size:.82rem;font-weight:900;letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  h1{
+    margin:0 0 12px;
+    font-size:clamp(2.25rem,5vw,4.4rem);
+    line-height:.96;
+    letter-spacing:-.06em;
+    max-width:11ch;
+  }
+  .gold{color:var(--gold2)}
+  .hero-copy p{
+    margin:0 0 18px;
+    color:var(--muted);
+    font-size:1.05rem;
+    line-height:1.72;
+    max-width:64ch;
+  }
+  .points{
+    display:grid;
+    gap:12px;
+    margin:0 0 22px;
+  }
+  .point{
+    display:flex;gap:12px;align-items:flex-start;
+    padding:14px 16px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.07);
+    background:rgba(255,255,255,.025);
+  }
+  .point-bullet{
+    width:30px;height:30px;border-radius:50%;
+    display:grid;place-items:center;
+    background:rgba(214,171,78,.14);
+    border:1px solid rgba(214,171,78,.24);
+    color:#f1d18c;
+    flex:0 0 auto;
+    font-weight:900;
+  }
+  .point strong{display:block;margin-bottom:4px}
+  .point span{display:block;color:var(--muted);line-height:1.55}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+  .auth-wrap{
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .auth-tabs{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+  }
+  .tab-btn{
+    appearance:none;border:none;cursor:pointer;
+    min-height:48px;border-radius:14px;
+    background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.07);
+    color:#dce4fa;
+    font-weight:800;
+    transition:.18s ease;
+  }
+  .tab-btn.active{
+    background:linear-gradient(135deg,rgba(214,171,78,.22),rgba(214,171,78,.10));
+    border-color:var(--line-strong);
+    color:#fff1c9;
+  }
+
+  .auth-card{
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.03);
+    border-radius:22px;
+    padding:22px;
+  }
+  .auth-header h2{
+    margin:0 0 6px;
+    font-size:1.5rem;
+    letter-spacing:-.03em;
+  }
+  .auth-header p{
+    margin:0 0 18px;
+    color:var(--muted);
+    line-height:1.65;
+  }
+
+  .field{margin-bottom:14px}
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  label{
+    display:block;
+    margin:0 0 7px;
+    font-weight:800;
+    color:#f2f4fb;
+  }
+  input{
+    width:100%;
+    padding:15px 16px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    outline:none;
+    font-size:1rem;
+  }
+  input::placeholder{color:#8ea0c8}
+  input:focus{
+    border-color:rgba(214,171,78,.46);
+    box-shadow:0 0 0 3px rgba(214,171,78,.10);
+  }
+
+  .helper-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    margin-top:6px;
+    flex-wrap:wrap;
+  }
+  .helper-link{
+    color:#f0cf89;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .helper-link:hover{text-decoration:underline}
+
+  .cta-note{
+    margin-top:14px;
+    color:var(--muted);
+    line-height:1.55;
+    font-size:.95rem;
+  }
+
+  .notice{
+    display:none;
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:14px;
+    font-weight:700;
+    line-height:1.45;
+  }
+  .notice.show{display:block}
+  .notice.error{
+    background:rgba(226,125,125,.12);
+    border:1px solid rgba(226,125,125,.35);
+    color:#ffd4d4;
+  }
+  .notice.success{
+    background:rgba(24,195,126,.12);
+    border:1px solid rgba(24,195,126,.35);
+    color:#bbf4dd;
+  }
+
+  .mini-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+    margin-top:8px;
+  }
+  .mini-card{
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.025);
+    border-radius:18px;
+    padding:16px;
+  }
+  .mini-card strong{
+    display:block;
+    color:#fff;
+    margin-bottom:6px;
+  }
+  .mini-card span{
+    display:block;
+    color:var(--muted);
+    line-height:1.45;
+    font-size:.93rem;
+  }
+
+  .footer-note{
+    padding:0 0 32px;
+  }
+  .footer-box{
+    border:1px solid rgba(214,171,78,.16);
+    border-radius:24px;
+    background:
+      radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 26%),
+      linear-gradient(180deg,#0a1430,#081124);
+    box-shadow:var(--shadow);
+    padding:22px;
+  }
+  .footer-box p{
+    margin:0;
+    color:var(--muted);
+    line-height:1.72;
+  }
+
+  @media(max-width:1020px){
+    .hero-grid{grid-template-columns:1fr}
+  }
+  @media(max-width:720px){
+    .topbar-inner{flex-direction:column;align-items:flex-start}
+    .nav{width:100%}
+    .nav .btn{flex:1}
+    .field-row,.mini-grid,.auth-tabs{grid-template-columns:1fr}
+    .hero-copy,.auth-wrap,.auth-card,.footer-box{padding:20px}
+    .helper-row{align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="/index.html" aria-label="VaultForge home">
+        <div class="brand-mark">VF</div>
+        <div class="brand-copy">
+          <strong>VAULTFORGE</strong>
+          <span>Private Deal Flow. Real Execution.</span>
+        </div>
+      </a>
+      <div class="nav">
+        <a class="btn btn-dark" href="/index.html">Back Home</a>
+        <a class="btn btn-dark" href="/property-cards.html">Listings</a>
+        <a class="btn btn-gold" href="/member-login.html" id="topJoinBtn">Join / Login</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="panel hero-copy">
+          <div class="eyebrow">Founding Access • Private Member Network</div>
+          <h1>Get into <span class="gold">VaultForge</span> the right way.</h1>
+          <p>
+            This is the private real estate network for deals, capital, alerts, and opportunities. Join as a new member, sign back in, or reset your password without confusion.
+          </p>
+
+          <div class="points">
+            <div class="point">
+              <div class="point-bullet">1</div>
+              <div>
+                <strong>Create your account</strong>
+                <span>New members can sign up directly here instead of feeling like they already needed an account.</span>
+              </div>
+            </div>
+            <div class="point">
+              <div class="point-bullet">2</div>
+              <div>
+                <strong>Complete your member profile</strong>
+                <span>Choose roles like buyer, lender, operator, wholesaler, developer, or capital partner so VaultForge can power better matches and alerts.</span>
+              </div>
+            </div>
+            <div class="point">
+              <div class="point-bullet">3</div>
+              <div>
+                <strong>Access live opportunities</strong>
+                <span>Listings, property matching alerts, buyer alerts, lender alerts, pain opportunities, and more as the platform grows.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn btn-gold" type="button" data-open-tab="signup">Create Account</button>
+            <button class="btn btn-dark" type="button" data-open-tab="signin">Member Login</button>
+            <button class="btn btn-dark" type="button" data-open-tab="forgot">Forgot Password</button>
+          </div>
+        </div>
+
+        <div class="panel auth-wrap">
+          <div class="auth-tabs" aria-label="Auth options">
+            <button class="tab-btn active" type="button" data-tab="signin">Sign In</button>
+            <button class="tab-btn" type="button" data-tab="signup">Create Account</button>
+            <button class="tab-btn" type="button" data-tab="forgot">Forgot Password</button>
+          </div>
+
+          <div class="auth-card">
+            <div class="auth-header">
+              <h2 id="authTitle">Member Sign In</h2>
+              <p id="authSubtitle">Sign in to open your dashboard, listings, alerts, and matches.</p>
+            </div>
+
+            <form id="authForm" novalidate>
+              <div id="nameRow" class="field-row" style="display:none;">
+                <div class="field">
+                  <label for="firstName">First Name</label>
+                  <input id="firstName" type="text" autocomplete="given-name" placeholder="First name">
+                </div>
+                <div class="field">
+                  <label for="lastName">Last Name</label>
+                  <input id="lastName" type="text" autocomplete="family-name" placeholder="Last name">
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+              </div>
+
+              <div id="passwordWrap" class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" autocomplete="current-password" placeholder="Enter password">
+              </div>
+
+              <div id="confirmPasswordWrap" class="field" style="display:none;">
+                <label for="confirmPassword">Confirm Password</label>
+                <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm password">
+              </div>
+
+              <button id="submitBtn" class="btn btn-green" type="submit" style="width:100%;margin-top:6px;">Enter Member Area</button>
+
+              <div class="helper-row">
+                <span id="modeHint" class="cta-note">Already a member? Sign in here.</span>
+                <span id="secondaryLink" class="helper-link" data-open-tab="signup">Need an account? Create one</span>
+              </div>
+
+              <div id="errorNotice" class="notice error"></div>
+              <div id="successNotice" class="notice success"></div>
+            </form>
+          </div>
+
+          <div class="mini-grid">
+            <div class="mini-card">
+              <strong>Live Now</strong>
+              <span>Member accounts, listings, profile setup, and match-ready infrastructure.</span>
+            </div>
+            <div class="mini-card">
+              <strong>Alerts</strong>
+              <span>Property matching, buyer alerts, lender alerts, and pain opportunity visibility.</span>
+            </div>
+            <div class="mini-card">
+              <strong>Building Next</strong>
+              <span>Capital matching, better dashboards, direct introductions, and more automation.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="footer-note">
+      <div class="footer-box">
+        <p>
+          Founding members get in early while VaultForge expands. This page now gives people a clear path to <strong>sign in</strong>, <strong>create an account</strong>, or <strong>reset a password</strong> instead of looking like login is only for people who already know the system.
+        </p>
+      </div>
+    </section>
+  </main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<script>
+const tabs = document.querySelectorAll('[data-tab]');
+const openTabButtons = document.querySelectorAll('[data-open-tab]');
+const authTitle = document.getElementById('authTitle');
+const authSubtitle = document.getElementById('authSubtitle');
+const nameRow = document.getElementById('nameRow');
+const passwordWrap = document.getElementById('passwordWrap');
+const confirmPasswordWrap = document.getElementById('confirmPasswordWrap');
+const submitBtn = document.getElementById('submitBtn');
+const modeHint = document.getElementById('modeHint');
+const secondaryLink = document.getElementById('secondaryLink');
+
+const authForm = document.getElementById('authForm');
+const firstNameEl = document.getElementById('firstName');
+const lastNameEl = document.getElementById('lastName');
+const emailEl = document.getElementById('email');
+const passwordEl = document.getElementById('password');
+const confirmPasswordEl = document.getElementById('confirmPassword');
+
+const errorNotice = document.getElementById('errorNotice');
+const successNotice = document.getElementById('successNotice');
+
+let currentMode = 'signin';
+
+function showError(message){
+  errorNotice.textContent = message;
+  errorNotice.classList.add('show');
+  successNotice.classList.remove('show');
+}
+function showSuccess(message){
+  successNotice.textContent = message;
+  successNotice.classList.add('show');
+  errorNotice.classList.remove('show');
+}
+function clearMessages(){
+  errorNotice.textContent = '';
+  successNotice.textContent = '';
+  errorNotice.classList.remove('show');
+  successNotice.classList.remove('show');
+}
+function setLoading(isLoading, label){
+  submitBtn.disabled = isLoading;
+  submitBtn.textContent = isLoading ? label : getButtonText(currentMode);
+}
+function getButtonText(mode){
+  if(mode === 'signup') return 'Create My Account';
+  if(mode === 'forgot') return 'Send Reset Link';
+  return 'Enter Member Area';
+}
+
+function setMode(mode){
+  currentMode = mode;
+  clearMessages();
+
+  tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === mode));
+
+  if(mode === 'signin'){
+    authTitle.textContent = 'Member Sign In';
+    authSubtitle.textContent = 'Sign in to open your dashboard, listings, alerts, and matches.';
+    nameRow.style.display = 'none';
+    passwordWrap.style.display = 'block';
+    confirmPasswordWrap.style.display = 'none';
+    passwordEl.autocomplete = 'current-password';
+    passwordEl.placeholder = 'Enter password';
+    submitBtn.textContent = getButtonText(mode);
+    modeHint.textContent = 'Already a member? Sign in here.';
+    secondaryLink.textContent = 'Need an account? Create one';
+    secondaryLink.dataset.openTab = 'signup';
+  }
+
+  if(mode === 'signup'){
+    authTitle.textContent = 'Create Your VaultForge Account';
+    authSubtitle.textContent = 'New members can create an account here and start building their profile the right way.';
+    nameRow.style.display = 'grid';
+    passwordWrap.style.display = 'block';
+    confirmPasswordWrap.style.display = 'block';
+    passwordEl.autocomplete = 'new-password';
+    passwordEl.placeholder = 'Create password';
+    submitBtn.textContent = getButtonText(mode);
+    modeHint.textContent = 'New member setup starts here.';
+    secondaryLink.textContent = 'Already have an account? Sign in';
+    secondaryLink.dataset.openTab = 'signin';
+  }
+
+  if(mode === 'forgot'){
+    authTitle.textContent = 'Reset Your Password';
+    authSubtitle.textContent = 'Enter your email and VaultForge will send a secure password reset link.';
+    nameRow.style.display = 'none';
+    passwordWrap.style.display = 'none';
+    confirmPasswordWrap.style.display = 'none';
+    submitBtn.textContent = getButtonText(mode);
+    modeHint.textContent = 'Forgot your password? Reset it here.';
+    secondaryLink.textContent = 'Back to sign in';
+    secondaryLink.dataset.openTab = 'signin';
+  }
+}
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => setMode(tab.dataset.tab));
+});
+
+openTabButtons.forEach(btn => {
+  btn.addEventListener('click', () => setMode(btn.dataset.openTab));
+});
+
+secondaryLink.addEventListener('click', () => setMode(secondaryLink.dataset.openTab));
+
+async function handleSignIn(){
+  const email = emailEl.value.trim();
+  const password = passwordEl.value;
+
+  if(!email || !password){
+    showError('Enter email and password.');
+    return;
+  }
+
+  setLoading(true, 'Signing In...');
+
+  try{
+    await VaultForgeAuth.signIn(email, password);
+    showSuccess('Login successful. Redirecting...');
+    window.location.href = '/members.html';
+  }catch(error){
+    showError(error && error.message ? error.message : 'Login failed.');
+  }finally{
+    setLoading(false);
+  }
+}
+
+async function handleSignUp(){
+  const firstName = firstNameEl.value.trim();
+  const lastName = lastNameEl.value.trim();
+  const email = emailEl.value.trim();
+  const password = passwordEl.value;
+  const confirmPassword = confirmPasswordEl.value;
+
+  if(!firstName || !lastName){
+    showError('Enter first and last name.');
+    return;
+  }
+  if(!email || !password || !confirmPassword){
+    showError('Complete all signup fields.');
+    return;
+  }
+  if(password.length < 6){
+    showError('Password must be at least 6 characters.');
+    return;
+  }
+  if(password !== confirmPassword){
+    showError('Passwords do not match.');
+    return;
+  }
+
+  setLoading(true, 'Creating Account...');
+
+  try{
+    if (VaultForgeAuth.signUp) {
+      await VaultForgeAuth.signUp(email, password, {
+        first_name: firstName,
+        last_name: lastName,
+        full_name: firstName + ' ' + lastName
+      });
+    } else if (window.supabase && window.supabase.auth && typeof window.supabase.auth.signUp === 'function') {
+      await window.supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            full_name: firstName + ' ' + lastName
+          }
+        }
+      });
+    } else {
+      throw new Error('Signup is not connected yet in auth.js.');
+    }
+
+    showSuccess('Account created. Check your email for confirmation if required, then sign in.');
+    setMode('signin');
+    passwordEl.value = '';
+    confirmPasswordEl.value = '';
+  }catch(error){
+    showError(error && error.message ? error.message : 'Account creation failed.');
+  }finally{
+    setLoading(false);
+  }
+}
+
+async function handleForgotPassword(){
+  const email = emailEl.value.trim();
+
+  if(!email){
+    showError('Enter your email address.');
+    return;
+  }
+
+  setLoading(true, 'Sending Reset Link...');
+
+  try{
+    if (VaultForgeAuth.resetPassword) {
+      await VaultForgeAuth.resetPassword(email);
+    } else if (window.supabase && window.supabase.auth && typeof window.supabase.auth.resetPasswordForEmail === 'function') {
+      await window.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/member-login.html'
+      });
+    } else {
+      throw new Error('Password reset is not connected yet in auth.js.');
+    }
+
+    showSuccess('Password reset link sent. Check your email.');
+  }catch(error){
+    showError(error && error.message ? error.message : 'Could not send reset link.');
+  }finally{
+    setLoading(false);
+  }
+}
+
+authForm.addEventListener('submit', async function(event){
+  event.preventDefault();
+  clearMessages();
+
+  if(currentMode === 'signup'){
+    await handleSignUp();
+    return;
+  }
+
+  if(currentMode === 'forgot'){
+    await handleForgotPassword();
+    return;
+  }
+
+  await handleSignIn();
+});
+
+passwordEl.addEventListener('keydown', function(event){
+  if(event.key === 'Enter' && currentMode === 'signin'){
+    event.preventDefault();
+    handleSignIn();
+  }
+});
+
+(async function(){
+  try{
+    if (VaultForgeAuth && VaultForgeAuth.getSession) {
+      const session = await VaultForgeAuth.getSession();
+      if(session){
+        window.location.href = '/members.html';
+      }
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
