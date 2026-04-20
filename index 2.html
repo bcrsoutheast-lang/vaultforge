@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VaultForge | Private Operating System for Investors</title>
+  <meta name="description" content="VaultForge is a private operating system for investors: deal flow, listings, match routing, investor workflow, and team collaboration in one premium workspace.">
+  <style>
+    :root{
+      --bg:#060f1e;
+      --bg2:#091733;
+      --panel:#0f1d39;
+      --panel2:#132447;
+      --text:#f4f7ff;
+      --muted:#9db0d7;
+      --line:rgba(255,255,255,.10);
+      --blue:#4f8cff;
+      --blue2:#7aa7ff;
+      --green:#18c37e;
+      --gold:#d8b15d;
+      --shadow:0 24px 80px rgba(0,0,0,.38);
+      --radius:26px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;scroll-behavior:smooth}
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(79,140,255,.16), transparent 24%),
+        radial-gradient(circle at 88% 14%, rgba(24,195,126,.08), transparent 18%),
+        radial-gradient(circle at 50% 42%, rgba(216,177,93,.06), transparent 24%),
+        linear-gradient(180deg,var(--bg),var(--bg2));
+      min-height:100vh;
+    }
+    a{text-decoration:none;color:inherit}
+    .shell{width:min(1320px,calc(100% - 28px));margin:0 auto}
+    .topbar{
+      position:sticky;top:0;z-index:40;backdrop-filter:blur(16px);
+      background:rgba(6,15,30,.76);border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .topbar-inner{
+      display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;
+    }
+    .brand{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand-mark{
+      width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+      background:linear-gradient(135deg,#15315e,#0a1935);
+      border:1px solid rgba(122,167,255,.22);
+      box-shadow:var(--shadow);
+      color:#7fa7ff;font-weight:900;font-size:1.5rem;letter-spacing:.06em;
+    }
+    .brand-copy strong{display:block;font-size:1rem;letter-spacing:.18em}
+    .brand-copy span{display:block;color:var(--muted);font-size:.9rem}
+    .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{
+      appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;
+      display:inline-flex;align-items:center;justify-content:center;font-weight:800;transition:.18s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{
+      background:linear-gradient(135deg,var(--blue),#2f6bf2);color:#fff;box-shadow:0 16px 30px rgba(79,140,255,.24);
+    }
+    .btn-ghost{
+      background:rgba(255,255,255,.03);border:1px solid var(--line);color:#fff;
+    }
+    .hero{padding:30px 0 22px}
+    .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    .hero-card,.hero-side,.section-card,.feature-card,.pricing-card,.office-card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:
+        radial-gradient(circle at top right, rgba(122,167,255,.10), transparent 28%),
+        linear-gradient(180deg,var(--panel),#0c1730);
+      box-shadow:var(--shadow);
+    }
+    .hero-card{padding:30px}
+    .eyebrow{
+      color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px;
+    }
+    .hero-title{
+      margin:0 0 12px;font-size:clamp(2.4rem,5.4vw,4.6rem);line-height:.95;letter-spacing:-.06em;max-width:12ch;
+    }
+    .hero-copy{
+      margin:0 0 20px;color:var(--muted);font-size:1.08rem;line-height:1.72;max-width:64ch;
+    }
+    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+    .hero-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .metric{
+      border:1px solid rgba(122,167,255,.12);border-radius:20px;padding:18px;background:rgba(255,255,255,.025);
+    }
+    .metric strong{display:block;font-size:1.7rem;margin-bottom:6px}
+    .metric span{display:block;color:var(--muted);font-size:.9rem;line-height:1.35}
+    .hero-side{padding:22px;display:flex;flex-direction:column;gap:14px}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;width:max-content;padding:9px 13px;border-radius:999px;
+      font-size:.86rem;font-weight:800;border:1px solid rgba(24,195,126,.24);background:rgba(24,195,126,.10);color:#aef0cf;
+    }
+    .chip.gold{border-color:rgba(216,177,93,.24);background:rgba(216,177,93,.12);color:#f0dba8}
+    .hero-side h2{margin:0;font-size:1.28rem}
+    .hero-side p{margin:0;color:var(--muted);line-height:1.68}
+    .section{padding:10px 0 26px}
+    .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:18px}
+    .section-head h3{margin:0;font-size:1.42rem;letter-spacing:-.02em}
+    .section-head p{margin:6px 0 0;color:var(--muted)}
+    .section-card{padding:24px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .feature-card,.office-card,.pricing-card{padding:22px}
+    .icon{
+      width:50px;height:50px;border-radius:16px;display:grid;place-items:center;
+      background:linear-gradient(135deg,rgba(79,140,255,.18),rgba(17,35,70,.8));
+      border:1px solid rgba(122,167,255,.18);font-size:1.25rem;margin-bottom:14px;
+    }
+    .feature-card h4,.office-card h4,.pricing-card h4{margin:0 0 8px;font-size:1.1rem}
+    .feature-card p,.office-card p,.pricing-card p{margin:0;color:var(--muted);line-height:1.65}
+    .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .tag{
+      border-radius:999px;padding:8px 10px;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+      border:1px solid rgba(122,167,255,.14);background:rgba(255,255,255,.03);color:#dbe7ff;
+    }
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .office-list{display:grid;gap:10px;margin-top:14px}
+    .office-item{
+      border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:14px;background:rgba(255,255,255,.025);
+    }
+    .office-item strong{display:block;margin-bottom:4px}
+    .office-item span{display:block;color:var(--muted);line-height:1.55;font-size:.92rem}
+    .pricing-card{min-height:100%;display:flex;flex-direction:column;gap:14px}
+    .price{font-size:2rem;font-weight:900;letter-spacing:-.04em}
+    .price small{font-size:.95rem;color:var(--muted);font-weight:700}
+    .pricing-list{display:grid;gap:10px;color:var(--muted)}
+    .pricing-list div{line-height:1.55}
+    .cta{padding:34px 0 46px}
+    .cta-card{
+      border:1px solid rgba(122,167,255,.14);border-radius:30px;
+      background:
+        radial-gradient(circle at top right, rgba(79,140,255,.18), transparent 28%),
+        linear-gradient(180deg,var(--panel2),#0b1630);
+      box-shadow:var(--shadow);padding:28px;text-align:center;
+    }
+    .cta-card h3{margin:0 0 10px;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-.03em}
+    .cta-card p{margin:0 auto 18px;color:var(--muted);line-height:1.72;max-width:72ch}
+    .cta-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+    .footer-space{height:34px}
+    @media(max-width:1160px){
+      .hero-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:980px){
+      .hero-grid,.split{grid-template-columns:1fr}
+      .grid-3{grid-template-columns:1fr}
+    }
+    @media(max-width:720px){
+      .topbar-inner{flex-direction:column;align-items:flex-start}
+      .nav{width:100%}
+      .nav .btn{flex:1}
+      .hero-metrics,.grid-4{grid-template-columns:1fr}
+      .hero-card,.hero-side,.section-card,.feature-card,.office-card,.pricing-card,.cta-card{padding:20px}
+      .section-head{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">VF</div>
+        <div class="brand-copy">
+          <strong>VAULTFORGE</strong>
+          <span>Private Operating System for Investors</span>
+        </div>
+      </div>
+      <div class="nav">
+        <a class="btn btn-ghost" href="/member-login.html">Member Login</a>
+        <a class="btn btn-ghost" href="/property-cards.html">Listings</a>
+        <a class="btn btn-ghost" href="/pain.html">Pain AI</a>
+        <a class="btn btn-primary" href="/member-login.html">Enter VaultForge</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-card">
+          <div class="eyebrow">Private Deal Flow • Investor Workflow • Team Operations</div>
+          <h1 class="hero-title">Run your real estate business in one place.</h1>
+          <p class="hero-copy">
+            VaultForge is a private operating system for investors. Manage deal flow, create listings, route opportunities,
+            maintain your investment profile, and build the back-office infrastructure your company needs to operate like a serious firm.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/member-login.html">Member Access</a>
+            <a class="btn btn-ghost" href="/property-cards.html">Browse Listings</a>
+            <a class="btn btn-ghost" href="/pain.html">Open Pain AI</a>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric"><strong>GA</strong><span>Georgia launch market</span></div>
+            <div class="metric"><strong>TN</strong><span>Tennessee launch market</span></div>
+            <div class="metric"><strong>FL</strong><span>Florida launch market</span></div>
+            <div class="metric"><strong>3X</strong><span>Residential, Commercial, and Land workflows</span></div>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="chip">Private member infrastructure</div>
+          <div class="chip gold">Built for operators</div>
+          <h2>This is not just a listing site.</h2>
+          <p>
+            VaultForge is being built as an investor office, a deal inbox, a listing engine, a match system, and eventually a team workspace.
+            The goal is simple: give serious investors one place to conduct real work.
+          </p>
+          <p>
+            Instead of juggling spreadsheets, scattered texts, inbox chaos, brokers, and disconnected notes, VaultForge gives you a private,
+            premium system for sourcing, organizing, routing, and acting on opportunities.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3>What VaultForge does</h3>
+          <p>The core product is already taking shape as a private investor workflow system.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h4>Private Deal Flow</h4>
+          <p>Submit opportunities through Pain AI, create structured listings, and keep opportunities inside a controlled investor environment instead of public chaos.</p>
+          <div class="tag-row"><div class="tag">Exclusive</div><div class="tag">Curated</div><div class="tag">Fast</div></div>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎯</div>
+          <h4>Smart Match Routing</h4>
+          <p>Members set target states, property types, strategies, and deal range. VaultForge uses that data to route relevant opportunities to the right investor profiles.</p>
+          <div class="tag-row"><div class="tag">Profile-based</div><div class="tag">State aware</div><div class="tag">Structured</div></div>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🏢</div>
+          <h4>Investor Office Workflow</h4>
+          <p>Dashboard, listings, profile management, inbox actions, and market quick-create flows are the base layer for a much bigger investor operating system.</p>
+          <div class="tag-row"><div class="tag">Daily use</div><div class="tag">Ops layer</div><div class="tag">Premium</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3>Built for the work investors actually do</h3>
+          <p>VaultForge is designed around how real operators source, evaluate, organize, and move on deals.</p>
+        </div>
+      </div>
+      <div class="grid-4">
+        <div class="office-card"><div class="icon">📥</div><h4>Deal Inbox</h4><p>Matched opportunities show up inside a private inbox where investors can view, sort, and act on relevant opportunities.</p></div>
+        <div class="office-card"><div class="icon">🧠</div><h4>Pain AI</h4><p>Capture distressed and time-sensitive opportunities in a structured way across Residential, Commercial, and Land.</p></div>
+        <div class="office-card"><div class="icon">📍</div><h4>Market Routing</h4><p>Georgia, Tennessee, and Florida launch-market quick actions keep deal creation and targeting fast and local.</p></div>
+        <div class="office-card"><div class="icon">📊</div><h4>Investor Profile</h4><p>Every member builds a match profile so opportunities can be routed by state, asset type, strategy, and price range.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div class="section-card">
+          <div class="section-head" style="margin-bottom:14px;">
+            <div>
+              <h3>Who this is for</h3>
+              <p>VaultForge is not just for one type of investor.</p>
+            </div>
+          </div>
+          <div class="office-list">
+            <div class="office-item"><strong>Solo investors</strong><span>Operators who need a private dashboard to organize opportunities, listings, and follow-up without running everything through scattered files.</span></div>
+            <div class="office-item"><strong>Acquisitions teams</strong><span>Teams that need deal routing, filtering, pipeline movement, and shared opportunity visibility across multiple users.</span></div>
+            <div class="office-item"><strong>Brokers and wholesalers</strong><span>Professionals who need a better private distribution and investor matching system than mass blasting deals into random lists.</span></div>
+            <div class="office-item"><strong>Serious real estate companies</strong><span>Firms that want a private investor office, not just a public-facing website.</span></div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head" style="margin-bottom:14px;">
+            <div>
+              <h3>What makes VaultForge different</h3>
+              <p>The long-term vision is much bigger than “post deals online.”</p>
+            </div>
+          </div>
+          <div class="office-list">
+            <div class="office-item"><strong>Private infrastructure</strong><span>Opportunities are routed in a member environment, not pushed into a noisy public feed.</span></div>
+            <div class="office-item"><strong>Investor operating system</strong><span>Listings, profiles, matches, inbox actions, workflow, and eventually team operations live under one roof.</span></div>
+            <div class="office-item"><strong>Multi-user future</strong><span>VaultForge is positioned to evolve into a shared workspace for owners, acquisitions managers, analysts, and dispositions teams.</span></div>
+            <div class="office-item"><strong>Enterprise upside</strong><span>The product can grow from solo investor tool to team software to full company operating system.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3>The roadmap is bigger than listings</h3>
+          <p>VaultForge is being built toward a high-end investor business platform.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="feature-card"><div class="icon">🏗️</div><h4>Investor HQ</h4><p>A full daily-use investor dashboard with pipeline, tasks, contacts, notes, documents, new opportunities, and company-level visibility.</p></div>
+        <div class="feature-card"><div class="icon">👥</div><h4>VaultForge Teams</h4><p>Shared company workspaces, employee access, role permissions, team notes, task assignment, and multi-user deal execution.</p></div>
+        <div class="feature-card"><div class="icon">💼</div><h4>Premium Monetization</h4><p>Solo, Pro, Team, and Enterprise plans built around real operational value, not gimmicks.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h3>How this can become a serious business</h3>
+          <p>The value is not just the deal feed. The value is becoming where investors actually work.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="pricing-card">
+          <h4>Solo Investor</h4>
+          <div class="price">$99–199 <small>/month</small></div>
+          <p>For independent operators who want private deal flow, listings, and a structured investor workspace.</p>
+          <div class="pricing-list">
+            <div>• Match inbox</div><div>• Listing control</div><div>• Profile targeting</div><div>• Deal organization</div>
+          </div>
+        </div>
+        <div class="pricing-card">
+          <h4>Operator / Pro</h4>
+          <div class="price">$299–599 <small>/month</small></div>
+          <p>For serious investors who want stronger workflow, better routing, and premium investor-office features.</p>
+          <div class="pricing-list">
+            <div>• Better pipeline controls</div><div>• Notes and saved deals</div><div>• Alerts and notifications</div><div>• More workflow power</div>
+          </div>
+        </div>
+        <div class="pricing-card">
+          <h4>Teams / Enterprise</h4>
+          <div class="price">$1k+ <small>/month</small></div>
+          <p>For real estate companies that need multi-user infrastructure and company-level operating systems.</p>
+          <div class="pricing-list">
+            <div>• Team seats</div><div>• Shared pipeline</div><div>• Tasks and permissions</div><div>• Workspace operations</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="cta-card">
+        <h3>Private deal flow. Real execution.</h3>
+        <p>
+          VaultForge is being built for investors who want more than another website. The goal is a private operating system where serious real estate professionals can source, route, organize, and execute real business.
+        </p>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="/member-login.html">Enter VaultForge</a>
+          <a class="btn btn-ghost" href="/property-cards.html">View Listings</a>
+          <a class="btn btn-ghost" href="/pain.html">Try Pain AI</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-space"></div>
+  </main>
+</body>
+</html>
