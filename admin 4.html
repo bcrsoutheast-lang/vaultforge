@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<script>
+const SUPABASE_URL="https://mnwwvpuxrzostrplfgmq.supabase.co";
+const SUPABASE_KEY="sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+const sb=window.VaultForgeAuth&&window.VaultForgeAuth.supabase?window.VaultForgeAuth.supabase:window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
+function fmtMoney(v){const n=Number(v);if(!Number.isFinite(n))return "—";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n)}
+async function getSessionOrRedirect(){if(window.VaultForgeAuth&&window.VaultForgeAuth.requireLogin)return await window.VaultForgeAuth.requireLogin();const r=await sb.auth.getSession();const s=r?.data?.session;if(!s){window.location.href="/member-login.html";return null}return s}
+async function logoutNow(){try{if(window.VaultForgeAuth&&window.VaultForgeAuth.logout){await window.VaultForgeAuth.logout();return}}catch(e){}await sb.auth.signOut();window.location.href="/member-login.html";}
+</script>
+<style>
+:root{--bg:#040b18;--bg2:#09162f;--panel:#0b1731;--text:#f7f8fc;--muted:#a8b4d4;--line:rgba(255,255,255,.10);--gold:#d6ab4e;--gold2:#f0c96a;--green:#1dcf88;--blue:#4f8cff;--red:#e95f73;--shadow:0 28px 70px rgba(0,0,0,.36);--radius:28px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% 6%, rgba(214,171,78,.12), transparent 18%),radial-gradient(circle at 88% 10%, rgba(79,140,255,.12), transparent 18%),linear-gradient(180deg,var(--bg),var(--bg2))}
+a{text-decoration:none;color:inherit}.shell{width:min(1320px,calc(100% - 28px));margin:0 auto}
+.topbar{position:sticky;top:0;z-index:60;backdrop-filter:blur(16px);background:rgba(4,11,24,.82);border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),linear-gradient(180deg,#15191f,#0c1018);border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow);color:var(--gold2);font-weight:900;font-size:1.25rem}
+.brand-copy strong{display:block;font-size:1.04rem;letter-spacing:.16em;color:var(--gold2)}.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.top-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:min(860px,100%)}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:52px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;transition:.18s ease;text-align:center}
+.btn:hover{transform:translateY(-1px)}.btn-blue{background:linear-gradient(135deg,var(--blue),#2f6bf2);color:#fff}.btn-gold{background:linear-gradient(135deg,var(--gold2),#b7852d);color:#111}.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}.btn-red{background:linear-gradient(135deg,#f16f7d,#d44c5b);color:#fff}
+.panel{border:1px solid var(--line);border-radius:var(--radius);background:radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),linear-gradient(180deg,var(--panel),#091327);box-shadow:var(--shadow);padding:22px}
+.hero{padding:24px 0 18px}.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}.title{margin:0 0 10px;font-size:clamp(2rem,4.8vw,4.2rem);line-height:.96;letter-spacing:-.05em}.copy{color:var(--muted);line-height:1.65}
+.metric{border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:20px;background:rgba(255,255,255,.025)}.metric strong{display:block;font-size:2rem;margin-bottom:6px}.metric span{color:var(--muted)}
+.section{padding:8px 0 28px}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}.section-head h3{margin:0;font-size:1.35rem}.section-head p{margin:6px 0 0;color:var(--muted)}
+.status{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}.ok{color:#aaf2ce}.err{color:#ffc3cc}
+.item{border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;background:rgba(255,255,255,.02)}.item h4{margin:0 0 8px;font-size:1.05rem}
+.pills,.actions{display:flex;gap:10px;flex-wrap:wrap}.pill{border-radius:999px;padding:9px 12px;font-size:.86rem;font-weight:800;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#e6eeff}
+.list{display:grid;gap:12px}.list-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}.list-row:last-child{border-bottom:none}
+.card-link{cursor:pointer}
+.hidden{display:none!important}
+@media(max-width:1080px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+@media(max-width:900px){.top-actions{grid-template-columns:repeat(2,minmax(0,1fr));width:100%}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">VF</div>
+      <div class="brand-copy">
+        <strong>VAULTFORGE ADMIN</strong>
+        <span id="memberLine">Checking admin session...</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn btn-dark" href="/members.html">Members</a>
+      <a class="btn btn-dark" href="/property-cards.html">Listings</a>
+      <a class="btn btn-dark" href="/pain.html">Pain</a>
+      <a class="btn btn-blue" href="/property-create.html">Create Listing</a>
+      <a class="btn btn-gold" href="/member-profile.html">My Profile</a>
+      <button class="btn btn-dark" id="refreshBtn" type="button">Refresh</button>
+      <button class="btn btn-red" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+  <section class="hero">
+    <div class="grid2">
+      <div class="panel">
+        <div class="eyebrow">Admin Restore</div>
+        <h1 class="title">Back in admin mode.</h1>
+        <p class="copy">This page is intentionally different from the member dashboard. It gives you counts, quick links, recent messages, and role visibility in one place.</p>
+        <div class="pills" style="margin-top:14px">
+          <div class="pill" id="adminModePill">Checking role...</div>
+          <div class="pill" id="adminEmailPill">—</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Admin Status</div>
+        <div class="grid3">
+          <div class="metric"><strong id="membersCount">0</strong><span>Member Profiles</span></div>
+          <div class="metric"><strong id="listingsCount">0</strong><span>Listings</span></div>
+          <div class="metric"><strong id="messagesCount">0</strong><span>Admin Messages</span></div>
+        </div>
+        <div id="adminStatus" class="status">Ready.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Quick Admin Actions</h3>
+        <p>Fast routes to the places you use most.</p>
+      </div>
+    </div>
+    <div class="grid4">
+      <div class="panel card-link" data-href="/members.html"><div class="eyebrow">Dashboard</div><h3 style="margin:0 0 6px">Member Dashboard</h3><p class="copy">Check live member-side experience.</p></div>
+      <div class="panel card-link" data-href="/property-cards.html"><div class="eyebrow">Listings</div><h3 style="margin:0 0 6px">All Listings</h3><p class="copy">See every property card and detail flow.</p></div>
+      <div class="panel card-link" data-href="/property-create.html"><div class="eyebrow">Create</div><h3 style="margin:0 0 6px">Create Listing</h3><p class="copy">Open the merged create page.</p></div>
+      <div class="panel card-link" data-href="/pain.html"><div class="eyebrow">Pain</div><h3 style="margin:0 0 6px">Pain Tool</h3><p class="copy">Open the pain workflow.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid2">
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h3>Recent Admin Messages</h3>
+            <p>Latest messages saved into <code>admin_messages</code>.</p>
+          </div>
+        </div>
+        <div id="messagesWrap" class="list"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h3>Recent Profiles</h3>
+            <p>Latest records in <code>member_profiles</code>.</p>
+          </div>
+        </div>
+        <div id="profilesWrap" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid2">
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h3>Recent Listings</h3>
+            <p>Latest records in <code>property_cards</code>.</p>
+          </div>
+        </div>
+        <div id="listingsWrap" class="list"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h3>Role Check</h3>
+            <p>How this page determines admin.</p>
+          </div>
+        </div>
+        <div class="item">
+          <div class="list-row"><span class="copy">Role field</span><span><code>role = 'admin'</code></span></div>
+          <div class="list-row"><span class="copy">Boolean flag</span><span><code>is_admin = true</code></span></div>
+          <div class="list-row"><span class="copy">Current result</span><span id="roleCheckResult">Checking...</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+let adminProfile=null;
+
+function setAdminStatus(msg, cls=""){
+  const el=document.getElementById("adminStatus");
+  el.className="status "+cls;
+  el.textContent=msg;
+}
+function rowHtml(left,right){
+  return `<div class="list-row"><span class="copy">${left}</span><span>${right}</span></div>`;
+}
+function profileCard(p){
+  const name=esc(p.full_name||"No name");
+  const role=esc(p.role||"No role");
+  const market=esc(p.primary_market||"No market");
+  return `<div class="item">
+    <h4>${name}</h4>
+    <div class="pills">
+      <div class="pill">${role}</div>
+      <div class="pill">${market}</div>
+    </div>
+  </div>`;
+}
+function listingCard(r){
+  const title=esc(r.title||"Untitled");
+  const state=esc(r.state||"—");
+  const type=esc(r.property_type||"—");
+  const price=(r.price!=null)?esc(fmtMoney(r.price)):"—";
+  return `<div class="item">
+    <h4>${title}</h4>
+    <div class="pills">
+      <div class="pill">${state}</div>
+      <div class="pill">${type}</div>
+      <div class="pill">${price}</div>
+    </div>
+    <div class="actions" style="margin-top:10px">
+      <a class="btn btn-dark" href="/property-card.html?id=${encodeURIComponent(r.id)}">Open</a>
+      <a class="btn btn-dark" href="/property-create.html?edit=${encodeURIComponent(r.id)}">Edit</a>
+    </div>
+  </div>`;
+}
+function messageCard(m){
+  const name=esc(m.name||"Unknown");
+  const subject=esc(m.subject||"No subject");
+  const page=esc(m.page_source||"—");
+  const message=esc(m.message||"");
+  return `<div class="item">
+    <h4>${subject}</h4>
+    <div class="pills">
+      <div class="pill">${name}</div>
+      <div class="pill">${page}</div>
+    </div>
+    <p class="copy" style="margin:10px 0 0">${message}</p>
+  </div>`;
+}
+async function loadAdmin(){
+  try{
+    setAdminStatus("Loading admin...");
+    const session=await getSessionOrRedirect();
+    if(!session) return;
+    document.getElementById("memberLine").textContent="Logged in as "+(session.user.email||"Admin");
+    document.getElementById("adminEmailPill").textContent=session.user.email||"—";
+
+    const [profileResp, membersResp, listingsResp, messagesResp] = await Promise.all([
+      sb.from("member_profiles").select("*").eq("user_id", session.user.id).maybeSingle(),
+      sb.from("member_profiles").select("*").order("created_at",{ascending:false}).limit(8),
+      sb.from("property_cards").select("*").order("created_at",{ascending:false}).limit(8),
+      sb.from("admin_messages").select("*").order("created_at",{ascending:false}).limit(8)
+    ]);
+
+    if(profileResp.error && profileResp.error.code!=="PGRST116") throw profileResp.error;
+    if(membersResp.error) throw membersResp.error;
+    if(listingsResp.error) throw listingsResp.error;
+    if(messagesResp.error) throw messagesResp.error;
+
+    adminProfile = profileResp.data || null;
+    const isAdmin = !!(adminProfile && (adminProfile.role === "admin" || adminProfile.is_admin === true));
+
+    document.getElementById("adminModePill").textContent = isAdmin ? "Admin confirmed" : "Not admin";
+    document.getElementById("roleCheckResult").textContent = isAdmin ? "Admin confirmed" : "No admin role detected";
+
+    if(!isAdmin){
+      setAdminStatus("This user is not marked admin in member_profiles.","err");
+      return;
+    }
+
+    document.getElementById("membersCount").textContent = String((membersResp.data||[]).length);
+    document.getElementById("listingsCount").textContent = String((listingsResp.data||[]).length);
+    document.getElementById("messagesCount").textContent = String((messagesResp.data||[]).length);
+
+    document.getElementById("profilesWrap").innerHTML = (membersResp.data||[]).length
+      ? membersResp.data.map(profileCard).join("")
+      : `<div class="item">No profiles found.</div>`;
+
+    document.getElementById("listingsWrap").innerHTML = (listingsResp.data||[]).length
+      ? listingsResp.data.map(listingCard).join("")
+      : `<div class="item">No listings found.</div>`;
+
+    document.getElementById("messagesWrap").innerHTML = (messagesResp.data||[]).length
+      ? messagesResp.data.map(messageCard).join("")
+      : `<div class="item">No admin messages found.</div>`;
+
+    document.querySelectorAll(".card-link").forEach(card=>{
+      card.onclick=()=>window.location.href=card.dataset.href;
+    });
+
+    setAdminStatus("Admin ready.","ok");
+  }catch(e){
+    setAdminStatus(e.message||"Admin load failed.","err");
+  }
+}
+
+document.getElementById("logoutBtn").onclick=logoutNow;
+document.getElementById("refreshBtn").onclick=loadAdmin;
+loadAdmin();
+</script>
+</body>
+</html>
