@@ -1,0 +1,186 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VaultForge | Members</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<script>
+const SUPABASE_URL="https://mnwwvpuxrzostrplfgmq.supabase.co";
+const SUPABASE_KEY="sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+const STORAGE_BUCKET="vaultforge-media";
+const sb=window.VaultForgeAuth&&window.VaultForgeAuth.supabase?window.VaultForgeAuth.supabase:window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+function fmtMoney(v){const n=Number(v);if(!Number.isFinite(n))return "—";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n)}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
+function photosOf(r){
+  const p=r?.photo_urls||r?.image_urls||[];
+  if(Array.isArray(p)) return p.filter(Boolean);
+  try{const j=JSON.parse(p); return Array.isArray(j)?j.filter(Boolean):[]}catch(e){return []}
+}
+async function getSessionOrRedirect(){if(window.VaultForgeAuth&&window.VaultForgeAuth.requireLogin)return await window.VaultForgeAuth.requireLogin();const r=await sb.auth.getSession();const s=r?.data?.session;if(!s){window.location.href="/member-login.html";return null}return s}
+async function logoutNow(){try{if(window.VaultForgeAuth&&window.VaultForgeAuth.logout){await window.VaultForgeAuth.logout();return}}catch(e){}await sb.auth.signOut();window.location.href="/member-login.html"}
+</script>
+<style>
+:root{--bg:#050c1a;--bg2:#08142d;--panel:#0c1832;--text:#f7f8fc;--muted:#a6b2d1;--line:rgba(255,255,255,.10);--gold:#d6ab4e;--gold2:#f0c96a;--green:#18c37e;--blue:#4f8cff;--danger:#e27d7d;--shadow:0 30px 90px rgba(0,0,0,.42);--radius:26px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% 8%, rgba(214,171,78,.12), transparent 18%),radial-gradient(circle at 88% 12%, rgba(79,140,255,.12), transparent 18%),linear-gradient(180deg,var(--bg),var(--bg2))}
+a{text-decoration:none;color:inherit}.shell{width:min(1200px,calc(100% - 28px));margin:0 auto}.hidden{display:none!important}
+.topbar{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);background:rgba(5,12,26,.80);border-bottom:1px solid rgba(255,255,255,.06)}.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),linear-gradient(180deg,#15191f,#0c1018);border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow);color:var(--gold2);font-weight:900;font-size:1.25rem}.brand-copy strong{display:block;font-size:1.04rem;letter-spacing:.16em;color:var(--gold2)}.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;transition:.18s ease}.btn:hover{transform:translateY(-1px)}.btn-blue{background:linear-gradient(135deg,var(--blue),#2f6bf2);color:#fff}.btn-gold{background:linear-gradient(135deg,var(--gold2),#b7852d);color:#111}.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}.btn-red{background:linear-gradient(135deg,#f16f7d,#d44c5b);color:#fff}.btn-green{background:linear-gradient(135deg,#1dd48a,#10a96d);color:#fff}
+.card,.panel{border:1px solid var(--line);border-radius:var(--radius);background:radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),linear-gradient(180deg,var(--panel),#091327);box-shadow:var(--shadow);padding:20px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.hero{padding:24px 0 18px}.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}.title{margin:0 0 10px;font-size:clamp(2rem,4.6vw,4rem);line-height:.98;letter-spacing:-.05em}.copy{color:var(--muted);line-height:1.65}
+.metric strong{display:block;font-size:2rem;margin-bottom:6px}.metric span{color:var(--muted)}.metric{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;background:rgba(255,255,255,.025)}.section{padding:10px 0 24px}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}.section-head h3{margin:0;font-size:1.35rem}.section-head p{margin:6px 0 0;color:var(--muted)}
+.pills,.actions{display:flex;gap:10px;flex-wrap:wrap}.pill{border-radius:999px;padding:9px 12px;font-size:.86rem;font-weight:800;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#e6eeff}
+.item{border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;background:rgba(255,255,255,.02)}.item h4{margin:0 0 8px;font-size:1.18rem}.muted{color:var(--muted)}.price{font-weight:900;font-size:1.1rem;color:#f7e4b9}
+label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 7px}input,textarea,select{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;outline:none}textarea{min-height:120px;resize:vertical}.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}.ok{color:#aaf2ce}.err{color:#ffc3cc}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.photo{border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.03)}.photo img{width:100%;height:120px;object-fit:cover;display:block}.photo-empty{height:120px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(2,6,14,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:120}.modal.show{display:flex}.modal-card{width:min(760px,100%);max-height:92vh;overflow:auto}.close{appearance:none;border:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;min-width:46px;height:46px;border-radius:14px;cursor:pointer}
+.vf-contact-admin-btn{position:fixed;right:18px;bottom:18px;z-index:9998;border:none;cursor:pointer;border-radius:999px;padding:14px 18px;font-weight:800;background:linear-gradient(135deg,#f0c96a,#b7852d);color:#111;box-shadow:0 18px 38px rgba(0,0,0,.28)}
+.vf-contact-admin-modal{position:fixed;inset:0;background:rgba(2,6,14,.74);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999}
+.vf-contact-admin-modal.show{display:flex}.vf-contact-admin-card{width:min(680px,100%);border-radius:26px;padding:22px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,#0c1832,#091327);color:#f7f8fc;font-family:Arial,Helvetica,sans-serif;box-shadow:0 30px 90px rgba(0,0,0,.42)}
+.vf-contact-admin-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.vf-contact-admin-head h3{margin:0 0 6px;font-size:1.4rem}.vf-contact-admin-head p{margin:0;color:#a6b2d1;line-height:1.55}.vf-contact-admin-close{width:46px;height:46px;border-radius:14px;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff}
+.vf-contact-admin-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.vf-contact-admin-card label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:#a6b2d1;font-weight:700;margin:0 0 7px}.vf-contact-admin-card input,.vf-contact-admin-card textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;outline:none}.vf-contact-admin-card textarea{min-height:140px;resize:vertical}.vf-contact-admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.vf-contact-admin-send,.vf-contact-admin-cancel{border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800}.vf-contact-admin-send{background:linear-gradient(135deg,#1dd48a,#10a96d);color:#fff}.vf-contact-admin-cancel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#fff}.vf-contact-admin-status{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:13px;color:#d6e4ff}.vf-contact-admin-status.ok{color:#aaf2ce}.vf-contact-admin-status.err{color:#ffc3cc}
+@media(max-width:900px){.grid2,.grid3,.row2{grid-template-columns:1fr}.top-actions{width:100%}.top-actions .btn{flex:1}}
+@media(max-width:760px){.vf-contact-admin-row2{grid-template-columns:1fr}}
+</style>
+</head><body>
+<div class="topbar"><div class="shell topbar-inner"><div class="brand"><div class="brand-mark">VF</div><div class="brand-copy"><strong>VAULTFORGE</strong><span id="memberLine">Checking member session...</span></div></div><div class="top-actions"><a class="btn btn-dark" href="/property-cards.html">Listings</a><a class="btn btn-dark" href="/property-create.html">Create Listing</a><a class="btn btn-gold" href="/member-profile.html">My Profile</a><button id="logoutBtn" class="btn btn-blue" type="button">Logout</button></div></div></div>
+<main class="shell">
+<section class="hero"><div class="grid2"><div class="card"><div class="eyebrow">Final Core</div><h1 class="title">Live counts, real listings, one table.</h1><p class="copy">This dashboard only reads from <strong>property_cards</strong>. State counts, recent listings, and your listings all come from the same place.</p><div class="grid3" style="margin-top:18px"><div class="metric"><strong id="gaCount">0</strong><span>Georgia</span></div><div class="metric"><strong id="tnCount">0</strong><span>Tennessee</span></div><div class="metric"><strong id="flCount">0</strong><span>Florida</span></div></div><div class="grid3" style="margin-top:16px"><div class="metric"><strong id="totalCount">0</strong><span>Total live listings</span></div><div class="metric"><strong id="myCount">0</strong><span>My listings</span></div><div class="metric"><strong id="profileReady">Start</strong><span>Profile status</span></div></div><div class="actions" style="margin-top:14px"><div id="profileBadge" class="pill">Profile Start</div></div></div><div class="card"><div class="eyebrow">Create by State</div><h3 style="margin:0 0 10px">Pick state first</h3><p class="copy" style="margin-bottom:16px">This routes into the same creator and same database structure.</p><div class="actions"><a class="btn btn-dark" href="/property-create.html?state=Georgia&type=Residential">Georgia</a><a class="btn btn-dark" href="/property-create.html?state=Tennessee&type=Residential">Tennessee</a><a class="btn btn-dark" href="/property-create.html?state=Florida&type=Residential">Florida</a><button class="btn btn-gold" id="openAdminContact" type="button">Contact Admin</button></div><div id="dashStatus" class="status">Ready.</div></div></div></section>
+<section class="section"><div class="section-head"><div><h3>Recent Listings</h3><p>All live listings from property_cards.</p></div><div class="actions"><button class="btn btn-dark sf" data-state="All">All</button><button class="btn btn-dark sf" data-state="Georgia">Georgia</button><button class="btn btn-dark sf" data-state="Tennessee">Tennessee</button><button class="btn btn-dark sf" data-state="Florida">Florida</button></div></div><div id="recentWrap" class="grid2"></div></section>
+<section class="section"><div class="section-head"><div><h3>My Listings</h3><p>Your owned listings from property_cards.</p></div><a class="btn btn-blue" href="/property-create.html">Create Listing</a></div><div id="mineWrap" class="grid2"></div></section>
+</main>
+<div id="viewModal" class="modal"><div class="panel modal-card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px"><div><div class="eyebrow">Listing Detail</div><h3 id="vmTitle" style="margin:0 0 8px">Listing</h3><div id="vmMeta" class="muted"></div></div><button class="close" id="closeModal" type="button">×</button></div><div id="vmPhotos" class="photo-grid"></div><div id="vmDesc" class="copy" style="margin-top:12px"></div></div></div>
+
+<button type="button" class="vf-contact-admin-btn" id="vfContactAdminBtn">Contact Admin</button>
+<div class="vf-contact-admin-modal" id="vfContactAdminModal">
+  <div class="vf-contact-admin-card">
+    <div class="vf-contact-admin-head">
+      <div>
+        <h3>Contact Admin</h3>
+        <p>Send a message directly from the member area. This saves into your VaultForge admin inbox.</p>
+      </div>
+      <button type="button" class="vf-contact-admin-close" id="vfContactAdminClose">×</button>
+    </div>
+    <div class="vf-contact-admin-row2">
+      <div><label for="vfAdminName">Name</label><input id="vfAdminName" placeholder="Your name"></div>
+      <div><label for="vfAdminEmail">Email</label><input id="vfAdminEmail" placeholder="you@email.com"></div>
+    </div>
+    <div style="margin-top:12px"><label for="vfAdminSubject">Subject</label><input id="vfAdminSubject" placeholder="What do you need help with?"></div>
+    <div style="margin-top:12px"><label for="vfAdminMessage">Message</label><textarea id="vfAdminMessage" placeholder="Tell admin what happened, what page you were on, and what you need."></textarea></div>
+    <div class="vf-contact-admin-actions">
+      <button type="button" class="vf-contact-admin-send" id="vfAdminSend">Send Message</button>
+      <button type="button" class="vf-contact-admin-cancel" id="vfAdminCancel">Cancel</button>
+    </div>
+    <div class="vf-contact-admin-status" id="vfAdminStatus">Ready.</div>
+  </div>
+</div>
+
+<script>
+let currentUserId=null,allRows=[],currentState="All";
+function liveRows(rows){return(rows||[]).filter(r=>{const st=String(r.status||"").toLowerCase();return !st||st==="active"||st==="approved"||st==="live"})}
+function setDashStatus(msg,cls=""){const el=document.getElementById("dashStatus");el.className="status "+cls;el.textContent=msg}
+function cardHtml(row,mine=false){
+  const title=row.title||"Untitled Listing";
+  const state=String(row.state||row.property_state||row.location_state||"").trim();
+  const type=row.property_type||row.asset_type||row.deal_type||"—";
+  const price=row.price??row.asking_price??row.list_price??null;
+  const desc=row.description||row.summary||row.notes||"";
+  const photos=photosOf(row);
+  const encoded=encodeURIComponent(JSON.stringify({title,state,type,price,desc,photos,created_at:row.created_at}));
+  return `<article class="item"><h4>${esc(title)}</h4><div class="pills" style="margin-bottom:8px"><div class="pill">${esc(state||"—")}</div><div class="pill">${esc(type)}</div><div class="pill">${esc(row.status||"Active")}</div></div><div class="price">${price!=null?esc(fmtMoney(price)):"—"}</div><div class="muted" style="margin:8px 0 12px">${esc(desc||"No description yet.")}</div><div class="actions"><button class="btn btn-dark view-btn" data-view="${encoded}" type="button">View</button>${mine?`<a class="btn btn-dark" href="/property-create.html?edit=${encodeURIComponent(row.id)}">Edit</a><button class="btn btn-red del-btn" data-id="${esc(row.id)}" type="button">Delete</button>`:""}</div></article>`
+}
+function bindCards(){
+  document.querySelectorAll(".view-btn").forEach(btn=>btn.onclick=()=>{
+    const data=JSON.parse(decodeURIComponent(btn.getAttribute("data-view")));
+    document.getElementById("vmTitle").textContent=data.title||"Listing";
+    document.getElementById("vmMeta").textContent=[data.state,data.type,data.price!=null?fmtMoney(data.price):""].filter(Boolean).join(" • ");
+    document.getElementById("vmDesc").textContent=data.desc||"No description.";
+    const photos=Array.isArray(data.photos)?data.photos:[];
+    document.getElementById("vmPhotos").innerHTML=photos.length?photos.map(u=>`<div class="photo"><img src="${esc(u)}" alt="Photo"></div>`).join(""):`<div class="photo"><div class="photo-empty">No Photo Yet</div></div>`;
+    document.getElementById("viewModal").classList.add("show");
+  });
+  document.querySelectorAll(".del-btn").forEach(btn=>btn.onclick=async()=>{
+    const id=btn.getAttribute("data-id");
+    if(!id||!confirm("Delete this listing?"))return;
+    const resp=await sb.from("property_cards").delete().eq("id",id).eq("user_id",currentUserId);
+    if(resp.error){setDashStatus(resp.error.message,"err");return}
+    await loadDashboard();
+  });
+}
+function renderDashboard(){
+  const rows=liveRows(allRows);
+  const filtered=currentState==="All"?rows:rows.filter(r=>String(r.state||r.property_state||r.location_state||"").trim()===currentState);
+  const mine=rows.filter(r=>String(r.user_id||"")===String(currentUserId));
+  document.getElementById("gaCount").textContent=String(rows.filter(r=>String(r.state||r.property_state||r.location_state||"").trim()==="Georgia").length);
+  document.getElementById("tnCount").textContent=String(rows.filter(r=>String(r.state||r.property_state||r.location_state||"").trim()==="Tennessee").length);
+  document.getElementById("flCount").textContent=String(rows.filter(r=>String(r.state||r.property_state||r.location_state||"").trim()==="Florida").length);
+  document.getElementById("totalCount").textContent=String(rows.length);
+  document.getElementById("myCount").textContent=String(mine.length);
+  document.getElementById("recentWrap").innerHTML=filtered.length?filtered.slice(0,12).map(r=>cardHtml(r,false)).join(""):`<div class="panel">No live listings found for this view.</div>`;
+  document.getElementById("mineWrap").innerHTML=mine.length?mine.map(r=>cardHtml(r,true)).join(""):`<div class="panel">You have not created any listings yet.</div>`;
+  bindCards();
+}
+async function loadDashboard(){
+  try{
+    setDashStatus("Loading dashboard...");
+    const session=await getSessionOrRedirect();
+    if(!session)return;
+    currentUserId=session.user.id;
+    document.getElementById("memberLine").textContent="Logged in as "+(session.user.email||"Member");
+    const [profileResp,cardsResp]=await Promise.all([
+      sb.from("member_profiles").select("*").eq("user_id",currentUserId).maybeSingle(),
+      sb.from("property_cards").select("*").order("created_at",{ascending:false}).limit(200)
+    ]);
+    if(cardsResp.error)throw cardsResp.error;
+    allRows=cardsResp.data||[];
+    if(profileResp.error&&profileResp.error.code!=="PGRST116")throw profileResp.error;
+    const profile=profileResp.data||null;
+    const ready=profile&&profile.full_name?"Ready":"Start";
+    document.getElementById("profileReady").textContent=ready;
+    const profileBadgeEl=document.getElementById("profileBadge"); if(profileBadgeEl) profileBadgeEl.textContent="Profile "+ready;
+    if(profile){
+      const nameEl=document.getElementById("vfAdminName");
+      const emailEl=document.getElementById("vfAdminEmail");
+      if(nameEl && !nameEl.value) nameEl.value=profile.full_name||"";
+      if(emailEl && !emailEl.value) emailEl.value=session.user.email||"";
+    }
+    renderDashboard();
+    setDashStatus("Dashboard ready.","ok");
+  }catch(e){
+    setDashStatus(e.message||"Dashboard load failed.","err");
+  }
+}
+function setAdminStatus(msg,kind){
+  const el=document.getElementById("vfAdminStatus");
+  el.className="vf-contact-admin-status"+(kind?" "+kind:"");
+  el.textContent=msg;
+}
+function openAdminModal(){document.getElementById("vfContactAdminModal").classList.add("show")}
+function closeAdminModal(){document.getElementById("vfContactAdminModal").classList.remove("show")}
+document.getElementById("logoutBtn").onclick=logoutNow;
+document.getElementById("closeModal").onclick=()=>document.getElementById("viewModal").classList.remove("show");
+document.querySelectorAll(".sf").forEach(btn=>btn.onclick=()=>{currentState=btn.getAttribute("data-state")||"All";renderDashboard()});
+document.getElementById("vfContactAdminBtn").onclick=openAdminModal;
+document.getElementById("openAdminContact").onclick=openAdminModal;
+document.getElementById("vfContactAdminClose").onclick=closeAdminModal;
+document.getElementById("vfAdminCancel").onclick=closeAdminModal;
+document.getElementById("vfContactAdminModal").addEventListener("click",(e)=>{if(e.target.id==="vfContactAdminModal")closeAdminModal()});
+document.getElementById("vfAdminSend").onclick=async()=>{
+  try{
+    setAdminStatus("Sending...");
+    const session=window.VaultForgeAuth&&window.VaultForgeAuth.getSession?await window.VaultForgeAuth.getSession():(await sb.auth.getSession()).data.session;
+    const user=session?.user||null;
+    const name=document.getElementById("vfAdminName").value.trim();
+    const email=document.getElementById("vfAdminEmail").value.trim();
+    const subject=document.getElementById("vfAdminSubject").value.trim();
+    const message=document.getElementById("vfAdminMessage").value.trim();
+    if(!name||!email||!subject||!message){setAdminStatus("Name, email, subject, and message are required.","err");return}
+    const payload={user_id:user?user.id:null,name,email,subject,message,page_source:window.location.pathname};
+    const resp=await sb.from("admin_messages").insert([payload]).select().single();
+    if(resp.error) throw resp.error;
+    setAdminStatus("Message sent to admin.","ok");
+    document.getElementById("vfAdminSubject").value="";
+    document.getElementById("vfAdminMessage").value="";
+    setTimeout(closeAdminModal,700);
+  }catch(e){
+    setAdminStatus((e&&e.message)?e.message:"Send failed.","err");
+  }
+};
+loadDashboard();
+</script></body></html>
