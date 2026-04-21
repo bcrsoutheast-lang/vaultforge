@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Admin Merged V2</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<style>
+:root{
+  --bg:#071844;--bg2:#09152f;--panel:#0d1f59;--panel2:#09153f;--text:#fff;--muted:#c6d0f2;
+  --line:rgba(255,255,255,.10);--gold:#e2c465;--blue:#1d4ed8;--green:#16a34a;--red:#b91c1c;
+  --slate:#475569;--shadow:0 24px 70px rgba(0,0,0,.35);--radius:24px
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(226,196,101,.12), transparent 18%),
+    radial-gradient(circle at 88% 12%, rgba(29,78,216,.10), transparent 18%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+  color:var(--text);font-family:Arial,sans-serif;min-height:100vh
+}
+a{text-decoration:none;color:inherit}
+.shell{max-width:1280px;margin:0 auto;padding:0 14px}
+.topbar{position:sticky;top:0;z-index:60;backdrop-filter:blur(16px);background:rgba(7,24,68,.82);border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(226,196,101,.24), rgba(255,255,255,.06));border:1px solid rgba(226,196,101,.28);box-shadow:var(--shadow);color:var(--gold);font-weight:900}
+.brand-copy strong{display:block;letter-spacing:.16em;color:var(--gold)}
+.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.top-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:min(860px,100%)}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:.18s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#b6932c);color:#1e1604}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#1e40af);color:#fff}
+.btn-green{background:linear-gradient(135deg,var(--green),#15803d);color:#fff}
+.btn-red{background:linear-gradient(135deg,var(--red),#991b1b);color:#fff}
+.btn-gray{background:linear-gradient(135deg,var(--slate),#334155);color:#fff}
+.btn-dark{background:rgba(255,255,255,.04);border:1px solid var(--line);color:#fff}
+.panel,.card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.hero{padding:24px 0 18px}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.section{padding:10px 0 24px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+.title{margin:0 0 10px;font-size:clamp(2rem,4.8vw,4rem);line-height:.96;letter-spacing:-.05em}
+.copy{color:var(--muted);line-height:1.65}
+.metric{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px}
+.metric strong{display:block;font-size:2rem;margin-bottom:6px}
+.metric span{color:var(--muted)}
+.status{margin-top:12px;padding:11px 13px;border-radius:13px;background:#10255f;border:1px solid rgba(255,255,255,.08);font-size:13px}
+.ok{background:#173d2d;color:#bcf5dc}
+.err{background:#4a1f37;color:#ffd7e3}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.list{display:grid;gap:14px}
+.item{background:#09153f;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:16px}
+.item h3,.item h4{margin:0 0 8px}
+.meta{color:var(--muted);line-height:1.55}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pill{display:inline-block;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:700;margin:6px 6px 0 0}
+.pill-open{background:#5b213a;color:#ffd7e3}
+.pill-review{background:#3b3317;color:#fff1b9}
+.pill-resolved{background:#193b2f;color:#bcf5dc}
+.pill-closed{background:#334155;color:#e2e8f0}
+.pill-low{background:#193b2f;color:#bcf5dc}
+.pill-medium{background:#3b3317;color:#fff1b9}
+.pill-urgent{background:#5b213a;color:#ffd7e3}
+.hidden{display:none!important}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.section-head h2{margin:0;font-size:1.35rem}
+.kv{display:grid;gap:10px}
+.kv-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.kv-row:last-child{border-bottom:none}
+.small{font-size:.92rem}
+.card-link{cursor:pointer}
+@media(max-width:1080px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+@media(max-width:900px){.top-actions{grid-template-columns:repeat(2,minmax(0,1fr));width:100%}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">VF</div>
+      <div class="brand-copy">
+        <strong>VAULTFORGE ADMIN</strong>
+        <span id="adminLine">Checking admin session...</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn btn-dark" href="/members.html">Members</a>
+      <a class="btn btn-dark" href="/property-cards.html">Listings</a>
+      <a class="btn btn-dark" href="/pain.html">Pain</a>
+      <a class="btn btn-blue" href="/property-create.html">Create Listing</a>
+      <a class="btn btn-gold" href="/member-profile.html">My Profile</a>
+      <button class="btn btn-gray" id="reloadBtn" type="button">Reload</button>
+      <button class="btn btn-red" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+  <section class="hero">
+    <div class="grid2">
+      <div class="card">
+        <div class="eyebrow">Merged Admin</div>
+        <h1 class="title">Modern shell, old controls back.</h1>
+        <p class="copy">This admin page keeps role-based admin detection and restores the older applications and pain request workflows, including status controls.</p>
+        <div class="tabs" style="margin-top:16px">
+          <button class="btn btn-gold" id="showOverviewBtn" type="button">Overview</button>
+          <button class="btn btn-dark" id="showAppsBtn" type="button">Applications</button>
+          <button class="btn btn-dark" id="showPainBtn" type="button">Pain Requests</button>
+          <button class="btn btn-dark" id="showMessagesBtn" type="button">Admin Messages</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Counts</div>
+        <div class="grid4">
+          <div class="metric"><strong id="appsCount">0</strong><span>Applications</span></div>
+          <div class="metric"><strong id="painCount">0</strong><span>Pain Requests</span></div>
+          <div class="metric"><strong id="openCount">0</strong><span>Open Pain</span></div>
+          <div class="metric"><strong id="urgentCount">0</strong><span>Urgent / Immediate</span></div>
+        </div>
+        <div class="grid4" style="margin-top:12px">
+          <div class="metric"><strong id="profilesCount">0</strong><span>Profiles</span></div>
+          <div class="metric"><strong id="listingsCount">0</strong><span>Listings</span></div>
+          <div class="metric"><strong id="messagesCount">0</strong><span>Messages</span></div>
+          <div class="metric"><strong id="adminModeCount">ON</strong><span>Admin Mode</span></div>
+        </div>
+        <div id="adminStatus" class="status">Ready.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="overviewSection">
+    <div class="grid3">
+      <div class="panel">
+        <div class="section-head"><h2>Recent Profiles</h2></div>
+        <div id="profilesWrap" class="list"></div>
+      </div>
+      <div class="panel">
+        <div class="section-head"><h2>Recent Listings</h2></div>
+        <div id="listingsWrap" class="list"></div>
+      </div>
+      <div class="panel">
+        <div class="section-head"><h2>Admin Messages</h2></div>
+        <div id="messagesPreviewWrap" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section hidden" id="appsSection">
+    <div class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Applications</h2>
+          <p class="copy">Restored from the older working admin flow.</p>
+        </div>
+      </div>
+      <div id="appsList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section hidden" id="painSection">
+    <div class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Pain Requests</h2>
+          <p class="copy">Status controls restored: Open, In Review, Resolved, Closed.</p>
+        </div>
+      </div>
+      <div id="painList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="section hidden" id="messagesSection">
+    <div class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Admin Messages Inbox</h2>
+          <p class="copy">Messages sent from the member-side Contact Admin forms.</p>
+        </div>
+      </div>
+      <div id="messagesWrap" class="list"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const sections = {
+  overview: document.getElementById("overviewSection"),
+  apps: document.getElementById("appsSection"),
+  pain: document.getElementById("painSection"),
+  messages: document.getElementById("messagesSection")
+};
+
+function setStatus(msg, cls=""){
+  const el=document.getElementById("adminStatus");
+  el.className="status "+cls;
+  el.textContent=msg;
+}
+function showSection(name){
+  Object.values(sections).forEach(el=>el.classList.add("hidden"));
+  sections[name].classList.remove("hidden");
+  document.getElementById("showOverviewBtn").className = "btn " + (name==="overview" ? "btn-gold" : "btn-dark");
+  document.getElementById("showAppsBtn").className = "btn " + (name==="apps" ? "btn-gold" : "btn-dark");
+  document.getElementById("showPainBtn").className = "btn " + (name==="pain" ? "btn-gold" : "btn-dark");
+  document.getElementById("showMessagesBtn").className = "btn " + (name==="messages" ? "btn-gold" : "btn-dark");
+}
+function statusPill(status){
+  const s=String(status||"").toLowerCase();
+  if(s==="resolved") return "pill pill-resolved";
+  if(s==="closed") return "pill pill-closed";
+  if(s==="in_review") return "pill pill-review";
+  return "pill pill-open";
+}
+function urgencyPill(urgency){
+  const u=String(urgency||"").toLowerCase();
+  if(u==="low") return "pill pill-low";
+  if(u==="medium") return "pill pill-medium";
+  return "pill pill-urgent";
+}
+function profileCard(row){
+  return `<div class="item">
+    <h4>${esc(row.full_name || "Unnamed Profile")}</h4>
+    <div class="meta">
+      <strong>Market:</strong> ${esc(row.primary_market || "")}<br>
+      <strong>Role:</strong> ${esc(row.role || "")}
+    </div>
+  </div>`;
+}
+function listingCard(row){
+  return `<div class="item">
+    <h4>${esc(row.title || "Untitled Listing")}</h4>
+    <div class="meta">
+      <strong>State:</strong> ${esc(row.state || "")}<br>
+      <strong>Type:</strong> ${esc(row.property_type || "")}<br>
+      <strong>Price:</strong> ${row.price != null ? esc(fmtMoney(row.price)) : "—"}
+    </div>
+    <div class="actions">
+      <a class="btn btn-dark small" href="/property-card.html?id=${encodeURIComponent(row.id)}">Open</a>
+      <a class="btn btn-dark small" href="/property-create.html?edit=${encodeURIComponent(row.id)}">Edit</a>
+    </div>
+  </div>`;
+}
+function applicationCard(row){
+  return `<div class="item">
+    <h3>${esc(row.name || "Unnamed Applicant")}</h3>
+    <div class="meta">
+      <strong>Email:</strong> ${esc(row.email || "")}<br>
+      <strong>Market:</strong> ${esc(row.market || "")}<br>
+      ${row.role ? `<strong>Role:</strong> ${esc(row.role)}<br>` : ""}
+      ${row.phone ? `<strong>Phone:</strong> ${esc(row.phone)}<br>` : ""}
+      <strong>Created:</strong> ${esc(new Date(row.created_at || "").toLocaleString())}
+    </div>
+    <div class="actions">
+      <button class="btn btn-green small app-approve-btn" data-email="${esc(row.email || "")}" type="button">Approve</button>
+      <button class="btn btn-red small app-delete-btn" data-id="${esc(row.id)}" type="button">Delete</button>
+    </div>
+  </div>`;
+}
+function painCard(row){
+  return `<div class="item">
+    <h3>#${esc(row.id)} ${esc(row.name || "")}</h3>
+    <div class="meta">
+      <strong>Email:</strong> ${esc(row.email || "")}<br>
+      <strong>Market:</strong> ${esc(row.market || "")}<br>
+      <strong>Created:</strong> ${esc(new Date(row.created_at || "").toLocaleString())}
+    </div>
+    <div>
+      <span class="${urgencyPill(row.urgency)}">${esc(row.urgency || "")}</span>
+      <span class="${statusPill(row.status)}">Status: ${esc(row.status || "open")}</span>
+      <span class="pill pill-open">Need: ${esc(row.needed_role || "")}</span>
+      ${row.budget ? `<span class="pill pill-open">Budget: ${esc(row.budget)}</span>` : ""}
+    </div>
+    <p class="copy">${esc(row.problem || "")}</p>
+    <div class="actions">
+      <button class="btn btn-gray small pain-status-btn" data-id="${esc(row.id)}" data-status="open" type="button">Open</button>
+      <button class="btn btn-blue small pain-status-btn" data-id="${esc(row.id)}" data-status="in_review" type="button">In Review</button>
+      <button class="btn btn-green small pain-status-btn" data-id="${esc(row.id)}" data-status="resolved" type="button">Resolved</button>
+      <button class="btn btn-red small pain-status-btn" data-id="${esc(row.id)}" data-status="closed" type="button">Closed</button>
+      <button class="btn btn-red small pain-delete-btn" data-id="${esc(row.id)}" type="button">Delete</button>
+    </div>
+  </div>`;
+}
+function messageCard(row){
+  return `<div class="item">
+    <h4>${esc(row.subject || "No subject")}</h4>
+    <div class="meta">
+      <strong>From:</strong> ${esc(row.name || "")} (${esc(row.email || "")})<br>
+      <strong>Page:</strong> ${esc(row.page_source || "")}<br>
+      <strong>Status:</strong> ${esc(row.status || "new")}
+    </div>
+    <p class="copy">${esc(row.message || "")}</p>
+    <div class="actions">
+      <button class="btn btn-green small msg-resolve-btn" data-id="${esc(row.id)}" type="button">Resolve</button>
+      <button class="btn btn-red small msg-delete-btn" data-id="${esc(row.id)}" type="button">Delete</button>
+    </div>
+  </div>`;
+}
+async function updatePainStatus(id, nextStatus){
+  setStatus(`Updating pain request #${id}...`);
+  const result = await sb.from("pain_requests").update({status: nextStatus}).eq("id", id);
+  if(result.error){setStatus(`Update failed: ${result.error.message}`,"err");return}
+  setStatus(`Pain request #${id} updated to ${nextStatus}.`,"ok");
+  await loadAll();
+}
+async function deletePain(id){
+  setStatus(`Deleting pain request #${id}...`);
+  const result = await sb.from("pain_requests").delete().eq("id", id);
+  if(result.error){setStatus(`Delete failed: ${result.error.message}`,"err");return}
+  setStatus(`Pain request #${id} deleted.`,"ok");
+  await loadAll();
+}
+async function deleteApplication(id){
+  setStatus(`Deleting application #${id}...`);
+  const result = await sb.from("applications").delete().eq("id", id);
+  if(result.error){setStatus(`Delete failed: ${result.error.message}`,"err");return}
+  setStatus(`Application #${id} deleted.`,"ok");
+  await loadAll();
+}
+async function resolveMessage(id){
+  setStatus(`Resolving message #${id}...`);
+  const result = await sb.from("admin_messages").update({status:"resolved"}).eq("id", id);
+  if(result.error){setStatus(`Update failed: ${result.error.message}`,"err");return}
+  setStatus(`Message #${id} resolved.`,"ok");
+  await loadAll();
+}
+async function deleteMessage(id){
+  setStatus(`Deleting message #${id}...`);
+  const result = await sb.from("admin_messages").delete().eq("id", id);
+  if(result.error){setStatus(`Delete failed: ${result.error.message}`,"err");return}
+  setStatus(`Message #${id} deleted.`,"ok");
+  await loadAll();
+}
+function bindAdminActions(){
+  document.querySelectorAll(".pain-status-btn").forEach(btn=>{
+    btn.onclick=()=>updatePainStatus(btn.dataset.id, btn.dataset.status);
+  });
+  document.querySelectorAll(".pain-delete-btn").forEach(btn=>{
+    btn.onclick=()=>{ if(confirm("Delete this pain request?")) deletePain(btn.dataset.id); };
+  });
+  document.querySelectorAll(".app-delete-btn").forEach(btn=>{
+    btn.onclick=()=>{ if(confirm("Delete this application?")) deleteApplication(btn.dataset.id); };
+  });
+  document.querySelectorAll(".app-approve-btn").forEach(btn=>{
+    btn.onclick=()=>setStatus(`Approve placeholder clicked for ${btn.dataset.email || "application"}. Add your exact approve workflow next.`,"ok");
+  });
+  document.querySelectorAll(".msg-resolve-btn").forEach(btn=>{
+    btn.onclick=()=>resolveMessage(btn.dataset.id);
+  });
+  document.querySelectorAll(".msg-delete-btn").forEach(btn=>{
+    btn.onclick=()=>{ if(confirm("Delete this admin message?")) deleteMessage(btn.dataset.id); };
+  });
+}
+async function loadAll(){
+  try{
+    setStatus("Loading admin...");
+    const session = await getSessionOrRedirect();
+    if(!session) return;
+    document.getElementById("adminLine").textContent = "Logged in as " + (session.user.email || "Admin");
+
+    const [profileResp, appsResp, painResp, profilesResp, listingsResp, messagesResp] = await Promise.all([
+      sb.from("member_profiles").select("*").eq("user_id", session.user.id).maybeSingle(),
+      sb.from("applications").select("*").order("created_at",{ascending:false}),
+      sb.from("pain_requests").select("*").order("created_at",{ascending:false}),
+      sb.from("member_profiles").select("*").order("created_at",{ascending:false}).limit(6),
+      sb.from("property_cards").select("*").order("created_at",{ascending:false}).limit(6),
+      sb.from("admin_messages").select("*").order("created_at",{ascending:false})
+    ]);
+
+    if(profileResp.error && profileResp.error.code!=="PGRST116") throw profileResp.error;
+    if(appsResp.error) throw appsResp.error;
+    if(painResp.error) throw painResp.error;
+    if(profilesResp.error) throw profilesResp.error;
+    if(listingsResp.error) throw listingsResp.error;
+    if(messagesResp.error) throw messagesResp.error;
+
+    const profile = profileResp.data || null;
+    const isAdmin = !!(profile && (profile.role === "admin" || profile.is_admin === true));
+    if(!isAdmin){
+      setStatus("This user is not marked admin in member_profiles.","err");
+      return;
+    }
+
+    const apps = appsResp.data || [];
+    const pain = painResp.data || [];
+    const profiles = profilesResp.data || [];
+    const listings = listingsResp.data || [];
+    const messages = messagesResp.data || [];
+
+    document.getElementById("appsCount").textContent = String(apps.length);
+    document.getElementById("painCount").textContent = String(pain.length);
+    document.getElementById("openCount").textContent = String(pain.filter(x => String(x.status || "").toLowerCase() === "open").length);
+    document.getElementById("urgentCount").textContent = String(pain.filter(x => {
+      const u = String(x.urgency || "").toLowerCase();
+      return u === "urgent" || u === "immediate";
+    }).length);
+    document.getElementById("profilesCount").textContent = String(profiles.length);
+    document.getElementById("listingsCount").textContent = String(listings.length);
+    document.getElementById("messagesCount").textContent = String(messages.length);
+
+    document.getElementById("appsList").innerHTML = apps.length ? apps.map(applicationCard).join("") : `<div class="item">No applications found.</div>`;
+    document.getElementById("painList").innerHTML = pain.length ? pain.map(painCard).join("") : `<div class="item">No pain requests found.</div>`;
+    document.getElementById("profilesWrap").innerHTML = profiles.length ? profiles.map(profileCard).join("") : `<div class="item">No profiles found.</div>`;
+    document.getElementById("listingsWrap").innerHTML = listings.length ? listings.map(listingCard).join("") : `<div class="item">No listings found.</div>`;
+    document.getElementById("messagesWrap").innerHTML = messages.length ? messages.map(messageCard).join("") : `<div class="item">No admin messages found.</div>`;
+    document.getElementById("messagesPreviewWrap").innerHTML = messages.length ? messages.slice(0,4).map(messageCard).join("") : `<div class="item">No admin messages found.</div>`;
+
+    bindAdminActions();
+    setStatus("Admin loaded.","ok");
+  }catch(e){
+    setStatus(e.message || "Admin load failed.","err");
+  }
+}
+
+document.getElementById("showOverviewBtn").onclick=()=>showSection("overview");
+document.getElementById("showAppsBtn").onclick=()=>showSection("apps");
+document.getElementById("showPainBtn").onclick=()=>showSection("pain");
+document.getElementById("showMessagesBtn").onclick=()=>showSection("messages");
+document.getElementById("reloadBtn").onclick=loadAll;
+document.getElementById("logoutBtn").onclick=logoutNow;
+
+showSection("overview");
+loadAll();
+</script>
+</body>
+</html>
