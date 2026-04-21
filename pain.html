@@ -1,0 +1,97 @@
+const SUPABASE_URL = "YOUR_URL";
+const SUPABASE_KEY = "YOUR_KEY";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let uploadedPhotos = [];
+
+async function uploadPropertyPhotos(files){
+  uploadedPhotos = [];
+
+  for(const file of files){
+
+    const ext = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
+    const filePath = `property/${fileName}`;
+
+    const { error } = await sb.storage
+      .from('vaultforge-media')
+      .upload(filePath,file,{ upsert:true });
+
+    if(error){
+      alert("Upload failed: " + error.message);
+      return;
+    }
+
+    const { data } = sb.storage
+      .from('vaultforge-media')
+      .getPublicUrl(filePath);
+
+    uploadedPhotos.push(data.publicUrl);
+  }
+
+  renderPhotos();
+}
+
+function renderPhotos(){
+
+  const wrap = document.getElementById("photoPreview");
+  wrap.innerHTML = "";
+
+  uploadedPhotos.forEach((url,i)=>{
+
+    wrap.innerHTML += `
+      <div style="margin-bottom:12px">
+        <img src="${url}" style="width:100%;border-radius:14px;">
+        <button onclick="removePhoto(${i})">Delete Photo</button>
+      </div>
+    `;
+  });
+}
+
+function removePhoto(i){
+  uploadedPhotos.splice(i,1);
+  renderPhotos();
+}
+
+async function saveDeal(){
+
+  const payload = {
+    state: document.getElementById("state").value,
+    category: document.getElementById("category").value,
+    strategy: document.getElementById("strategy").value,
+    price: document.getElementById("price").value,
+    distress: document.getElementById("distress").value,
+    title: document.getElementById("title").value,
+    description: document.getElementById("description").value,
+    photos: uploadedPhotos
+  };
+
+  const { error } = await sb
+    .from("pain_deals")
+    .insert([payload]);
+
+  if(error){
+    alert("Save failed: " + error.message);
+    return;
+  }
+
+  alert("Saved successfully");
+}
+</script>
+
+<div>
+  <input type="file" multiple onchange="uploadPropertyPhotos(this.files)">
+</div>
+
+<div id="photoPreview"></div>
+
+<input id="state" placeholder="State">
+<input id="category" placeholder="Category">
+<input id="strategy" placeholder="Strategy">
+<input id="price" placeholder="Price">
+<input id="distress" placeholder="Distress">
+<input id="title" placeholder="Deal Title">
+<textarea id="description" placeholder="Description"></textarea>
+
+<button onclick="saveDeal()">Save Submission</button>
