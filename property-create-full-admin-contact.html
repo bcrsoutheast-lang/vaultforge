@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Dynamic Create Listing</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<script>
+const SUPABASE_URL="https://mnwwvpuxrzostrplfgmq.supabase.co";
+const SUPABASE_KEY="sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+const STORAGE_BUCKET="vaultforge-media";
+const sb=window.VaultForgeAuth&&window.VaultForgeAuth.supabase?window.VaultForgeAuth.supabase:window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+function fmtMoney(v){const n=Number(v);if(!Number.isFinite(n))return "—";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n)}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
+function photosOf(r){
+  const p=r?.photo_urls||r?.image_urls||[];
+  if(Array.isArray(p)) return p.filter(Boolean);
+  try{const j=JSON.parse(p); return Array.isArray(j)?j.filter(Boolean):[]}catch(e){return []}
+}
+async function getSessionOrRedirect(){
+  if(window.VaultForgeAuth&&window.VaultForgeAuth.requireLogin) return await window.VaultForgeAuth.requireLogin();
+  const r=await sb.auth.getSession(); const s=r?.data?.session;
+  if(!s){window.location.href="/member-login.html"; return null}
+  return s;
+}
+async function logoutNow(){
+  try{if(window.VaultForgeAuth&&window.VaultForgeAuth.logout){await window.VaultForgeAuth.logout();return}}catch(e){}
+  await sb.auth.signOut(); window.location.href="/member-login.html";
+}
+</script>
+<style>
+:root{--bg:#050c1a;--bg2:#08142d;--panel:#0c1832;--text:#f7f8fc;--muted:#a6b2d1;--line:rgba(255,255,255,.10);--gold:#d6ab4e;--gold2:#f0c96a;--green:#18c37e;--blue:#4f8cff;--red:#e46372;--shadow:0 30px 90px rgba(0,0,0,.42);--radius:26px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% 8%, rgba(214,171,78,.12), transparent 18%),radial-gradient(circle at 88% 12%, rgba(79,140,255,.12), transparent 18%),linear-gradient(180deg,var(--bg),var(--bg2))}
+a{text-decoration:none;color:inherit}.shell{width:min(1280px,calc(100% - 28px));margin:0 auto}
+.topbar{position:sticky;top:0;z-index:60;backdrop-filter:blur(16px);background:rgba(5,12,26,.80);border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),linear-gradient(180deg,#15191f,#0c1018);border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow);color:var(--gold2);font-weight:900;font-size:1.25rem}
+.brand-copy strong{display:block;font-size:1.04rem;letter-spacing:.16em;color:var(--gold2)}.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;transition:.18s ease}
+.btn:hover{transform:translateY(-1px)}.btn-blue{background:linear-gradient(135deg,var(--blue),#2f6bf2);color:#fff}.btn-gold{background:linear-gradient(135deg,var(--gold2),#b7852d);color:#111}.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}.btn-red{background:linear-gradient(135deg,#f16f7d,#d44c5b);color:#fff}.btn-green{background:linear-gradient(135deg,#1dd48a,#10a96d);color:#fff}
+.panel{border:1px solid var(--line);border-radius:var(--radius);background:radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),linear-gradient(180deg,var(--panel),#091327);box-shadow:var(--shadow);padding:22px}
+.hero{padding:24px 0 18px}.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}.title{margin:0 0 10px;font-size:clamp(2rem,4.8vw,4rem);line-height:.98;letter-spacing:-.05em}.copy{color:var(--muted);line-height:1.65}
+.section{padding:8px 0 26px}.section-head{margin-bottom:14px}.section-head h3{margin:0 0 6px;font-size:1.25rem}.section-head p{margin:0;color:var(--muted)}
+label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 7px}
+input,textarea,select{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;outline:none}
+textarea{min-height:110px;resize:vertical}
+.metric{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;background:rgba(255,255,255,.025)}.metric strong{display:block;font-size:1.8rem;margin-bottom:6px}.metric span{color:var(--muted)}
+.status{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}.ok{color:#aaf2ce}.err{color:#ffc3cc}
+.pills{display:flex;gap:10px;flex-wrap:wrap}.pill{border-radius:999px;padding:9px 12px;font-size:.86rem;font-weight:800;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#e6eeff}
+.photo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}.photo-card{border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.03)}.photo-card img{width:100%;height:110px;object-fit:cover;display:block}.photo-empty{height:110px;display:flex;align-items:center;justify-content:center;color:var(--muted)}.small-actions{display:flex;gap:8px;flex-wrap:wrap;padding:10px}
+.preview-card{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px;align-items:start}.preview-photo{border:1px solid rgba(255,255,255,.08);border-radius:22px;overflow:hidden;background:rgba(255,255,255,.03)}.preview-photo img{width:100%;height:260px;object-fit:cover;display:block}
+.preview-body{display:grid;gap:12px}.price-badge{display:inline-flex;padding:12px 16px;border-radius:999px;background:rgba(214,171,78,.16);border:1px solid rgba(214,171,78,.22);color:#f7df9a;font-weight:900}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.hidden{display:none!important}
+.vf-contact-admin-btn{position:fixed;right:18px;bottom:18px;z-index:9998;border:none;cursor:pointer;border-radius:999px;padding:14px 18px;font-weight:800;background:linear-gradient(135deg,#f0c96a,#b7852d);color:#111;box-shadow:0 18px 38px rgba(0,0,0,.28)}
+.vf-contact-admin-modal{position:fixed;inset:0;background:rgba(2,6,14,.74);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999}
+.vf-contact-admin-modal.show{display:flex}.vf-contact-admin-card{width:min(680px,100%);border-radius:26px;padding:22px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,#0c1832,#091327);color:#f7f8fc;box-shadow:0 30px 90px rgba(0,0,0,.42)}
+.vf-contact-admin-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.vf-contact-admin-head h3{margin:0 0 6px;font-size:1.4rem}.vf-contact-admin-head p{margin:0;color:#a6b2d1;line-height:1.55}.vf-contact-admin-close{width:46px;height:46px;border-radius:14px;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff}
+.vf-contact-admin-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.vf-contact-admin-card label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:#a6b2d1;font-weight:700;margin:0 0 7px}.vf-contact-admin-card input,.vf-contact-admin-card textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;outline:none}.vf-contact-admin-card textarea{min-height:140px;resize:vertical}.vf-contact-admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.vf-contact-admin-send,.vf-contact-admin-cancel{border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800}.vf-contact-admin-send{background:linear-gradient(135deg,#1dd48a,#10a96d);color:#fff}.vf-contact-admin-cancel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#fff}.vf-contact-admin-status{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:13px;color:#d6e4ff}.vf-contact-admin-status.ok{color:#aaf2ce}.vf-contact-admin-status.err{color:#ffc3cc}
+@media(max-width:1080px){.grid2,.grid3,.row2,.preview-card,.photo-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.top-actions{width:100%}.top-actions .btn{flex:1}}
+@media(max-width:760px){.vf-contact-admin-row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand"><div class="brand-mark">VF</div><div class="brand-copy"><strong>VAULTFORGE</strong><span id="memberLine">Checking member session...</span></div></div>
+    <div class="top-actions">
+      <a class="btn btn-dark" href="/members.html">Member Dashboard</a>
+      <a class="btn btn-dark" href="/property-cards.html">Listings</a>
+      <button class="btn btn-gold" id="openAdminContactTop" type="button">Contact Admin</button>
+      <button id="logoutBtn" class="btn btn-blue" type="button">Logout</button>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+  <section class="hero">
+    <div class="grid2">
+      <div class="panel">
+        <div class="eyebrow">Dynamic Create</div>
+        <h1 class="title">Type-based property fields.</h1>
+        <p class="copy">Residential, Commercial, and Land each show their own field sets while keeping the same working save flow.</p>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Status</div>
+        <div class="grid3">
+          <div class="metric"><strong id="photoMetric">0</strong><span>Photos</span></div>
+          <div class="metric"><strong id="modeMetric">New</strong><span>Mode</span></div>
+          <div class="metric"><strong id="typeMetric">—</strong><span>Type</span></div>
+        </div>
+        <div id="createStatus" class="status">Ready.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="panel">
+      <div class="section-head"><h3>Core Listing</h3><p>Main save fields for property_cards.</p></div>
+      <div class="row2">
+        <div><label for="title">Title</label><input id="title" placeholder="Atlanta Duplex Opportunity"></div>
+        <div><label for="state">State</label><select id="state"><option value="">Select state</option><option>Georgia</option><option>Tennessee</option><option>Florida</option></select></div>
+      </div>
+      <div class="row2" style="margin-top:12px">
+        <div><label for="city">City</label><input id="city" placeholder="Atlanta"></div>
+        <div><label for="property_type">Property Type</label><select id="property_type"><option value="">Select type</option><option>Residential</option><option>Commercial</option><option>Land</option></select></div>
+      </div>
+      <div class="row2" style="margin-top:12px">
+        <div><label for="price">Price</label><input id="price" type="number" min="0" placeholder="450000"></div>
+        <div><label for="status">Status</label><select id="status"><option>Active</option><option>Approved</option><option>Live</option><option>Draft</option></select></div>
+      </div>
+      <div style="margin-top:12px"><label for="description">Description</label><textarea id="description" placeholder="Deal summary, why it matters, timing, seller story, opportunity..."></textarea></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="panel hidden" id="resSection">
+      <div class="section-head"><h3>Residential Fields</h3><p>Beds, baths, sqft, lot, year, rent, ARV, rehab.</p></div>
+      <div class="grid3">
+        <div><label for="res_beds">Bedrooms</label><input id="res_beds" type="number" min="0" step="1" placeholder="3"></div>
+        <div><label for="res_baths">Bathrooms</label><input id="res_baths" type="number" min="0" step="0.5" placeholder="2"></div>
+        <div><label for="res_sqft">Living Sqft</label><input id="res_sqft" type="number" min="0" placeholder="1800"></div>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <div><label for="res_lot">Lot Size</label><input id="res_lot" placeholder=".25 acre"></div>
+        <div><label for="res_year">Year Built</label><input id="res_year" type="number" min="0" placeholder="1988"></div>
+        <div><label for="res_occupancy">Occupancy</label><select id="res_occupancy"><option value="">Select</option><option>Vacant</option><option>Owner Occupied</option><option>Tenant Occupied</option></select></div>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <div><label for="res_rent">Monthly Rent</label><input id="res_rent" type="number" min="0" placeholder="2400"></div>
+        <div><label for="res_arv">ARV</label><input id="res_arv" type="number" min="0" placeholder="580000"></div>
+        <div><label for="res_rehab">Rehab Estimate</label><input id="res_rehab" type="number" min="0" placeholder="65000"></div>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="comSection">
+      <div class="section-head"><h3>Commercial Fields</h3><p>Use type, sqft, lot, NOI, cap rate, tenant/lease, zoning.</p></div>
+      <div class="grid3">
+        <div><label for="com_use">Commercial Use</label><select id="com_use"><option value="">Select</option><option>Office</option><option>Retail</option><option>Industrial</option><option>Mixed Use</option><option>Warehouse</option><option>Hospitality</option></select></div>
+        <div><label for="com_sqft">Building Sqft</label><input id="com_sqft" type="number" min="0" placeholder="12500"></div>
+        <div><label for="com_lot">Lot Size</label><input id="com_lot" placeholder="1.8 acres"></div>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <div><label for="com_noi">NOI</label><input id="com_noi" type="number" min="0" placeholder="180000"></div>
+        <div><label for="com_cap">Cap Rate %</label><input id="com_cap" type="number" min="0" step="0.01" placeholder="7.5"></div>
+        <div><label for="com_tenant">Tenant Status</label><select id="com_tenant"><option value="">Select</option><option>Vacant</option><option>Single Tenant</option><option>Multi Tenant</option><option>Partially Occupied</option></select></div>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <div><label for="com_lease">Lease Term</label><input id="com_lease" placeholder="3 years remaining"></div>
+        <div><label for="com_zoning">Zoning</label><input id="com_zoning" placeholder="C-2"></div>
+        <div><label for="com_broker">Broker / Contact</label><input id="com_broker" placeholder="Name / phone"></div>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="landSection">
+      <div class="section-head"><h3>Land Fields</h3><p>Acres, zoning, utilities, frontage, topography, entitlement, APN.</p></div>
+      <div class="grid3">
+        <div><label for="land_acres">Acres</label><input id="land_acres" type="number" min="0" step="0.01" placeholder="12.5"></div>
+        <div><label for="land_zoning">Zoning</label><input id="land_zoning" placeholder="R-3 / AG / C-1"></div>
+        <div><label for="land_utilities">Utilities</label><input id="land_utilities" placeholder="Water / sewer nearby"></div>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <div><label for="land_frontage">Frontage</label><input id="land_frontage" placeholder="420 ft"></div>
+        <div><label for="land_topo">Topography</label><input id="land_topo" placeholder="Flat / rolling / wooded"></div>
+        <div><label for="land_entitled">Entitled</label><select id="land_entitled"><option value="">Select</option><option>Yes</option><option>No</option><option>In Process</option></select></div>
+      </div>
+      <div class="grid3" style="margin-top:12px">
+        <div><label for="land_apn">Parcel / APN</label><input id="land_apn" placeholder="Parcel number"></div>
+        <div><label for="land_access">Road Access</label><input id="land_access" placeholder="Paved county road"></div>
+        <div><label for="land_notes">Development Notes</label><input id="land_notes" placeholder="Pads / lots / entitlements / survey"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid2">
+      <div class="panel">
+        <div class="section-head"><h3>Photos</h3><p>Upload up to 10 images.</p></div>
+        <div><label for="photos">Choose Photos</label><input id="photos" type="file" accept="image/*" multiple></div>
+        <div class="actions" style="margin-top:12px">
+          <button id="clearNewPhotosBtn" class="btn btn-dark" type="button">Clear New Photos</button>
+          <button id="removeAllPhotosBtn" class="btn btn-red" type="button">Remove All Photos</button>
+          <button id="openAdminContactMid" class="btn btn-gold" type="button">Contact Admin</button>
+        </div>
+        <div id="photoPreview" class="photo-grid"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-head"><h3>Live Preview</h3><p>See the card before save.</p></div>
+        <div class="preview-card">
+          <div class="preview-photo" id="previewPhoto"></div>
+          <div class="preview-body">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+              <div style="font-size:2.1rem;font-weight:900;line-height:1.02;letter-spacing:-.04em" id="previewTitle">Untitled Listing</div>
+              <div class="price-badge" id="previewPrice">—</div>
+            </div>
+            <div class="pills" id="previewPills"></div>
+            <div class="pills" id="previewExtras"></div>
+            <div class="copy" id="previewDesc">No description yet.</div>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:18px">
+          <button id="saveBtn" class="btn btn-green" type="button">Save Listing</button>
+          <a class="btn btn-dark" href="/property-cards.html">Open Listings</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button type="button" class="vf-contact-admin-btn" id="vfContactAdminBtn">Contact Admin</button>
+<div class="vf-contact-admin-modal" id="vfContactAdminModal">
+  <div class="vf-contact-admin-card">
+    <div class="vf-contact-admin-head">
+      <div>
+        <h3>Contact Admin</h3>
+        <p>Send a message directly from the create page. This saves into your VaultForge admin inbox.</p>
+      </div>
+      <button type="button" class="vf-contact-admin-close" id="vfContactAdminClose">×</button>
+    </div>
+    <div class="vf-contact-admin-row2">
+      <div><label for="vfAdminName">Name</label><input id="vfAdminName" placeholder="Your name"></div>
+      <div><label for="vfAdminEmail">Email</label><input id="vfAdminEmail" placeholder="you@email.com"></div>
+    </div>
+    <div style="margin-top:12px"><label for="vfAdminSubject">Subject</label><input id="vfAdminSubject" placeholder="What do you need help with?"></div>
+    <div style="margin-top:12px"><label for="vfAdminMessage">Message</label><textarea id="vfAdminMessage" placeholder="Tell admin what happened, what page you were on, and what you need."></textarea></div>
+    <div class="vf-contact-admin-actions">
+      <button type="button" class="vf-contact-admin-send" id="vfAdminSend">Send Message</button>
+      <button type="button" class="vf-contact-admin-cancel" id="vfAdminCancel">Cancel</button>
+    </div>
+    <div class="vf-contact-admin-status" id="vfAdminStatus">Ready.</div>
+  </div>
+</div>
+
+<script>
+let currentUserId=null, editId=null, existingPhotos=[], stagedPhotos=[];
+
+function setCreateStatus(msg,cls=""){const el=document.getElementById("createStatus");el.className="status "+cls;el.textContent=msg}
+function syncMetrics(){document.getElementById("photoMetric").textContent=String(existingPhotos.length+stagedPhotos.length);document.getElementById("modeMetric").textContent=editId?"Edit":"New";document.getElementById("typeMetric").textContent=document.getElementById("property_type").value||"—"}
+function updateTypeSections(){
+  const t=document.getElementById("property_type").value;
+  document.getElementById("resSection").classList.toggle("hidden", t!=="Residential");
+  document.getElementById("comSection").classList.toggle("hidden", t!=="Commercial");
+  document.getElementById("landSection").classList.toggle("hidden", t!=="Land");
+  refreshPreview();
+}
+function renderPhotoPreview(){
+  const container=document.getElementById("photoPreview");
+  const all=[...existingPhotos, ...stagedPhotos.map(p=>p.preview)];
+  if(!all.length){container.innerHTML='<div class="photo-card"><div class="photo-empty">No photos yet</div></div>';syncMetrics();refreshPreview();return}
+  container.innerHTML=all.map((src,i)=>`<div class="photo-card"><img src="${esc(src)}" alt="Photo"><div class="small-actions"><button class="btn btn-red remove-photo-btn" data-index="${i}" type="button">Remove</button></div></div>`).join("");
+  document.querySelectorAll(".remove-photo-btn").forEach(btn=>btn.onclick=()=>{const idx=Number(btn.dataset.index||0); if(idx<existingPhotos.length){existingPhotos.splice(idx,1)} else {stagedPhotos.splice(idx-existingPhotos.length,1)} renderPhotoPreview();});
+  syncMetrics(); refreshPreview();
+}
+function typeSpecificExtras(){
+  const t=document.getElementById("property_type").value;
+  const extras=[];
+  if(t==="Residential"){
+    const beds=document.getElementById("res_beds").value.trim();
+    const baths=document.getElementById("res_baths").value.trim();
+    const sqft=document.getElementById("res_sqft").value.trim();
+    const lot=document.getElementById("res_lot").value.trim();
+    const year=document.getElementById("res_year").value.trim();
+    const occ=document.getElementById("res_occupancy").value.trim();
+    const rent=document.getElementById("res_rent").value.trim();
+    const arv=document.getElementById("res_arv").value.trim();
+    const rehab=document.getElementById("res_rehab").value.trim();
+    if(beds) extras.push(`Beds: ${beds}`);
+    if(baths) extras.push(`Baths: ${baths}`);
+    if(sqft) extras.push(`Sqft: ${sqft}`);
+    if(lot) extras.push(`Lot: ${lot}`);
+    if(year) extras.push(`Year: ${year}`);
+    if(occ) extras.push(`Occupancy: ${occ}`);
+    if(rent) extras.push(`Rent: ${fmtMoney(rent)}`);
+    if(arv) extras.push(`ARV: ${fmtMoney(arv)}`);
+    if(rehab) extras.push(`Rehab: ${fmtMoney(rehab)}`);
+  } else if(t==="Commercial"){
+    const use=document.getElementById("com_use").value.trim();
+    const sqft=document.getElementById("com_sqft").value.trim();
+    const lot=document.getElementById("com_lot").value.trim();
+    const noi=document.getElementById("com_noi").value.trim();
+    const cap=document.getElementById("com_cap").value.trim();
+    const tenant=document.getElementById("com_tenant").value.trim();
+    const lease=document.getElementById("com_lease").value.trim();
+    const zoning=document.getElementById("com_zoning").value.trim();
+    const broker=document.getElementById("com_broker").value.trim();
+    if(use) extras.push(`Use: ${use}`);
+    if(sqft) extras.push(`Building Sqft: ${sqft}`);
+    if(lot) extras.push(`Lot: ${lot}`);
+    if(noi) extras.push(`NOI: ${fmtMoney(noi)}`);
+    if(cap) extras.push(`Cap Rate: ${cap}%`);
+    if(tenant) extras.push(`Tenant: ${tenant}`);
+    if(lease) extras.push(`Lease: ${lease}`);
+    if(zoning) extras.push(`Zoning: ${zoning}`);
+    if(broker) extras.push(`Broker: ${broker}`);
+  } else if(t==="Land"){
+    const acres=document.getElementById("land_acres").value.trim();
+    const zoning=document.getElementById("land_zoning").value.trim();
+    const utilities=document.getElementById("land_utilities").value.trim();
+    const frontage=document.getElementById("land_frontage").value.trim();
+    const topo=document.getElementById("land_topo").value.trim();
+    const entitled=document.getElementById("land_entitled").value.trim();
+    const apn=document.getElementById("land_apn").value.trim();
+    const access=document.getElementById("land_access").value.trim();
+    const notes=document.getElementById("land_notes").value.trim();
+    if(acres) extras.push(`Acres: ${acres}`);
+    if(zoning) extras.push(`Zoning: ${zoning}`);
+    if(utilities) extras.push(`Utilities: ${utilities}`);
+    if(frontage) extras.push(`Frontage: ${frontage}`);
+    if(topo) extras.push(`Topography: ${topo}`);
+    if(entitled) extras.push(`Entitled: ${entitled}`);
+    if(apn) extras.push(`APN: ${apn}`);
+    if(access) extras.push(`Access: ${access}`);
+    if(notes) extras.push(`Notes: ${notes}`);
+  }
+  return extras;
+}
+function refreshPreview(){
+  const title=document.getElementById("title").value.trim()||"Untitled Listing";
+  const state=document.getElementById("state").value.trim()||"No state";
+  const city=document.getElementById("city").value.trim()||"No city";
+  const type=document.getElementById("property_type").value.trim()||"No type";
+  const status=document.getElementById("status").value.trim()||"Draft";
+  const desc=document.getElementById("description").value.trim()||"No description yet.";
+  const priceRaw=document.getElementById("price").value.trim();
+  const photo=existingPhotos[0] || (stagedPhotos[0]?stagedPhotos[0].preview:"");
+  document.getElementById("previewTitle").textContent=title;
+  document.getElementById("previewPrice").textContent=priceRaw?fmtMoney(priceRaw):"—";
+  document.getElementById("previewPills").innerHTML=[state,city,type,status].map(v=>`<div class="pill">${esc(v)}</div>`).join("");
+  document.getElementById("previewExtras").innerHTML=typeSpecificExtras().slice(0,6).map(v=>`<div class="pill">${esc(v)}</div>`).join("");
+  document.getElementById("previewDesc").textContent=desc;
+  document.getElementById("previewPhoto").innerHTML=photo?`<img src="${esc(photo)}" alt="Preview photo">`:`<div class="photo-empty" style="height:260px">No Photo Yet</div>`;
+  syncMetrics();
+}
+async function uploadNewPhotos(){
+  const out=[];
+  for(const item of stagedPhotos){
+    const file=item.file;
+    const safe=`${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+    const path=`property-cards/${currentUserId}/${safe}`;
+    const up=await sb.storage.from(STORAGE_BUCKET).upload(path,file,{upsert:true});
+    if(up.error) throw up.error;
+    const pub=sb.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+    out.push(pub.data.publicUrl);
+  }
+  return out;
+}
+function payload(){
+  const title=document.getElementById("title").value.trim();
+  const state=document.getElementById("state").value.trim();
+  const city=document.getElementById("city").value.trim();
+  const property_type=document.getElementById("property_type").value.trim();
+  const priceRaw=document.getElementById("price").value.trim();
+  const status=document.getElementById("status").value.trim()||"Active";
+  const description=document.getElementById("description").value.trim();
+  const extras=typeSpecificExtras();
+  return {user_id:currentUserId,title,state,city:city||null,property_type,price:priceRaw===""?null:Number(priceRaw),description:[description,...extras].filter(Boolean).join("\n\n"),status};
+}
+async function loadEditIfNeeded(){
+  const params=new URLSearchParams(location.search);
+  editId=params.get("edit");
+  const prefState=params.get("state");
+  const prefType=params.get("type");
+  if(prefState) document.getElementById("state").value=prefState;
+  if(prefType) document.getElementById("property_type").value=prefType;
+  if(!editId){updateTypeSections(); renderPhotoPreview(); return}
+  const resp=await sb.from("property_cards").select("*").eq("id",editId).maybeSingle();
+  if(resp.error){setCreateStatus(resp.error.message,"err");return}
+  const row=resp.data;
+  if(!row){updateTypeSections(); renderPhotoPreview(); return}
+  document.getElementById("title").value=row.title||"";
+  document.getElementById("state").value=row.state||"";
+  document.getElementById("city").value=row.city||"";
+  document.getElementById("property_type").value=row.property_type||"";
+  document.getElementById("price").value=row.price??row.asking_price??"";
+  document.getElementById("status").value=row.status||"Active";
+  document.getElementById("description").value=row.description||row.summary||row.notes||"";
+  existingPhotos=photosOf(row);
+  document.getElementById("saveBtn").textContent="Update Listing";
+  updateTypeSections(); renderPhotoPreview();
+}
+async function saveListing(){
+  try{
+    setCreateStatus("Saving listing...");
+    const core=payload();
+    if(!core.title||!core.state||!core.property_type){setCreateStatus("Title, state, and property type are required.","err");return}
+    const newUrls=stagedPhotos.length?await uploadNewPhotos():[];
+    const photo_urls=[...existingPhotos,...newUrls].slice(0,10);
+    const fullPayload={...core,photo_urls};
+    let resp;
+    if(editId){resp=await sb.from("property_cards").update(fullPayload).eq("id",editId).eq("user_id",currentUserId).select().single()}
+    else{resp=await sb.from("property_cards").insert([fullPayload]).select().single()}
+    if(resp.error) throw resp.error;
+    existingPhotos=photosOf(resp.data); stagedPhotos=[]; renderPhotoPreview();
+    setCreateStatus(editId?"Listing updated.":"Listing created.","ok");
+    if(!editId){editId=resp.data.id; document.getElementById("saveBtn").textContent="Update Listing"; history.replaceState(null,"","/property-create.html?edit="+encodeURIComponent(editId))}
+  }catch(e){setCreateStatus(e.message||"Save failed.","err")}
+}
+function setAdminStatus(msg,kind){
+  const el=document.getElementById("vfAdminStatus");
+  el.className="vf-contact-admin-status"+(kind?" "+kind:"");
+  el.textContent=msg;
+}
+function openAdminModal(){document.getElementById("vfContactAdminModal").classList.add("show")}
+function closeAdminModal(){document.getElementById("vfContactAdminModal").classList.remove("show")}
+function wireInputs(){
+  ["title","state","city","property_type","price","status","description","res_beds","res_baths","res_sqft","res_lot","res_year","res_occupancy","res_rent","res_arv","res_rehab","com_use","com_sqft","com_lot","com_noi","com_cap","com_tenant","com_lease","com_zoning","com_broker","land_acres","land_zoning","land_utilities","land_frontage","land_topo","land_entitled","land_apn","land_access","land_notes"].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return; el.addEventListener("input", refreshPreview); el.addEventListener("change", ()=>{if(id==="property_type") updateTypeSections(); else refreshPreview();});
+  });
+  document.getElementById("photos").addEventListener("change",(e)=>{const files=[...(e.target.files||[])].slice(0,10); stagedPhotos=files.map(file=>({file,preview:URL.createObjectURL(file)})); renderPhotoPreview();});
+  document.getElementById("clearNewPhotosBtn").onclick=()=>{stagedPhotos=[]; document.getElementById("photos").value=""; renderPhotoPreview();};
+  document.getElementById("removeAllPhotosBtn").onclick=()=>{existingPhotos=[]; stagedPhotos=[]; document.getElementById("photos").value=""; renderPhotoPreview();};
+  document.getElementById("vfContactAdminBtn").onclick=openAdminModal;
+  document.getElementById("openAdminContactTop").onclick=openAdminModal;
+  document.getElementById("openAdminContactMid").onclick=openAdminModal;
+  document.getElementById("vfContactAdminClose").onclick=closeAdminModal;
+  document.getElementById("vfAdminCancel").onclick=closeAdminModal;
+  document.getElementById("vfContactAdminModal").addEventListener("click",(e)=>{if(e.target.id==="vfContactAdminModal")closeAdminModal()});
+}
+(async function boot(){
+  const session=await getSessionOrRedirect(); if(!session) return;
+  currentUserId=session.user.id;
+  document.getElementById("memberLine").textContent="Logged in as "+(session.user.email||"Member");
+  document.getElementById("logoutBtn").onclick=logoutNow;
+  document.getElementById("saveBtn").onclick=saveListing;
+  wireInputs();
+  try{
+    const prof=await sb.from("member_profiles").select("full_name").eq("user_id",currentUserId).maybeSingle();
+    if(!prof.error){
+      if(prof.data?.full_name) document.getElementById("vfAdminName").value=prof.data.full_name;
+      document.getElementById("vfAdminEmail").value=session.user.email||"";
+    }
+  }catch(e){}
+  document.getElementById("vfAdminSend").onclick=async()=>{
+    try{
+      setAdminStatus("Sending...");
+      const name=document.getElementById("vfAdminName").value.trim();
+      const email=document.getElementById("vfAdminEmail").value.trim();
+      const subject=document.getElementById("vfAdminSubject").value.trim();
+      const message=document.getElementById("vfAdminMessage").value.trim();
+      if(!name||!email||!subject||!message){setAdminStatus("Name, email, subject, and message are required.","err");return}
+      const payload={user_id:currentUserId,name,email,subject,message,page_source:window.location.pathname,property_id:editId||null};
+      const resp=await sb.from("admin_messages").insert([payload]).select().single();
+      if(resp.error) throw resp.error;
+      setAdminStatus("Message sent to admin.","ok");
+      document.getElementById("vfAdminSubject").value="";
+      document.getElementById("vfAdminMessage").value="";
+      setTimeout(closeAdminModal,700);
+    }catch(e){setAdminStatus((e&&e.message)?e.message:"Send failed.","err")}
+  };
+  await loadEditIfNeeded();
+})();
+</script>
+</body>
+</html>
