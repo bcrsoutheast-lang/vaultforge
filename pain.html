@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VaultForge | Pain</title>
+<style>
+:root{
+--bg:#07111f;
+--panel:#101c35;
+--panel2:#0c1730;
+--text:#f4f7ff;
+--muted:#9fb0d2;
+--line:rgba(255,255,255,.10);
+--blue:#4f8cff;
+--green:#18c37e;
+--gold:#d8b15d;
+--red:#ff6f7d;
+--radius:22px;
+}
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:linear-gradient(180deg,#07111f,#081426);
+color:var(--text);
+}
+.wrap{max-width:1180px;margin:auto;padding:18px}
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+flex-wrap:wrap;
+margin-bottom:18px;
+}
+.brand{font-size:28px;font-weight:900;letter-spacing:.08em}
+.sub{font-size:14px;color:var(--muted)}
+.card{
+background:linear-gradient(180deg,var(--panel),var(--panel2));
+border:1px solid var(--line);
+border-radius:var(--radius);
+padding:20px;
+}
+.grid{
+display:grid;
+grid-template-columns:1.2fr .8fr;
+gap:18px;
+}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.btn{
+border:none;
+padding:13px 16px;
+border-radius:14px;
+font-weight:800;
+cursor:pointer;
+min-height:46px;
+}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-green{background:var(--green);color:#07111f}
+.btn-gold{background:var(--gold);color:#07111f}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{
+background:rgba(255,255,255,.03);
+border:1px solid var(--line);
+color:#fff;
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:760px){
+.row2,.row3{grid-template-columns:1fr}
+.wrap{padding:14px}
+.card{padding:16px}
+}
+.fieldset{
+border:1px solid var(--line);
+border-radius:18px;
+padding:14px;
+margin-bottom:14px;
+background:rgba(255,255,255,.02);
+}
+.fieldset h3{margin:0 0 12px}
+label{
+display:block;
+font-size:12px;
+letter-spacing:.10em;
+text-transform:uppercase;
+color:var(--muted);
+font-weight:700;
+margin:0 0 7px;
+}
+input,select,textarea{
+width:100%;
+padding:13px 14px;
+border-radius:14px;
+border:1px solid var(--line);
+background:rgba(255,255,255,.03);
+color:#fff;
+outline:none;
+}
+textarea{min-height:120px;resize:vertical}
+.pill-list{display:flex;flex-wrap:wrap;gap:10px}
+.pill{
+padding:10px 14px;
+border-radius:999px;
+border:1px solid var(--line);
+background:rgba(255,255,255,.03);
+cursor:pointer;
+font-weight:700;
+color:#fff;
+}
+.pill.active{
+background:rgba(79,140,255,.22);
+border-color:rgba(79,140,255,.7);
+}
+.notice{
+padding:14px;
+border-radius:16px;
+background:rgba(255,255,255,.03);
+border:1px solid var(--line);
+margin-bottom:14px;
+color:var(--muted);
+line-height:1.55;
+}
+.status{
+margin-top:14px;
+padding:12px;
+border-radius:14px;
+border:1px solid var(--line);
+background:rgba(255,255,255,.03);
+font-size:14px;
+}
+.success{color:#9ff0cc}
+.error{color:#ffb4bf}
+.preview{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+gap:10px;
+margin-top:12px;
+}
+.preview img{
+width:100%;
+height:110px;
+object-fit:cover;
+border-radius:14px;
+border:1px solid var(--line);
+}
+.hidden{display:none!important}
+.analysis{white-space:pre-wrap;line-height:1.55}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<div class="top">
+<div>
+<div class="brand">VAULTFORGE PAIN</div>
+<div class="sub" id="memberLine">Checking member session...</div>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+<a href="/members.html"><button class="btn btn-ghost">Dashboard</button></a>
+<a href="/member-profile.html"><button class="btn btn-ghost">Profile</button></a>
+<button class="btn btn-blue" id="logoutBtn">Logout</button>
+</div>
+</div>
+
+<div class="grid">
+
+<!-- LEFT -->
+<div class="card">
+
+<h2 style="margin-top:0;">Pain Intake</h2>
+
+<div class="notice">
+<strong style="display:block;color:#fff;margin-bottom:8px;">Choose state + property type</strong>
+
+<label style="margin-bottom:8px;">States</label>
+<div class="pill-list" id="statePills">
+<button class="pill stateBtn" data-state="Georgia">Georgia</button>
+<button class="pill stateBtn" data-state="Tennessee">Tennessee</button>
+<button class="pill stateBtn" data-state="Florida">Florida</button>
+</div>
+
+<div style="height:14px"></div>
+
+<label style="margin-bottom:8px;">Categories</label>
+<div class="pill-list">
+<button class="pill typeBtn" data-type="Residential">Residential</button>
+<button class="pill typeBtn" data-type="Commercial">Commercial</button>
+<button class="pill typeBtn" data-type="Land">Land</button>
+</div>
+</div>
+
+<!-- MAIN -->
+<div class="fieldset">
+<h3>Property</h3>
+
+<div class="row2" style="margin-bottom:12px;">
+<div>
+<label>State</label>
+<select id="state">
+<option value="">Select state</option>
+<option>Georgia</option>
+<option>Tennessee</option>
+<option>Florida</option>
+</select>
+</div>
+
+<div>
+<label>Category</label>
+<select id="property_type">
+<option value="">Select category</option>
+<option>Residential</option>
+<option>Commercial</option>
+<option>Land</option>
+</select>
+</div>
+</div>
+
+<div class="row2" style="margin-bottom:12px;">
+<div>
+<label>Strategy</label>
+<select id="strategy">
+<option value="">Select strategy</option>
+<option>Distressed</option>
+<option>Value Add</option>
+<option>Redevelopment</option>
+<option>Stabilized</option>
+<option>Land Development</option>
+<option>Advisory</option>
+</select>
+</div>
+
+<div>
+<label>Price</label>
+<input id="price" type="number" placeholder="250000">
+</div>
+</div>
+
+<div class="row2">
+<div>
+<label>Distress</label>
+<select id="distress">
+<option value="true">Yes</option>
+<option value="false">No</option>
+</select>
+</div>
+
+<div>
+<label>Deal Title</label>
+<input id="title" placeholder="Atlanta Opportunity">
+</div>
+</div>
+
+</div>
+
+<!-- RESIDENTIAL -->
+<div class="fieldset hidden" id="resFields">
+<h3>Residential</h3>
+
+<div class="row3">
+<div><label>Beds</label><input id="beds" type="number"></div>
+<div><label>Baths</label><input id="baths"></div>
+<div><label>Sq Ft</label><input id="res_sqft"></div>
+</div>
+
+<div class="row3" style="margin-top:12px;">
+<div><label>Lot Size</label><input id="lot_size"></div>
+<div><label>Year Built</label><input id="year_built"></div>
+<div>
+<label>Occupancy</label>
+<select id="occupancy">
+<option value="">Select</option>
+<option>Vacant</option>
+<option>Owner Occupied</option>
+<option>Tenant Occupied</option>
+</select>
+</div>
+</div>
+
+<div class="row2" style="margin-top:12px;">
+<div><label>ARV</label><input id="arv"></div>
+<div><label>Rehab Needed</label><input id="rehab_needed"></div>
+</div>
+</div>
+
+<!-- COMMERCIAL -->
+<div class="fieldset hidden" id="comFields">
+<h3>Commercial</h3>
+
+<div class="row3">
+<div><label>Asset Type</label><input id="commercial_asset_type"></div>
+<div><label>Units</label><input id="commercial_units"></div>
+<div><label>Sq Ft</label><input id="commercial_sqft"></div>
+</div>
+
+<div class="row3" style="margin-top:12px;">
+<div><label>NOI</label><input id="noi"></div>
+<div><label>Cap Rate</label><input id="cap_rate"></div>
+<div><label>Occupancy</label><input id="commercial_occupancy"></div>
+</div>
+
+<div class="row3" style="margin-top:12px;">
+<div><label>Lease Status</label><input id="lease_status"></div>
+<div><label>Parking</label><input id="parking"></div>
+<div><label>Zoning</label><input id="commercial_zoning"></div>
+</div>
+</div>
+
+<!-- LAND -->
+<div class="fieldset hidden" id="landFields">
+<h3>Land</h3>
+
+<div class="row3">
+<div><label>Acres</label><input id="acres"></div>
+<div><label>Zoning</label><input id="land_zoning"></div>
+<div><label>Utilities</label><input id="utilities"></div>
+</div>
+
+<div class="row3" style="margin-top:12px;">
+<div><label>Road Frontage</label><input id="road_frontage"></div>
+<div><label>Entitled</label>
+<select id="entitled">
+<option value="">Select</option>
+<option>Yes</option>
+<option>No</option>
+<option>Partial</option>
+</select>
+</div>
+<div><label>Flood Zone</label><input id="flood_zone"></div>
+</div>
+
+<div class="row2" style="margin-top:12px;">
+<div><label>Buildable Lots</label><input id="buildable_lots"></div>
+<div><label>Land Use Notes</label><input id="land_use_notes"></div>
+</div>
+</div>
+
+<!-- DESCRIPTION -->
+<div class="fieldset">
+<h3>Description</h3>
+<label>Describe situation</label>
+<textarea id="pain_text" placeholder="Seller pain, timing, property issue, buyer needed..."></textarea>
+</div>
+
+<!-- PHOTO UPLOAD -->
+<div class="fieldset">
+<h3>Property Photos</h3>
+
+<label>Upload Images</label>
+<input id="photoInput" type="file" multiple accept="image/*">
+
+<div class="small" style="margin-top:8px;">
+Upload photos of property / docs / lot / damage / site
+</div>
+
+<div class="preview" id="previewWrap"></div>
+
+<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+<button class="btn btn-red hidden" id="clearPhotosBtn">Delete Photos</button>
+</div>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+<button class="btn btn-gold" id="analyzeBtn">Analyze</button>
+<button class="btn btn-green" id="saveBtn">Save Submission</button>
+</div>
+
+<div class="status" id="statusBar">Ready.</div>
+
+</div>
+
+<!-- RIGHT -->
+<div class="card">
+<h2 style="margin-top:0;">Analysis</h2>
+
+<div class="notice">
+Analyze gives quick read before saving.
+</div>
+
+<div class="fieldset">
+<h3>Output</h3>
+<div id="analysisOutput" class="analysis">Nothing analyzed yet.</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase = createClient(
+'https://mnwwvpuxrzostrplfgmq.supabase.co',
+'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ'
+);
+
+let currentUser=null;
+let selectedFiles=[];
+
+function byId(id){return document.getElementById(id)}
+
+function status(msg,type=''){
+const el=byId('statusBar');
+el.className='status';
+if(type)el.classList.add(type);
+el.textContent=msg;
+}
+
+function val(id){
+const el=byId(id);
+return el ? el.value.trim() : '';
+}
+
+function toggleFields(){
+const type=val('property_type');
+
+byId('resFields').classList.toggle('hidden',type!=='Residential');
+byId('comFields').classList.toggle('hidden',type!=='Commercial');
+byId('landFields').classList.toggle('hidden',type!=='Land');
+
+document.querySelectorAll('.typeBtn').forEach(b=>{
+b.classList.toggle('active',b.dataset.type===type);
+});
+}
+
+function syncStatePills(){
+const st=val('state');
+document.querySelectorAll('.stateBtn').forEach(b=>{
+b.classList.toggle('active',b.dataset.state===st);
+});
+}
+
+function previewFiles(){
+const wrap=byId('previewWrap');
+wrap.innerHTML='';
+
+selectedFiles.forEach(file=>{
+const reader=new FileReader();
+reader.onload=e=>{
+const img=document.createElement('img');
+img.src=e.target.result;
+wrap.appendChild(img);
+};
+reader.readAsDataURL(file);
+});
+
+byId('clearPhotosBtn').classList.toggle('hidden',selectedFiles.length===0);
+}
+
+async function uploadPhotos(){
+if(!selectedFiles.length) return [];
+
+const urls=[];
+
+for(const file of selectedFiles){
+const name=`${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+const path=`pain-uploads/${currentUser.id}/${name}`;
+
+const { error } = await supabase.storage
+.from('vaultforge')
+.upload(path,file,{upsert:true});
+
+if(error) throw error;
+
+const { data } = supabase.storage
+.from('vaultforge')
+.getPublicUrl(path);
+
+urls.push(data.publicUrl);
+}
+
+return urls;
+}
+
+function buildPayload(photoUrls=[]){
+return {
+user_id:currentUser.id,
+title:val('title'),
+state:val('state'),
+property_type:val('property_type'),
+strategy:val('strategy'),
+price:val('price') ? Number(val('price')) : null,
+distress:val('distress')==='true',
+pain_text:val('pain_text'),
+photo_urls:photoUrls,
+details_json:{
+beds:val('beds'),
+baths:val('baths'),
+sqft:val('res_sqft'),
+lot_size:val('lot_size'),
+year_built:val('year_built'),
+occupancy:val('occupancy'),
+arv:val('arv'),
+rehab_needed:val('rehab_needed'),
+
+asset_type:val('commercial_asset_type'),
+units:val('commercial_units'),
+commercial_sqft:val('commercial_sqft'),
+noi:val('noi'),
+cap_rate:val('cap_rate'),
+commercial_occupancy:val('commercial_occupancy'),
+lease_status:val('lease_status'),
+parking:val('parking'),
+commercial_zoning:val('commercial_zoning'),
+
+acres:val('acres'),
+land_zoning:val('land_zoning'),
+utilities:val('utilities'),
+road_frontage:val('road_frontage'),
+entitled:val('entitled'),
+flood_zone:val('flood_zone'),
+buildable_lots:val('buildable_lots'),
+land_use_notes:val('land_use_notes')
+}
+};
+}
+
+function analyze(){
+const p=buildPayload();
+let txt='';
+
+txt += 'State: ' + (p.state || 'Missing') + '\n';
+txt += 'Type: ' + (p.property_type || 'Missing') + '\n';
+txt += 'Strategy: ' + (p.strategy || 'Missing') + '\n';
+txt += 'Price: ' + (p.price || 'Missing') + '\n';
+txt += 'Photos: ' + selectedFiles.length + '\n';
+
+if((p.pain_text||'').length<20){
+txt += '\nDescription short.';
+}else{
+txt += '\nDescription looks solid.';
+}
+
+byId('analysisOutput').textContent=txt;
+status('Analysis complete.','success');
+}
+
+async function save(){
+try{
+status('Uploading photos...');
+
+const urls=await uploadPhotos();
+
+status('Saving submission...');
+
+const payload=buildPayload(urls);
+
+const { error } = await supabase
+.from('pain_projects')
+.insert([payload]);
+
+if(error) throw error;
+
+status('Saved successfully.','success');
+
+}catch(err){
+status('Save failed: ' + err.message,'error');
+}
+}
+
+async function boot(){
+const { data } = await supabase.auth.getSession();
+
+if(!data.session){
+location.href='/member-login.html';
+return;
+}
+
+currentUser=data.session.user;
+byId('memberLine').textContent='Logged in as ' + currentUser.email;
+status('Ready.');
+}
+
+document.querySelectorAll('.stateBtn').forEach(btn=>{
+btn.onclick=()=>{
+byId('state').value=btn.dataset.state;
+syncStatePills();
+};
+});
+
+document.querySelectorAll('.typeBtn').forEach(btn=>{
+btn.onclick=()=>{
+byId('property_type').value=btn.dataset.type;
+toggleFields();
+};
+});
+
+byId('state').onchange=syncStatePills;
+byId('property_type').onchange=toggleFields;
+
+byId('photoInput').onchange=(e)=>{
+selectedFiles=[...e.target.files];
+previewFiles();
+};
+
+byId('clearPhotosBtn').onclick=()=>{
+selectedFiles=[];
+byId('photoInput').value='';
+previewFiles();
+};
+
+byId('analyzeBtn').onclick=analyze;
+byId('saveBtn').onclick=save;
+
+byId('logoutBtn').onclick=async()=>{
+await supabase.auth.signOut();
+location.href='/member-login.html';
+};
+
+boot();
+</script>
+
+</body>
+</html>
