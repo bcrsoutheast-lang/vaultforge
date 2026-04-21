@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>VaultForge Admin</title><script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script><style>
+body{background:#07122a;color:#fff;font-family:Arial;padding:20px}a{text-decoration:none;color:inherit}button{padding:14px;margin:6px;border-radius:12px;border:none;cursor:pointer;font:inherit}
+.wrap{max-width:1100px;margin:auto}.card{background:#0c1b3a;padding:16px;margin-top:14px;border-radius:14px}.row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.blue{background:#3b82f6;color:#fff}.green{background:#16a34a;color:#fff}.orange{background:#f59e0b;color:#111}.red{background:#dc2626;color:#fff}.dark{background:#12264f;color:#fff;border:1px solid #2b477d}.pill{display:inline-block;padding:8px 12px;border-radius:999px;background:#16315d;margin-right:6px;margin-top:6px}.muted{color:#c9d5ef}
+</style></head><body><div class='wrap'>
+<h1>VAULTFORGE ADMIN</h1><div id='session' class='muted'>Loading admin…</div>
+<div class='row'>
+<a class='blue' style='padding:14px;border-radius:12px' href='/listing-form.html'>Create Listing</a>
+<button class='dark' onclick='loadListings()'>Refresh</button>
+<a class='dark' style='padding:14px;border-radius:12px' href='/members.html'>Members</a>
+<a class='dark' style='padding:14px;border-radius:12px' href='/pain.html'>Pain</a>
+</div>
+<div id='status' class='muted'></div>
+<div id='listings'></div>
+</div><script>
+const sb=supabase.createClient('https://mnwwvpuxrzostrplfgmq.supabase.co','sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ');
+function s(t){document.getElementById('status').textContent=t}
+function go(u){window.location.href=u}
+async function loadListings(){
+ s('Loading listings...');
+ const sess=(await sb.auth.getSession()).data.session;
+ if(sess) document.getElementById('session').textContent='Logged in as '+sess.user.email;
+ const r=await sb.from('property_cards').select('*').order('created_at',{ascending:false});
+ if(r.error){s(r.error.message);return}
+ const rows=r.data||[];
+ document.getElementById('listings').innerHTML=rows.map(d=>`<div class='card'><h3>${d.title||'No title'}</h3><div><span class='pill'>${d.status||''}</span><span class='pill'>${d.state||''}</span><span class='pill'>${d.property_type||''}</span></div><div class='muted' style='margin-top:10px'>City: ${d.city||''}<br>Price: ${d.price||''}<br>User: ${d.user_id||''}</div><div class='row' style='margin-top:12px'><a class='dark' style='padding:12px;border-radius:12px' href='/listing.html?id=${d.id}'>View</a><a class='dark' style='padding:12px;border-radius:12px' href='/listing-form.html?edit=${d.id}'>Edit</a><button class='green' onclick="setStatus('${d.id}','Active')">Approve / Live</button><button class='orange' onclick="setStatus('${d.id}','Draft')">Set Draft</button><button class='red' onclick="delRow('${d.id}')">Delete</button></div></div>`).join('');
+ s('Ready.');
+}
+async function setStatus(id,status){
+ const ok=confirm('Set status to '+status+'?'); if(!ok) return;
+ const r=await sb.from('property_cards').update({status}).eq('id',id);
+ if(r.error){s(r.error.message);return}
+ loadListings();
+}
+async function delRow(id){
+ const ok=confirm('Delete listing?'); if(!ok) return;
+ const r=await sb.from('property_cards').delete().eq('id',id);
+ if(r.error){s(r.error.message);return}
+ loadListings();
+}
+loadListings();
+</script></body></html>
