@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Members Nav Fix</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<style>
+:root{--bg:#030913;--bg2:#071427;--panel:#08172d;--panel2:#0b1f3f;--text:#f6f8ff;--muted:#a7b5d6;--line:rgba(255,255,255,.08);--gold:#d6ab4e;--gold2:#f1cf7b;--blue:#3f76ff;--red:#df6577;--shadow:0 28px 90px rgba(0,0,0,.42);--radius:24px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 10% 8%, rgba(214,171,78,.12), transparent 18%),radial-gradient(circle at 86% 12%, rgba(63,118,255,.10), transparent 18%),linear-gradient(180deg,var(--bg),var(--bg2))}
+a{text-decoration:none;color:inherit}.shell{max-width:1540px;margin:0 auto;padding:0 16px}.hidden{display:none!important}
+.topbar{position:sticky;top:0;z-index:60;backdrop-filter:blur(16px);background:rgba(3,9,19,.82);border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.04));border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow);color:var(--gold2);font-weight:900;font-size:1.22rem}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2)}.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.top-actions{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;width:min(1180px,100%)}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:.18s ease}
+.btn:hover{transform:translateY(-1px)}.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}.btn-red{background:linear-gradient(135deg,var(--red),#cf4f62);color:#fff}.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.layout{display:grid;grid-template-columns:270px 1fr;gap:18px;padding:22px 0 32px}.sidebar{display:grid;gap:18px;align-self:start;position:sticky;top:96px}.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.nav-list{display:grid;gap:10px}.nav-link{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);font-weight:800}.nav-link:hover{border-color:rgba(241,207,123,.24)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}.profile-mini{display:grid;gap:12px}.profile-card-top{display:flex;align-items:center;gap:12px}
+.avatar{width:58px;height:58px;border-radius:999px;background:linear-gradient(135deg, rgba(214,171,78,.18), rgba(255,255,255,.05));border:1px solid rgba(214,171,78,.22);display:grid;place-items:center;font-weight:900;color:var(--gold2);overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.progress{height:10px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--gold2))}
+.small{font-size:.92rem}.muted{color:var(--muted)}.main{display:grid;gap:18px}.hero{display:grid;grid-template-columns:1fr 420px;gap:18px}
+.hero-card{min-height:230px;display:grid;align-items:center}.hero-card h1{margin:0 0 12px;font-size:clamp(2rem,4vw,3.5rem);line-height:.97;letter-spacing:-.05em}.hero-card p{margin:0;color:var(--muted);line-height:1.65;font-size:1.06rem}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.hero-media{display:grid;place-items:center;color:#9fb0d3}
+.grid-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}.metric{background:linear-gradient(180deg,var(--panel),#071223);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);cursor:pointer;transition:.18s ease}.metric:hover{transform:translateY(-2px);border-color:rgba(241,207,123,.22)}.metric strong{display:block;font-size:2rem;margin-bottom:6px}.metric span{color:var(--muted)}.metric small{display:block;color:#cdd8ff;margin-top:6px}
+.content-grid{display:grid;grid-template-columns:1.4fr .8fr;gap:18px}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}.section-head h2{margin:0;font-size:1.45rem}.section-head p{margin:4px 0 0;color:var(--muted)}
+.filters,.actions,.pills{display:flex;gap:10px;flex-wrap:wrap}.pill{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:.85rem;font-weight:800}
+.cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.listing{background:linear-gradient(180deg,#08172d,#06111f);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}.listing-photo{position:relative;height:210px;background:#0c1629}.listing-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.ribbon{position:absolute;left:12px;top:12px;padding:7px 10px;border-radius:999px;background:rgba(22,195,127,.92);color:#fff;font-size:.76rem;font-weight:900}.ribbon.alt{background:rgba(63,118,255,.92)}.ribbon.warn{background:rgba(214,171,78,.92);color:#161103}.price{position:absolute;right:12px;bottom:12px;padding:11px 14px;border-radius:999px;background:rgba(7,14,26,.72);border:1px solid rgba(241,207,123,.18);font-weight:900;color:#f7df9a}
+.listing-body{padding:18px}.listing-body h3{margin:0 0 10px;font-size:1.45rem}.listing-body p{margin:0;color:var(--muted);line-height:1.5}.statline{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;color:#cfe0ff;font-size:.94rem}.cash{margin-top:12px;color:#7ef2b8;font-weight:900}
+.feed{display:grid;gap:10px}.feed-item{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}.feed-item:last-child{border-bottom:none}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.qa{padding:18px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.02);text-align:center;cursor:pointer}.qa:hover{border-color:rgba(241,207,123,.24)}
+.status{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}.ok{color:#aaf2ce}.err{color:#ffc3cc}.warn{color:#ffe6a6}
+@media(max-width:1280px){.grid-stats{grid-template-columns:repeat(3,1fr)}.quick-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:1100px){.layout{grid-template-columns:1fr}.sidebar{position:static}.hero,.content-grid{grid-template-columns:1fr}.cards-grid{grid-template-columns:1fr}}@media(max-width:900px){.top-actions{grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.grid-stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">VF</div>
+      <div class="brand-copy">
+        <strong>VAULTFORGE</strong>
+        <span id="memberLine">Loading member workspace...</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn btn-dark" href="/property-cards.html">Listings</a>
+      <a class="btn btn-blue" href="/property-create.html">Create Listing</a>
+      <a class="btn btn-dark" href="/pain.html">Pain</a>
+      <a class="btn btn-gold" href="/member-profile.html">My Profile</a>
+      <a class="btn btn-dark hidden" id="adminBackBtn" href="/admin.html">Open Admin</a>
+      <button class="btn btn-red" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell layout">
+  <aside class="sidebar">
+    <div class="panel">
+      <div class="nav-list">
+        <a class="nav-link" href="/members.html"><span class="dot"></span> Dashboard</a>
+        <a class="nav-link" href="/property-cards.html"><span class="dot"></span> Listings</a>
+        <a class="nav-link" href="/property-create.html"><span class="dot"></span> Create Listing</a>
+        <a class="nav-link" href="/pain.html"><span class="dot"></span> Pain Requests</a>
+        <button class="nav-link" id="contactAdminBtn" type="button"><span class="dot"></span> Contact Admin</button>
+        <a class="nav-link" href="/member-profile.html"><span class="dot"></span> My Profile</a>
+        <a class="nav-link hidden" id="adminBackBtnSide" href="/admin.html"><span class="dot"></span> Back to Admin</a>
+      </div>
+    </div>
+    <div class="panel profile-mini">
+      <div class="profile-card-top">
+        <div class="avatar" id="avatarWrap">VF</div>
+        <div>
+          <div style="font-weight:900;font-size:1.06rem" id="miniName">Member</div>
+          <div class="muted small" id="miniTier">Premium Member</div>
+          <div class="small" id="miniMarket">—</div>
+        </div>
+      </div>
+      <div class="small" style="font-weight:800">Profile Completeness</div>
+      <div class="progress"><span id="profileProgress" style="width:18%"></span></div>
+      <div class="small muted" id="profileProgressText">Start your profile</div>
+      <a class="btn btn-gold" href="/member-profile.html">View My Profile</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="panel hero-card">
+        <div>
+          <div class="eyebrow">Premium Access</div>
+          <h1 id="heroTitle">Welcome back.</h1>
+          <p>Access premium off-market deals, create listings fast, and connect with serious buyers and investors in your market.</p>
+          <div class="hero-actions">
+            <a class="btn btn-gold" href="/property-create.html">Create New Listing</a>
+            <a class="btn btn-dark" href="/property-cards.html">Browse Listings</a>
+            <a class="btn btn-dark hidden" id="adminBackBtnHero" href="/admin.html">Return to Admin</a>
+          </div>
+          <div id="memberStatus" class="status">Loading dashboard...</div>
+        </div>
+      </div>
+      <div class="panel hero-media">Premium member workspace</div>
+    </section>
+
+    <section class="grid-stats">
+      <div class="metric" data-go="/property-cards.html"><strong id="totalListingsCount">0</strong><span>Total Listings</span><small id="totalListingsSub">All markets</small></div>
+      <div class="metric" data-go="/property-cards.html"><strong id="liveListingsCount">0</strong><span>Live Listings</span><small>Active and visible</small></div>
+      <div class="metric" data-go="#myListingsSection"><strong id="myListingsCount">0</strong><span>My Listings</span><small>Owned by you</small></div>
+      <div class="metric" data-go="/member-profile.html"><strong id="profileReadyCount">Start</strong><span>Profile Status</span><small id="profileReadySub">Needs completion</small></div>
+      <div class="metric" data-go="/pain.html"><strong id="painCount">1</strong><span>Pain Requests</span><small>Need attention</small></div>
+      <div class="metric" data-go="/member-profile.html"><strong id="marketCount">—</strong><span>Primary Market</span><small>Your base market</small></div>
+    </section>
+
+    <section class="content-grid">
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Top Off-Market Deals</h2>
+            <p>Premium-looking cards without changing your core logic.</p>
+          </div>
+          <div class="filters">
+            <button class="btn btn-dark sf" data-state="All" type="button">All</button>
+            <button class="btn btn-dark sf" data-state="Georgia" type="button">Georgia</button>
+            <button class="btn btn-dark sf" data-state="Tennessee" type="button">Tennessee</button>
+            <button class="btn btn-dark sf" data-state="Florida" type="button">Florida</button>
+          </div>
+        </div>
+        <div class="cards-grid" id="featuredWrap"></div>
+      </div>
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Market Activity</h2>
+            <p>Useful signals that make the page feel alive.</p>
+          </div>
+        </div>
+        <div class="feed" id="activityFeed"></div>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="panel" id="myListingsSection">
+        <div class="section-head">
+          <div>
+            <h2>My Listings Overview</h2>
+            <p>Your owned inventory and fast actions.</p>
+          </div>
+          <a class="btn btn-dark" href="/property-cards.html">Manage All</a>
+        </div>
+        <div class="grid-stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+          <div class="metric"><strong id="mineLiveCount">0</strong><span>Live Listings</span><small>Visible to market</small></div>
+          <div class="metric"><strong id="mineDraftCount">0</strong><span>Draft Listings</span><small>Not published</small></div>
+          <div class="metric"><strong id="mineStatesCount">0</strong><span>Markets</span><small>States covered</small></div>
+          <div class="metric"><strong id="minePhotosCount">0</strong><span>Total Photos</span><small>Across your listings</small></div>
+        </div>
+        <div class="cards-grid" id="mineWrap"></div>
+      </div>
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Quick Actions</h2>
+            <p>Move fast without hunting for buttons.</p>
+          </div>
+        </div>
+        <div class="quick-grid">
+          <a class="qa" href="/property-create.html"><div style="font-weight:900;margin-bottom:8px">Create Listing</div><div class="muted small">Add new property</div></a>
+          <a class="qa" href="/pain.html"><div style="font-weight:900;margin-bottom:8px">Pain Request</div><div class="muted small">Need something?</div></a>
+          <button class="qa" id="contactAdminBtn2" type="button"><div style="font-weight:900;margin-bottom:8px">Contact Admin</div><div class="muted small">Send message</div></button>
+          <a class="qa" href="/member-profile.html"><div style="font-weight:900;margin-bottom:8px">View Profile</div><div class="muted small">Update your info</div></a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL='https://mnwwvpuxrzostrplfgmq.supabase.co';
+const SUPABASE_KEY='sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+const sb=window.VaultForgeAuth&&window.VaultForgeAuth.supabase?window.VaultForgeAuth.supabase:window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUserId=null, allRows=[], currentState='All', myProfile=null, isAdminUser=false;
+
+function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;')}
+function fmtMoney(v){const n=Number(v);if(!Number.isFinite(n))return '—';return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n)}
+function photosOf(r){const p=r?.photo_urls||r?.image_urls||[];if(Array.isArray(p)) return p.filter(Boolean);try{const j=JSON.parse(p);return Array.isArray(j)?j.filter(Boolean):[]}catch(e){return []}}
+async function getSessionOrRedirect(){if(window.VaultForgeAuth&&window.VaultForgeAuth.requireLogin)return await window.VaultForgeAuth.requireLogin();const r=await sb.auth.getSession();const s=r?.data?.session;if(!s){window.location.href='/member-login.html';return null}return s}
+async function logoutNow(){try{if(window.VaultForgeAuth&&window.VaultForgeAuth.logout){await window.VaultForgeAuth.logout();return}}catch(e){}await sb.auth.signOut();window.location.href='/member-login.html';}
+function setMemberStatus(msg, cls=''){const el=document.getElementById('memberStatus');el.className='status '+cls;el.textContent=msg}
+function completeness(p){if(!p) return 18; const checks=[p.full_name,p.primary_market,p.company_name,p.role,p.phone,p.website,p.investment_focus,p.buy_box,p.bio,p.profile_photo_url]; const filled=checks.filter(Boolean).length; return Math.max(18, Math.min(100, Math.round((filled/checks.length)*100)))}
+function listingStatusNorm(s){return String(s||'').toLowerCase()}
+function isLive(row){return ['live','active','approved'].includes(listingStatusNorm(row.status))}
+function ribbonText(row){const d=String(row.description||'').toLowerCase(); if(d.includes('distressed')) return ['DISTRESSED','warn']; if(d.includes('value add')) return ['VALUE ADD','alt']; if(d.includes('off market')) return ['OFF MARKET','']; return ['PREMIUM','alt']}
+function extractBenefits(row){const d=String(row.description||''); const lines=d.split(/\n+/).map(x=>x.trim()).filter(Boolean); const out=[]; for(const line of lines){ if(/^(buy bucket|exit strategy|seller motivation|arv|rehab|rent|cash flow|roi|spread|cap rate|benefit tags|strategy|distress):/i.test(line)) out.push(line);} return out.slice(0,3)}
+function toggleAdminBackButtons(show){['adminBackBtn','adminBackBtnSide','adminBackBtnHero'].forEach(id=>{const el=document.getElementById(id); if(el) el.classList.toggle('hidden', !show);});}
+function renderActivity(rows){const items=[]; if(rows[0]) items.push(['New off-market deal in '+(rows[0].city||rows[0].state||'your market'),'2 minutes ago']); if(rows[1]) items.push(['Your listings are visible across '+(new Set(rows.filter(r=>r.user_id===currentUserId).map(r=>r.state).filter(Boolean)).size || 1)+' markets','12 minutes ago']); items.push(['Profile status updated: '+document.getElementById('profileReadyCount').textContent,'20 minutes ago']); items.push(['Admin contact is available from member dashboard','1 hour ago']); items.push(['Create and manage deals from one premium workspace','Today']); document.getElementById('activityFeed').innerHTML=items.map(([t,tm])=>'<div class="feed-item"><div>'+esc(t)+'</div><div class="muted small">'+esc(tm)+'</div></div>').join('')}
+function cardHtml(row, mine=false){const title=row.title||'Untitled Listing';const state=String(row.state||'').trim()||'—';const city=row.city||'No city';const type=row.property_type||'—';const price=row.price!=null?fmtMoney(row.price):'—';const desc=row.description||'No description yet.';const photo=photosOf(row)[0]||'';const rb=ribbonText(row);const benefits=extractBenefits(row);return '<article class="listing"><div class="listing-photo">'+(photo?'<img src="'+esc(photo)+'" alt="Listing photo">':'<div style="height:100%;display:grid;place-items:center;color:#9fb0d3">No Photo Yet</div>')+'<div class="ribbon '+rb[1]+'">'+esc(rb[0])+'</div><div class="price">'+esc(price)+'</div></div><div class="listing-body"><h3>'+esc(title)+'</h3><div class="pills"><div class="pill">'+esc(state)+'</div><div class="pill">'+esc(type)+'</div><div class="pill">'+esc(row.status||'Active')+'</div><div class="pill">'+esc(city)+'</div></div><p style="margin-top:12px">'+esc(desc).slice(0,140)+(desc.length>140?'...':'')+'</p>'+(benefits.length?'<div class="statline">'+benefits.map(b=>'<span>'+esc(b)+'</span>').join('')+'</div>':'')+'<div class="cash">'+(benefits.find(b=>/^cash flow:/i.test(b))?esc(benefits.find(b=>/^cash flow:/i.test(b))):'Premium opportunity visibility')+'</div><div class="actions"><a class="btn btn-dark" href="/property-card.html?id='+encodeURIComponent(row.id)+'">View</a>'+(mine?'<a class="btn btn-dark" href="/property-create.html?edit='+encodeURIComponent(row.id)+'">Edit</a><button class="btn btn-red del-btn" data-id="'+esc(row.id)+'" type="button">Delete</button>':'')+'</div></div></article>'}
+function bindDynamic(){document.querySelectorAll('.del-btn').forEach(btn=>btn.onclick=async()=>{const id=btn.getAttribute('data-id'); if(!id || !confirm('Delete this listing?')) return; const resp=await sb.from('property_cards').delete().eq('id',id).eq('user_id',currentUserId); if(resp.error){setMemberStatus(resp.error.message,'err');return} await loadDashboard();}); document.querySelectorAll('[data-go]').forEach(el=>el.onclick=()=>{const go=el.getAttribute('data-go'); if(go.startsWith('#')) document.querySelector(go)?.scrollIntoView({behavior:'smooth',block:'start'}); else window.location.href=go;});}
+async function contactAdmin(){const subject=prompt('Subject for admin:'); if(subject===null) return; const message=prompt('Message for admin:'); if(message===null) return; if(!subject.trim()||!message.trim()){setMemberStatus('Subject and message are required.','err');return} const payload={user_id:currentUserId,name:myProfile?.full_name||'Member',email:document.getElementById('memberLine').textContent.replace('Logged in as ',''),subject:subject.trim(),message:message.trim(),page_source:window.location.pathname,status:'new'}; const resp=await sb.from('admin_messages').insert([payload]).select().single(); if(resp.error){setMemberStatus(resp.error.message,'err');return} setMemberStatus('Message sent to admin.','ok')}
+function renderDashboard(){const liveRows=allRows.filter(isLive); const featured=currentState==='All'?liveRows:liveRows.filter(r=>String(r.state||'').trim()===currentState); const mine=allRows.filter(r=>String(r.user_id||'')===String(currentUserId)); const mineLive=mine.filter(isLive); const mineDraft=mine.filter(r=>listingStatusNorm(r.status)==='draft'); const profilePct=completeness(myProfile); document.getElementById('totalListingsCount').textContent=String(allRows.length); document.getElementById('totalListingsSub').textContent=liveRows.length+' live • '+(allRows.length-liveRows.length)+' other'; document.getElementById('liveListingsCount').textContent=String(liveRows.length); document.getElementById('myListingsCount').textContent=String(mine.length); document.getElementById('profileReadyCount').textContent=profilePct>=70?'Ready':'Start'; document.getElementById('profileReadySub').textContent='Profile '+profilePct+'% complete'; document.getElementById('painCount').textContent='1'; document.getElementById('marketCount').textContent=myProfile?.primary_market||'—'; document.getElementById('featuredWrap').innerHTML=featured.length?featured.slice(0,4).map(r=>cardHtml(r,false)).join(''):'<div class="panel">No premium listings found for this view. <a href="/property-create.html" style="color:#f1cf7b">Create one now</a>.</div>'; document.getElementById('mineWrap').innerHTML=mine.length?mine.slice(0,4).map(r=>cardHtml(r,true)).join(''):'<div class="panel">You do not have listings yet. <a href="/property-create.html" style="color:#f1cf7b">Create your first listing</a>.</div>'; document.getElementById('mineLiveCount').textContent=String(mineLive.length); document.getElementById('mineDraftCount').textContent=String(mineDraft.length); document.getElementById('mineStatesCount').textContent=String(new Set(mine.map(r=>r.state).filter(Boolean)).size); document.getElementById('minePhotosCount').textContent=String(mine.reduce((n,r)=>n+photosOf(r).length,0)); renderActivity(liveRows); bindDynamic();}
+async function loadDashboard(){try{setMemberStatus('Loading premium dashboard...'); const session=await getSessionOrRedirect(); if(!session) return; currentUserId=session.user.id; document.getElementById('memberLine').textContent='Logged in as '+(session.user.email||'Member'); const [profileResp,cardsResp]=await Promise.all([sb.from('member_profiles').select('*').eq('user_id',currentUserId).maybeSingle(), sb.from('property_cards').select('*').order('created_at',{ascending:false}).limit(300)]); if(cardsResp.error) throw cardsResp.error; if(profileResp.error && profileResp.error.code!=='PGRST116') throw profileResp.error; myProfile=profileResp.data||null; allRows=cardsResp.data||[]; isAdminUser=!!(myProfile&&(myProfile.role==='admin'||myProfile.is_admin===true)); toggleAdminBackButtons(isAdminUser); const name=myProfile?.full_name || (session.user.email||'Member').split('@')[0]; document.getElementById('heroTitle').textContent='Welcome back, '+name; document.getElementById('miniName').textContent=name; document.getElementById('miniMarket').textContent=myProfile?.primary_market || 'Premium network access'; const pct=completeness(myProfile); document.getElementById('profileProgress').style.width=pct+'%'; document.getElementById('profileProgressText').textContent=pct>=70?pct+'% complete • strong member profile':pct+'% complete • finish profile for trust'; if(myProfile?.profile_photo_url){ document.getElementById('avatarWrap').innerHTML='<img src="'+esc(myProfile.profile_photo_url)+'" alt="Profile photo">'; } else { document.getElementById('avatarWrap').textContent=(name||'VF').slice(0,2).toUpperCase(); } renderDashboard(); setMemberStatus('Dashboard ready.','ok');}catch(e){console.error(e); document.getElementById('memberLine').textContent='Member workspace loaded'; toggleAdminBackButtons(true); setMemberStatus((e && e.message) || 'Dashboard load fallback active.','warn');}}
+document.getElementById('logoutBtn').onclick=logoutNow;
+document.getElementById('contactAdminBtn').onclick=contactAdmin;
+document.getElementById('contactAdminBtn2').onclick=contactAdmin;
+document.querySelectorAll('.sf').forEach(btn=>btn.onclick=()=>{currentState=btn.dataset.state||'All';renderDashboard()});
+toggleAdminBackButtons(true);
+loadDashboard();
+</script>
+</body>
+</html>
