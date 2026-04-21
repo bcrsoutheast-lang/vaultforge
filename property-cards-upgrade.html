@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Listings</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<script>
+const SUPABASE_URL="https://mnwwvpuxrzostrplfgmq.supabase.co";
+const SUPABASE_KEY="sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+const sb=window.VaultForgeAuth&&window.VaultForgeAuth.supabase?window.VaultForgeAuth.supabase:window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+function fmtMoney(v){const n=Number(v);if(!Number.isFinite(n))return "—";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n)}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
+function photosOf(r){
+  const p = r?.photo_urls || r?.image_urls || [];
+  if(Array.isArray(p)) return p.filter(Boolean);
+  try{
+    const parsed = JSON.parse(p);
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  }catch(e){
+    return [];
+  }
+}
+async function getSessionOrRedirect(){
+  if(window.VaultForgeAuth&&window.VaultForgeAuth.requireLogin) return await window.VaultForgeAuth.requireLogin();
+  const r=await sb.auth.getSession();
+  const s=r?.data?.session;
+  if(!s){window.location.href="/member-login.html";return null}
+  return s
+}
+async function logoutNow(){
+  try{if(window.VaultForgeAuth&&window.VaultForgeAuth.logout){await window.VaultForgeAuth.logout();return}}catch(e){}
+  await sb.auth.signOut();
+  window.location.href="/member-login.html"
+}
+</script>
+<style>
+:root{
+  --bg:#050c1a;--bg2:#08142d;--panel:#0c1832;--panel2:#0b1731;--text:#f7f8fc;--muted:#a6b2d1;
+  --line:rgba(255,255,255,.10);--gold:#d6ab4e;--gold2:#f0c96a;--green:#18c37e;--blue:#4f8cff;
+  --danger:#e46372;--shadow:0 30px 90px rgba(0,0,0,.42);--radius:26px
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(214,171,78,.12), transparent 18%),
+    radial-gradient(circle at 88% 12%, rgba(79,140,255,.12), transparent 18%),
+    linear-gradient(180deg,var(--bg),var(--bg2))
+}
+a{text-decoration:none;color:inherit}
+.shell{width:min(1240px,calc(100% - 28px));margin:0 auto}
+.topbar{
+  position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);
+  background:rgba(5,12,26,.80);border-bottom:1px solid rgba(255,255,255,.06)
+}
+.topbar-inner{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+  background:linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),linear-gradient(180deg,#15191f,#0c1018);
+  border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow);color:var(--gold2);font-weight:900;font-size:1.25rem
+}
+.brand-copy strong{display:block;font-size:1.04rem;letter-spacing:.16em;color:var(--gold2)}
+.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;transition:.18s ease
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#2f6bf2);color:#fff}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#b7852d);color:#111}
+.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn-red{background:linear-gradient(135deg,#f16f7d,#d44c5b);color:#fff}
+.card,.panel{
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),linear-gradient(180deg,var(--panel),#091327);
+  box-shadow:var(--shadow);padding:20px
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.hero{padding:24px 0 18px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+.title{margin:0 0 10px;font-size:clamp(2rem,4.6vw,4rem);line-height:.98;letter-spacing:-.05em}
+.copy{color:var(--muted);line-height:1.65}
+.metric{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;background:rgba(255,255,255,.025)}
+.metric strong{display:block;font-size:2rem;margin-bottom:6px}
+.metric span{color:var(--muted)}
+.section{padding:10px 0 24px}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.section-head h3{margin:0;font-size:1.35rem}
+.section-head p{margin:6px 0 0;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 7px}
+select{
+  width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#fff;outline:none
+}
+.status{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}
+.ok{color:#aaf2ce}.err{color:#ffc3cc}
+.cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.listing-card{
+  border:1px solid rgba(255,255,255,.08);border-radius:28px;overflow:hidden;
+  background:linear-gradient(180deg,var(--panel2),#081327);box-shadow:var(--shadow)
+}
+.photo-wrap{
+  position:relative;height:220px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.08)
+}
+.photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-empty{
+  width:100%;height:100%;display:grid;place-items:center;color:var(--muted);
+  background:linear-gradient(135deg,rgba(214,171,78,.08),rgba(79,140,255,.08))
+}
+.photo-count{
+  position:absolute;right:14px;bottom:14px;border-radius:999px;padding:8px 12px;
+  background:rgba(5,12,26,.72);border:1px solid rgba(255,255,255,.12);font-size:.82rem;font-weight:800
+}
+.listing-body{padding:18px}
+.listing-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.listing-title{font-size:1.65rem;font-weight:900;line-height:1.02;letter-spacing:-.04em}
+.listing-price{
+  background:rgba(214,171,78,.16);border:1px solid rgba(214,171,78,.22);color:#f7df9a;
+  padding:12px 16px;border-radius:999px;font-weight:900;white-space:nowrap
+}
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.pill{
+  border-radius:999px;padding:9px 12px;font-size:.86rem;font-weight:800;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#e6eeff
+}
+.meta-line{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.meta-chip{
+  border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.025);
+  color:#d8e2fb;font-size:.9rem;font-weight:700
+}
+.desc{color:#cbd7f4;line-height:1.55;margin:0 0 16px;min-height:48px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.empty{padding:24px;border-radius:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(2,6,14,.76);display:none;align-items:center;justify-content:center;padding:18px;z-index:120}
+.modal.show{display:flex}
+.modal-card{width:min(920px,100%);max-height:92vh;overflow:auto}
+.close{appearance:none;border:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;min-width:46px;height:46px;border-radius:14px;cursor:pointer}
+.modal-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.gallery-grid .photo{border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.03)}
+.gallery-grid .photo img{width:100%;height:180px;object-fit:cover;display:block}
+@media(max-width:980px){
+  .grid2,.grid4,.row2,.cards-grid,.modal-grid{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+  .top-actions{width:100%}
+  .top-actions .btn{flex:1}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">VF</div>
+      <div class="brand-copy">
+        <strong>VAULTFORGE</strong>
+        <span id="memberLine">Checking member session...</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn btn-dark" href="/members.html">Member Dashboard</a>
+      <a class="btn btn-blue" href="/property-create.html">Create Listing</a>
+      <button id="logoutBtn" class="btn btn-dark" type="button">Logout</button>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+  <section class="hero">
+    <div class="grid2">
+      <div class="card">
+        <div class="eyebrow">Listings</div>
+        <h1 class="title">Live property cards.</h1>
+        <p class="copy">Real listings from <strong>property_cards</strong>. Filters, photos, detail view, and owner actions all live here now.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Filters</div>
+        <div class="row2">
+          <div>
+            <label for="stateFilter">State</label>
+            <select id="stateFilter">
+              <option value="All">All</option>
+              <option>Georgia</option>
+              <option>Tennessee</option>
+              <option>Florida</option>
+            </select>
+          </div>
+          <div>
+            <label for="typeFilter">Type</label>
+            <select id="typeFilter">
+              <option value="All">All</option>
+              <option>Residential</option>
+              <option>Commercial</option>
+              <option>Land</option>
+            </select>
+          </div>
+        </div>
+        <div id="cardsStatus" class="status">Ready.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid4" style="margin-bottom:18px">
+      <div class="metric"><strong id="liveCount">0</strong><span>Live Listings</span></div>
+      <div class="metric"><strong id="visibleCount">0</strong><span>Visible Now</span></div>
+      <div class="metric"><strong id="myCount">0</strong><span>My Listings</span></div>
+      <div class="metric"><strong id="photoCount">0</strong><span>Listings With Photos</span></div>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <h3>Listings</h3>
+        <p id="listCountText">Loading...</p>
+      </div>
+    </div>
+    <div id="cardsWrap" class="cards-grid"></div>
+  </section>
+</main>
+
+<div id="viewModal" class="modal">
+  <div class="panel modal-card">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div class="eyebrow">Listing Detail</div>
+        <h3 id="vmTitle" style="margin:0 0 8px;font-size:2rem">Listing</h3>
+        <div id="vmMeta" class="copy"></div>
+      </div>
+      <button class="close" id="closeModal" type="button">×</button>
+    </div>
+
+    <div class="modal-grid">
+      <div>
+        <div id="vmPhotos" class="gallery-grid"></div>
+      </div>
+      <div>
+        <div class="pills" id="vmPills"></div>
+        <div id="vmDesc" class="copy" style="margin-top:6px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let rows=[];
+
+function liveRows(list){
+  return (list||[]).filter(r=>{
+    const st=String(r.status||"").toLowerCase();
+    return !st || st==="active" || st==="approved" || st==="live";
+  });
+}
+function setCardsStatus(msg,cls=""){
+  const el=document.getElementById("cardsStatus");
+  el.className="status "+cls;
+  el.textContent=msg;
+}
+function stateOf(r){return String(r.state||r.property_state||r.location_state||"").trim()}
+function typeOf(r){return String(r.property_type||r.asset_type||r.deal_type||"").trim()}
+function priceOf(r){return r.price ?? r.asking_price ?? r.list_price ?? null}
+function descOf(r){return r.description || r.summary || r.notes || ""}
+function cityOf(r){return r.city || r.market || ""}
+function listingCard(r){
+  const title=r.title||"Untitled Listing";
+  const state=stateOf(r);
+  const type=typeOf(r)||"—";
+  const price=priceOf(r);
+  const desc=descOf(r);
+  const city=cityOf(r);
+  const photos=photosOf(r);
+  const photo=photos[0] || "";
+  const encoded=encodeURIComponent(JSON.stringify({
+    id:r.id,title,state,type,price,desc,city,photos,status:r.status||"Active"
+  }));
+
+  return `
+  <article class="listing-card">
+    <div class="photo-wrap">
+      ${photo ? `<img src="${esc(photo)}" alt="Listing photo">` : `<div class="photo-empty">No Photo Yet</div>`}
+      <div class="photo-count">${photos.length ? photos.length+" photo"+(photos.length===1?"":"s") : "No photos"}</div>
+    </div>
+    <div class="listing-body">
+      <div class="listing-top">
+        <div class="listing-title">${esc(title)}</div>
+        <div class="listing-price">${price!=null ? esc(fmtMoney(price)) : "—"}</div>
+      </div>
+      <div class="pills">
+        <div class="pill">${esc(state||"—")}</div>
+        <div class="pill">${esc(type)}</div>
+        <div class="pill">${esc(r.status||"Active")}</div>
+      </div>
+      <div class="meta-line">
+        <div class="meta-chip">${esc(city||"No city")}</div>
+        <div class="meta-chip">${photos.length ? "Photos ready" : "Photo needed"}</div>
+      </div>
+      <p class="desc">${esc(desc || "No description yet.")}</p>
+      <div class="actions">
+        <button class="btn btn-dark view-btn" data-view="${encoded}" type="button">View</button>
+        <a class="btn btn-dark" href="/property-create.html?edit=${encodeURIComponent(r.id)}">Edit</a>
+        <button class="btn btn-red del-btn" data-id="${esc(r.id)}" type="button">Delete</button>
+      </div>
+    </div>
+  </article>`;
+}
+function render(){
+  const state=document.getElementById("stateFilter").value;
+  const type=document.getElementById("typeFilter").value;
+
+  const live=liveRows(rows);
+  let filtered=live;
+  if(state!=="All") filtered=filtered.filter(r=>stateOf(r)===state);
+  if(type!=="All") filtered=filtered.filter(r=>typeOf(r)===type);
+
+  const mine=live.filter(r=>String(r.user_id||"")===String(window.__vfUserId||""));
+  const withPhotos=live.filter(r=>photosOf(r).length>0);
+
+  document.getElementById("liveCount").textContent=String(live.length);
+  document.getElementById("visibleCount").textContent=String(filtered.length);
+  document.getElementById("myCount").textContent=String(mine.length);
+  document.getElementById("photoCount").textContent=String(withPhotos.length);
+  document.getElementById("listCountText").textContent=`${filtered.length} listing${filtered.length===1?"":"s"} visible in the current view.`;
+
+  document.getElementById("cardsWrap").innerHTML=filtered.length
+    ? filtered.map(r=>listingCard(r)).join("")
+    : `<div class="empty">No listings matched this view.</div>`;
+
+  bindCardActions();
+}
+function bindCardActions(){
+  document.querySelectorAll(".view-btn").forEach(btn=>{
+    btn.onclick=()=>{
+      const data=JSON.parse(decodeURIComponent(btn.getAttribute("data-view")));
+      document.getElementById("vmTitle").textContent=data.title||"Listing";
+      document.getElementById("vmMeta").textContent=[data.city,data.state,data.type,data.price!=null?fmtMoney(data.price):"",data.status].filter(Boolean).join(" • ");
+      document.getElementById("vmDesc").textContent=data.desc||"No description.";
+      document.getElementById("vmPills").innerHTML=[
+        data.state||"—",
+        data.type||"—",
+        data.status||"Active",
+        data.photos&&data.photos.length ? data.photos.length+" photo"+(data.photos.length===1?"":"s") : "No photos"
+      ].map(v=>`<div class="pill">${esc(v)}</div>`).join("");
+      const photos=Array.isArray(data.photos)?data.photos:[];
+      document.getElementById("vmPhotos").innerHTML=photos.length
+        ? photos.map(u=>`<div class="photo"><img src="${esc(u)}" alt="Photo"></div>`).join("")
+        : `<div class="photo"><div class="photo-empty">No Photo Yet</div></div>`;
+      document.getElementById("viewModal").classList.add("show");
+    };
+  });
+
+  document.querySelectorAll(".del-btn").forEach(btn=>{
+    btn.onclick=async()=>{
+      const id=btn.getAttribute("data-id");
+      if(!id || !confirm("Delete this listing?")) return;
+      const resp=await sb.from("property_cards").delete().eq("id",id).eq("user_id",window.__vfUserId);
+      if(resp.error){setCardsStatus(resp.error.message,"err");return}
+      await loadListings();
+    };
+  });
+}
+async function loadListings(){
+  try{
+    setCardsStatus("Loading listings...");
+    const session=await getSessionOrRedirect();
+    if(!session) return;
+    window.__vfUserId=session.user.id;
+    document.getElementById("memberLine").textContent="Logged in as "+(session.user.email||"Member");
+    const resp=await sb.from("property_cards").select("*").order("created_at",{ascending:false}).limit(300);
+    if(resp.error) throw resp.error;
+    rows=resp.data||[];
+    render();
+    setCardsStatus("Listings ready.","ok");
+  }catch(e){
+    setCardsStatus(e.message||"Load failed.","err");
+  }
+}
+document.getElementById("logoutBtn").onclick=logoutNow;
+document.getElementById("closeModal").onclick=()=>document.getElementById("viewModal").classList.remove("show");
+document.getElementById("stateFilter").onchange=render;
+document.getElementById("typeFilter").onchange=render;
+loadListings();
+</script>
+</body>
+</html>
