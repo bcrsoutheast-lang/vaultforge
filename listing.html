@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listing</title>
+<style>
+body{background:#07122a;color:#fff;font-family:Arial;padding:20px;}
+</style>
+</head>
+
+<body>
+
+<h2>Listing Details</h2>
+<div id="data"></div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get("id");
+
+const SUPA = "https://mnwwvpuxrzostrplfgmq.supabase.co/rest/v1/property_cards?id=eq."+id;
+const KEY = "sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ";
+
+async function load(){
+const res = await fetch(SUPA,{
+headers:{
+apikey:KEY,
+Authorization:"Bearer "+KEY
+}
+});
+const data = await res.json();
+
+const d = data[0];
+
+document.getElementById("data").innerHTML=`
+<b>${d.title}</b><br><br>
+State: ${d.state}<br>
+City: ${d.city}<br>
+Price: ${d.price}<br>
+Type: ${d.property_type}<br>
+Status: ${d.status}<br><br>
+
+<button onclick="edit()">Edit</button>
+`;
+
+}
+
+function edit(){
+window.location.href="listing-form.html?edit="+id;
+}
+
+load();
+</script>
+
+</body>
+</html>
