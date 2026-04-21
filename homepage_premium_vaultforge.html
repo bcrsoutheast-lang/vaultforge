@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Premium Off-Market Access</title>
+<style>
+:root{
+  --bg:#030913; --bg2:#071427; --panel:#08172d; --panel2:#0b1f3f;
+  --text:#f6f8ff; --muted:#a7b5d6; --line:rgba(255,255,255,.08);
+  --gold:#d6ab4e; --gold2:#f1cf7b; --blue:#3f76ff; --green:#17c37f;
+  --red:#df6577; --shadow:0 28px 90px rgba(0,0,0,.42); --radius:28px;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0;scroll-behavior:smooth}
+body{
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),
+    radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),
+    radial-gradient(circle at 50% 100%, rgba(23,195,127,.06), transparent 22%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+.shell{max-width:1480px;margin:0 auto;padding:0 16px}
+.topbar{
+  position:sticky;top:0;z-index:70;background:rgba(3,9,19,.72);
+  border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)
+}
+.topbar-inner{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+  background:linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.04));
+  border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow);
+  color:var(--gold2);font-weight:900;font-size:1.22rem
+}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2)}
+.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;
+  transition:.18s ease
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn-green{background:linear-gradient(135deg,var(--green),#10a96d);color:#fff}
+main{position:relative}
+.glow{
+  position:absolute;border-radius:999px;filter:blur(60px);opacity:.55;pointer-events:none;animation:float 8s ease-in-out infinite
+}
+.glow.g1{width:220px;height:220px;background:rgba(214,171,78,.18);top:90px;left:-60px}
+.glow.g2{width:260px;height:260px;background:rgba(63,118,255,.16);top:520px;right:-80px;animation-delay:1.2s}
+.glow.g3{width:180px;height:180px;background:rgba(23,195,127,.12);top:1380px;left:10%}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+.hero{
+  padding:56px 0 24px;display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:stretch
+}
+.panel{
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px
+}
+.hero-left{padding:34px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:14px}
+.hero h1{margin:0 0 16px;font-size:clamp(2.5rem,6vw,5.4rem);line-height:.93;letter-spacing:-.06em}
+.copy{color:var(--muted);line-height:1.7;font-size:1.06rem}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.trust-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.trust{
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;background:rgba(255,255,255,.02)
+}
+.trust strong{display:block;font-size:1.5rem;margin-bottom:6px}
+.hero-right{display:grid;gap:16px}
+.showcase{
+  position:relative;overflow:hidden;min-height:100%;padding:0
+}
+.showcase .inner{padding:24px}
+.live-pill{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+  background:rgba(23,195,127,.14);border:1px solid rgba(23,195,127,.28);color:#c8f9e3;font-weight:800
+}
+.blink{width:8px;height:8px;border-radius:50%;background:#42ffa8;box-shadow:0 0 18px #42ffa8;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{transform:scale(.9);opacity:.8}50%{transform:scale(1.15);opacity:1}}
+.preview-card{
+  margin-top:18px;border:1px solid rgba(255,255,255,.09);border-radius:26px;overflow:hidden;background:#07122a
+}
+.preview-art{
+  height:250px;position:relative;overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.18)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700' viewBox='0 0 1200 700'><defs><linearGradient id='g' x1='0' x2='1'><stop stop-color='%2391b8ff'/><stop offset='1' stop-color='%23487cff'/></linearGradient></defs><rect width='1200' height='700' fill='%2386b5ff'/><rect y='420' width='1200' height='280' fill='%23b57444'/><rect x='200' y='240' width='430' height='230' rx='10' fill='%23ececec'/><rect x='220' y='265' width='390' height='185' fill='%23ffffff'/><rect x='655' y='210' width='300' height='260' rx='8' fill='%23f6f6f6'/><rect x='675' y='230' width='260' height='220' fill='%23fff'/><path d='M180 500 C300 460, 420 470, 560 500 S900 540, 1120 500' stroke='%23d9d9d9' stroke-width='20' fill='none'/><g fill='%232b5b2c'><rect x='970' y='250' width='18' height='170'/><circle cx='980' cy='220' r='45'/><rect x='1030' y='265' width='14' height='150'/><circle cx='1037' cy='245' r='36'/></g></svg>") center/cover no-repeat;
+}
+.price-tag{
+  position:absolute;right:16px;bottom:16px;padding:12px 16px;border-radius:999px;background:rgba(7,14,26,.74);
+  border:1px solid rgba(241,207,123,.18);font-weight:900;color:#f7df9a
+}
+.preview-body{padding:18px 20px 22px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px}
+.pill{
+  padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  font-size:.84rem;font-weight:800
+}
+.pill-live{background:#183c2a;color:#c2f4da}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.section{padding:16px 0 4px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.section-head h2{margin:0;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-.04em}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature-card{
+  border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:22px;background:linear-gradient(180deg,#08172d,#07111f)
+}
+.feature-card h3{margin:0 0 8px}
+.sequence{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.step{
+  position:relative;padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,#08172d,#07111f)
+}
+.num{
+  width:42px;height:42px;border-radius:999px;display:grid;place-items:center;font-weight:900;
+  background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103;margin-bottom:12px
+}
+.deals{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.deal{
+  background:linear-gradient(180deg,#08172d,#06111f);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:var(--shadow)
+}
+.deal-photo{height:230px;position:relative;overflow:hidden}
+.deal-photo.georgia-1{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.28)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='%238bc2ff'/><rect y='465' width='1200' height='235' fill='%23986738'/><rect x='180' y='250' width='420' height='220' rx='12' fill='%23efefef'/><rect x='205' y='275' width='370' height='170' fill='%23ffffff'/><rect x='635' y='235' width='330' height='235' rx='10' fill='%23f4f4f4'/><rect x='655' y='255' width='290' height='195' fill='%23fff'/><path d='M130 510 C280 450 420 455 590 508 S920 560 1110 512' stroke='%23d7d7d7' stroke-width='22' fill='none'/><g fill='%232f6a32'><rect x='1010' y='260' width='16' height='160'/><circle cx='1018' cy='235' r='42'/><rect x='1068' y='285' width='12' height='130'/><circle cx='1074' cy='265' r='30'/></g></svg>") center/cover no-repeat;
+}
+.deal-photo.georgia-2{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.28)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='%238ec3ff'/><rect y='470' width='1200' height='230' fill='%23a36d43'/><rect x='170' y='240' width='500' height='240' rx='12' fill='%23e8e8e8'/><rect x='200' y='270' width='440' height='180' fill='%23fff'/><rect x='760' y='260' width='180' height='210' fill='%23f8f8f8'/><rect x='780' y='280' width='140' height='170' fill='%23ffffff'/><path d='M120 535 C280 495 440 500 620 530 S940 565 1120 530' stroke='%23d4d4d4' stroke-width='18' fill='none'/><g fill='%23315f31'><rect x='1000' y='245' width='18' height='175'/><circle cx='1009' cy='220' r='46'/></g></svg>") center/cover no-repeat;
+}
+.badge{
+  position:absolute;left:14px;top:14px;padding:9px 12px;border-radius:999px;font-size:.78rem;
+  font-weight:900;background:rgba(7,14,26,.74);border:1px solid rgba(241,207,123,.18)
+}
+.deal-body{padding:18px}
+.deal h3{margin:0 0 10px;font-size:1.55rem}
+.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.meta{
+  border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:12px;background:rgba(255,255,255,.02)
+}
+.meta b{display:block;margin-bottom:4px}
+.cta{
+  margin:28px 0 42px;padding:34px;border-radius:30px;border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg, rgba(63,118,255,.22), rgba(214,171,78,.12));
+  box-shadow:var(--shadow)
+}
+.foot{padding:12px 0 40px;color:var(--muted);font-size:.95rem}
+@media(max-width:1100px){
+  .hero,.deals,.feature-grid,.sequence{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+  .trust-row,.grid-3,.metric-grid{grid-template-columns:1fr}
+  .topbar-inner{align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">VF</div>
+      <div class="brand-copy">
+        <strong>VAULTFORGE</strong>
+        <span>Premium off-market access for serious operators</span>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="btn btn-dark" href="#about">About</a>
+      <a class="btn btn-dark" href="#deals">Featured Deals</a>
+      <a class="btn btn-dark" href="#join">How It Works</a>
+      <a class="btn btn-blue" href="/member-login.html">Member Login</a>
+      <a class="btn btn-gold" href="/member-login.html">Apply for Access</a>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="glow g3"></div>
+
+  <div class="shell">
+    <section class="hero">
+      <div class="panel hero-left">
+        <div class="eyebrow">Private Deal Network</div>
+        <h1>Where elite operators find real off-market access.</h1>
+        <div class="copy">
+          VaultForge is built for investors, wholesalers, developers, acquisition teams, and serious capital partners who want more than random listings. We curate premium off-market opportunities, connect real operators, and give approved members a clean, controlled workspace to source, review, and act.
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="/member-login.html">Request Access</a>
+          <a class="btn btn-dark" href="#deals">See Live Deal Style</a>
+          <a class="btn btn-blue" href="/member-login.html">Enter Member Portal</a>
+        </div>
+        <div class="trust-row">
+          <div class="trust"><strong>Premium</strong><span class="copy">Professional deal flow presentation</span></div>
+          <div class="trust"><strong>Private</strong><span class="copy">Controlled access, serious members only</span></div>
+          <div class="trust"><strong>Fast</strong><span class="copy">Review, decide, and move with confidence</span></div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="panel showcase">
+          <div class="inner">
+            <div class="live-pill"><span class="blink"></span> VaultForge live deal preview</div>
+            <div class="preview-card">
+              <div class="preview-art">
+                <div class="price-tag">$1,480,000</div>
+              </div>
+              <div class="preview-body">
+                <div class="eyebrow" style="margin-bottom:8px">Georgia Featured Opportunity</div>
+                <h3 style="margin:0;font-size:1.5rem">Atlanta Value-Add Flex / Warehouse Redevelopment</h3>
+                <div class="pills">
+                  <div class="pill pill-live">Active</div>
+                  <div class="pill">Georgia</div>
+                  <div class="pill">Commercial</div>
+                  <div class="pill">Off Market</div>
+                </div>
+                <div class="copy">
+                  Buy bucket: value-add industrial infill. Exit strategy: lease-up then disposition. Seller motivation: legacy owner with deferred maintenance.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">What VaultForge Is About</div>
+          <h2>Built like a real platform, not a random lead list.</h2>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Curated deal access</h3>
+          <div class="copy">Members do not waste time digging through noise. VaultForge is designed to present opportunities with real structure, investment logic, and professional context.</div>
+        </div>
+        <div class="feature-card">
+          <h3>Serious member network</h3>
+          <div class="copy">This is built for people who actually close: investors, lenders, developers, operators, and acquisition teams who want high-trust access.</div>
+        </div>
+        <div class="feature-card">
+          <h3>Professional command flow</h3>
+          <div class="copy">From application to member access to internal review, the platform is designed to feel like a $100M company, not a hobby project.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="join">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">How Access Works</div>
+          <h2>The sequence from interest to member access.</h2>
+        </div>
+      </div>
+      <div class="sequence">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>Apply</h3>
+          <div class="copy">Prospective members request access and identify who they are, what market they work, and what role they play in deals.</div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3>Review</h3>
+          <div class="copy">VaultForge screens applications to maintain quality, seriousness, and network integrity.</div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3>Enter the member area</h3>
+          <div class="copy">Approved members gain access to the premium member dashboard, live deal cards, private profiles, and direct platform workflow.</div>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <h3>Operate</h3>
+          <div class="copy">Members can review deals, manage listings, submit requests, and operate in a clean premium environment built for real transactions.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="deals">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Featured Georgia Deals</div>
+          <h2>Real-world premium presentation.</h2>
+        </div>
+      </div>
+
+      <div class="deals">
+        <article class="deal">
+          <div class="deal-photo georgia-1">
+            <div class="badge">Atlanta, GA • Commercial</div>
+            <div class="price-tag">$1,480,000</div>
+          </div>
+          <div class="deal-body">
+            <h3>Atlanta Flex / Warehouse Value-Add</h3>
+            <div class="pills">
+              <div class="pill pill-live">Active</div>
+              <div class="pill">Georgia</div>
+              <div class="pill">Commercial</div>
+              <div class="pill">Off Market</div>
+            </div>
+            <div class="copy">
+              A light-industrial / flex asset inside an infill corridor with upside through lease-up, modernization, and repositioning. Strong operator fit for investors seeking cash flow and mark-to-market upside.
+            </div>
+            <div class="meta-grid">
+              <div class="meta"><b>Buy Bucket</b> Infill value-add industrial</div>
+              <div class="meta"><b>Exit Strategy</b> Lease-up then disposition</div>
+              <div class="meta"><b>Seller Motivation</b> Legacy owner / deferred capex</div>
+              <div class="meta"><b>ARV / Exit Value</b> $2,150,000</div>
+              <div class="meta"><b>Rehab Estimate</b> $240,000</div>
+              <div class="meta"><b>Cash Flow / NOI</b> Stabilized NOI target $186,000</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="deal">
+          <div class="deal-photo georgia-2">
+            <div class="badge">Savannah, GA • Mixed Use</div>
+            <div class="price-tag">$865,000</div>
+          </div>
+          <div class="deal-body">
+            <h3>Savannah Mixed-Use Corridor Hold</h3>
+            <div class="pills">
+              <div class="pill pill-live">Active</div>
+              <div class="pill">Georgia</div>
+              <div class="pill">Mixed Use</div>
+              <div class="pill">Income + Upside</div>
+            </div>
+            <div class="copy">
+              Street-front mixed-use opportunity positioned for hold or phased repositioning. Attractive for investors seeking strong corridor visibility, long-term rent growth, and multiple exit options.
+            </div>
+            <div class="meta-grid">
+              <div class="meta"><b>Buy Bucket</b> Income hold / light reposition</div>
+              <div class="meta"><b>Exit Strategy</b> Hold, refinance, or condo split</div>
+              <div class="meta"><b>Seller Motivation</b> Estate transition</div>
+              <div class="meta"><b>ARV / Exit Value</b> $1,240,000</div>
+              <div class="meta"><b>Rent / NOI</b> Pro forma NOI $92,000</div>
+              <div class="meta"><b>Cap Rate / ROI</b> 8.6% target cap</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">Why Serious Investors Join</div>
+          <h2>Important info for real operators.</h2>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Professional deal logic</h3>
+          <div class="copy">Deals should not just have a price. They should communicate buy bucket, seller story, exit path, and the actual reason they matter.</div>
+        </div>
+        <div class="feature-card">
+          <h3>Controlled trust</h3>
+          <div class="copy">A strong network only stays strong when access is reviewed, roles are understood, and the environment feels premium from first click to final action.</div>
+        </div>
+        <div class="feature-card">
+          <h3>Built to scale</h3>
+          <div class="copy">VaultForge is positioned to grow into a serious private platform for acquisitions, capital, operator relationships, and curated deal access.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="section-head" style="margin-bottom:0">
+        <div>
+          <div class="eyebrow">Apply Now</div>
+          <h2 style="margin-bottom:10px">Enter the network before everyone else does.</h2>
+          <div class="copy">If you are an investor, operator, lender, wholesaler, or strategic partner who wants access to premium off-market workflow, VaultForge is built for you.</div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-gold" href="/member-login.html">Request Access</a>
+          <a class="btn btn-dark" href="/member-login.html">Member Login</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">
+      VaultForge • premium off-market access • private member network • serious operator workflow
+    </div>
+  </div>
+</main>
+</body>
+</html>
