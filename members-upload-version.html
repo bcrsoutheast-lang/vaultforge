@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Members</title>
+<meta name="description" content="VaultForge member dashboard with market filters, uploads, opportunity forms, private alerts, listings, matches, and admin-only controls.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<style>
+:root{--bg:#050c1a;--bg2:#08142d;--panel:#0c1832;--text:#f7f8fc;--muted:#a6b2d1;--line:rgba(255,255,255,.10);--gold:#d6ab4e;--gold2:#f0c96a;--green:#18c37e;--blue:#4f8cff;--danger:#e27d7d;--shadow:0 30px 90px rgba(0,0,0,.42);--radius:26px}
+*{box-sizing:border-box} html,body{margin:0;padding:0;scroll-behavior:smooth}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% 8%, rgba(214,171,78,.12), transparent 18%),radial-gradient(circle at 88% 12%, rgba(79,140,255,.12), transparent 18%),radial-gradient(circle at 50% 50%, rgba(214,171,78,.06), transparent 24%),linear-gradient(180deg,var(--bg),var(--bg2))}
+a{text-decoration:none;color:inherit} button,input,textarea,select{font:inherit}
+.shell{width:min(1320px,calc(100% - 28px));margin:0 auto} .hidden{display:none !important}
+.topbar{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);background:rgba(5,12,26,.80);border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand-mark{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(214,171,78,.22), rgba(255,255,255,.06)),linear-gradient(180deg,#15191f,#0c1018);border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow);color:var(--gold2);font-weight:900;font-size:1.25rem;letter-spacing:.06em}
+.brand-copy strong{display:block;font-size:1.04rem;letter-spacing:.16em;color:var(--gold2)}
+.brand-copy span{display:block;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:54vw}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;transition:.18s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#b7852d);color:#111;box-shadow:0 18px 34px rgba(214,171,78,.20)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#2f6bf2);color:#fff;box-shadow:0 16px 30px rgba(79,140,255,.24)}
+.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn-green{background:linear-gradient(135deg,#1dd48a,#10a96d);color:#fff;box-shadow:0 18px 34px rgba(24,195,126,.18)}
+.hero{padding:26px 0 18px}.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.hero-card,.side-card,.alert-card,.project-card,.match-card,.admin-card,.mini-card,.upgrade-card,.filter-card,.modal-card,.upload-card{border:1px solid var(--line);border-radius:var(--radius);background:radial-gradient(circle at top right, rgba(214,171,78,.10), transparent 28%),linear-gradient(180deg,var(--panel),#091327);box-shadow:var(--shadow)}
+.hero-card,.side-card,.alert-card,.project-card,.match-card,.admin-card,.mini-card,.upgrade-card,.filter-card,.upload-card{padding:20px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+.hero-title{margin:0 0 12px;font-size:clamp(2.2rem,5vw,4.4rem);line-height:.96;letter-spacing:-.06em;max-width:12ch}
+.hero-copy{margin:0 0 18px;color:var(--muted);font-size:1.05rem;line-height:1.72;max-width:64ch}
+.hero-actions,.card-actions,.match-actions,.admin-actions,.badge-row,.tag-row,.match-tags,.role-row,.filter-actions,.modal-actions,.upload-actions{display:flex;gap:10px;flex-wrap:wrap}
+.badge,.tag,.match-tag,.role-pill{border-radius:999px;padding:8px 11px;font-size:.8rem;font-weight:800;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:#e6eeff}
+.badge.gold,.role-pill.admin{background:rgba(214,171,78,.12);border-color:rgba(214,171,78,.28);color:#f3d898}
+.badge.green{background:rgba(24,195,126,.12);border-color:rgba(24,195,126,.28);color:#bef4da}
+.badge.blue{background:rgba(79,140,255,.12);border-color:rgba(79,140,255,.28);color:#dce8ff}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.metric{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;background:rgba(255,255,255,.025);display:block;min-height:114px}
+.metric strong{display:block;font-size:1.9rem;margin-bottom:7px}.metric span{display:block;color:var(--muted);line-height:1.35;font-size:.92rem}
+.side-card h2,.alert-card h4,.mini-card h4,.upgrade-card h4,.filter-card h3,.upload-card h3{margin:0 0 8px}.side-card p,.alert-card p,.mini-card p,.project-copy,.match-reasons,.admin-copy,.upgrade-copy,.filter-copy,.upload-copy{margin:0;color:var(--muted);line-height:1.62}
+.section{padding:10px 0 24px}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:18px}.section-head h3{margin:0;font-size:1.38rem;letter-spacing:-.02em}.section-head p{margin:6px 0 0;color:var(--muted);line-height:1.6}
+.alert-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}.alert-count{font-size:2rem;font-weight:900;letter-spacing:-.04em;margin-bottom:10px}
+.projects-grid,.admin-grid,.core-grid,.filters-grid,.upload-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.core-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filters-grid{grid-template-columns:1fr 1fr}.upload-grid{grid-template-columns:1fr 1fr}
+.project-head,.match-head,.admin-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.project-title,.match-title,.admin-title{margin:0;font-size:1.12rem;line-height:1.2}.project-meta,.match-meta,.admin-meta{color:var(--muted);font-size:.92rem;line-height:1.55}
+.score-badge{min-width:88px;text-align:center;border-radius:999px;padding:12px 14px;font-weight:900;font-size:1.02rem;border:1px solid rgba(214,171,78,.18);background:rgba(214,171,78,.12);color:#f7e4b9}
+.action-btn{appearance:none;border:none;cursor:pointer;min-height:44px;padding:10px 15px;border-radius:999px;font-weight:800;letter-spacing:.01em;color:#eef3ff;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 24px rgba(0,0,0,.18);transition:.18s ease}
+.action-btn:hover{transform:translateY(-1px)} .action-btn.view{background:linear-gradient(135deg,rgba(79,140,255,.22),rgba(44,89,194,.18));border-color:rgba(79,140,255,.36)}
+.action-btn.green{background:linear-gradient(135deg,rgba(24,195,126,.22),rgba(24,195,126,.10));border-color:rgba(24,195,126,.35);color:#cdf8e1}
+.action-btn.gold{background:linear-gradient(135deg,rgba(214,171,78,.22),rgba(214,171,78,.10));border-color:rgba(214,171,78,.35);color:#f3ddab}
+.action-btn.red{background:linear-gradient(135deg,rgba(226,125,125,.22),rgba(226,125,125,.10));border-color:rgba(226,125,125,.35);color:#ffd4d4}
+.action-btn.active-interested{background:linear-gradient(135deg,rgba(24,195,126,.22),rgba(24,195,126,.10));border-color:rgba(24,195,126,.35);color:#cdf8e1}
+.action-btn.active-passed{background:linear-gradient(135deg,rgba(226,125,125,.22),rgba(226,125,125,.10));border-color:rgba(226,125,125,.35);color:#ffd4d4}
+.action-btn.active-contacted{background:linear-gradient(135deg,rgba(214,171,78,.22),rgba(214,171,78,.12));border-color:rgba(214,171,78,.32);color:#f7e4b9}
+.filter-pill,.type-pill{appearance:none;border:none;cursor:pointer;min-height:50px;padding:12px 16px;border-radius:999px;font-weight:800;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:#eef3ff;transition:.18s ease}
+.filter-pill.active,.type-pill.active{background:linear-gradient(135deg,rgba(79,140,255,.25),rgba(47,107,242,.16));border-color:rgba(79,140,255,.45)}
+.filter-pill:hover,.type-pill:hover{transform:translateY(-1px)}
+.deal-details{margin-top:16px;padding:16px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.empty-box{border:1px dashed rgba(255,255,255,.12);border-radius:20px;padding:22px;color:var(--muted);background:rgba(255,255,255,.02)}
+.statusbar{margin-top:12px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}
+.statusbar.success{color:#aaf2ce}.statusbar.error{color:#ffc3cc}
+.field-grid-2,.field-grid-3{display:grid;gap:12px}.field-grid-2{grid-template-columns:1fr 1fr}.field-grid-3{grid-template-columns:1fr 1fr 1fr}
+label{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 7px;font-weight:700}
+input,select,textarea{width:100%;padding:14px 15px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#fff;outline:none;appearance:none}
+input[type="file"]{padding:10px 12px}
+textarea{min-height:110px;resize:vertical}
+.profile-photo-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.profile-photo{width:96px;height:96px;border-radius:24px;object-fit:cover;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12)}
+.file-note{font-size:.9rem;color:var(--muted);line-height:1.55}
+.price{font-size:2.2rem;font-weight:900;letter-spacing:-.04em;margin:8px 0}.small{font-size:.92rem;color:var(--muted)}.footer-space{height:42px}
+.modal{position:fixed;inset:0;background:rgba(2,6,14,.72);display:flex;align-items:center;justify-content:center;padding:18px;z-index:120}
+.modal-card{width:min(940px,100%);max-height:92vh;overflow:auto;padding:22px}
+.modal-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}
+.modal-title{margin:0;font-size:1.4rem}
+.close-btn{appearance:none;border:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;min-width:46px;height:46px;border-radius:14px;cursor:pointer}
+@media(max-width:1220px){.alert-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1040px){.hero-grid,.projects-grid,.admin-grid,.core-grid,.filters-grid,.upload-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.topbar-inner{flex-direction:column;align-items:flex-start}.top-actions{width:100%}.top-actions .btn{flex:1}.alert-grid,.metrics,.field-grid-2,.field-grid-3{grid-template-columns:1fr}.section-head{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="shell topbar-inner"><div class="brand"><div class="brand-mark">VF</div><div class="brand-copy"><strong>VAULTFORGE</strong><span id="memberLine">Checking member session...</span></div></div><div class="top-actions"><a class="btn btn-dark" href="/property-cards.html">Listings</a><a class="btn btn-dark" href="/pain.html">Pain AI</a><a class="btn btn-gold" href="/member-profile.html">My Profile</a><a id="adminNavBtn" class="btn btn-dark hidden" href="#adminSection">Admin Console</a><button id="logoutBtn" class="btn btn-blue" type="button">Logout</button></div></div></div>
+
+<main class="shell">
+<section class="hero"><div class="hero-grid"><div class="hero-card"><div class="eyebrow">Private Network • Role-Based Access</div><h1 class="hero-title">VaultForge command center.</h1><p class="hero-copy">Use market filters, click opportunity type, and open the right popup form for Residential, Commercial, or Land. This version adds submit locking and real file upload fields.</p><div class="badge-row"><div class="badge green">Session verified</div><div class="badge gold" id="membershipBadge">Founding path active</div><div class="badge blue" id="profileBadge">Profile loading</div></div><div class="hero-actions"><a class="btn btn-blue" href="/pain.html">Open Pain AI</a><a class="btn btn-dark" href="/property-create.html">Create Listing</a><a class="btn btn-dark" href="/member-profile.html">Update Profile</a></div><div class="metrics"><a class="metric" href="/member-profile.html"><strong id="metricProfile">—</strong><span>Profile status</span></a><a class="metric" href="#dealInbox"><strong id="metricMatchCount">0</strong><span>Pain matches</span></a><a class="metric" href="#myPainProjects"><strong id="metricPainCount">0</strong><span>My pain projects</span></a><a class="metric" href="#recommendedListings"><strong id="metricListingCount">0</strong><span>Listing alerts</span></a></div></div><div class="side-card"><div class="role-row" id="roleRow"><div class="role-pill">Member</div></div><h2>Built for what is live now and what is next.</h2><p id="profileSummaryCopy">Loading your profile, role tags, and match readiness...</p></div></div></section>
+
+<section class="section" id="uploadsSection">
+  <div class="upload-grid">
+    <div class="upload-card">
+      <div class="eyebrow">Profile Upload</div>
+      <h3>Upload profile photo</h3>
+      <p class="upload-copy" style="margin-bottom:14px;">Add a profile image here without leaving the member area. This saves a public image URL into your member profile record.</p>
+      <div class="profile-photo-wrap">
+        <img id="profilePhotoPreview" class="profile-photo" alt="Profile photo preview">
+        <div style="flex:1;min-width:220px;">
+          <label for="profilePhotoInput">Choose image</label>
+          <input id="profilePhotoInput" type="file" accept="image/*">
+          <div class="upload-actions" style="margin-top:12px;">
+            <button class="btn btn-green" id="uploadProfilePhotoBtn" type="button">Upload Profile Photo</button>
+          </div>
+          <div class="file-note">Requires a public Supabase Storage bucket named <strong>vaultforge-media</strong>. If your bucket has a different name, change it in the file constant.</div>
+        </div>
+      </div>
+    </div>
+    <div class="upload-card">
+      <div class="eyebrow">Market Focus</div>
+      <h3>Choose state + opportunity type</h3>
+      <p class="upload-copy" style="margin-bottom:14px;">Filter your dashboard by market, then open the right popup form. Opportunity forms now include real file inputs and safer save behavior.</p>
+      <div class="filter-actions">
+        <button class="filter-pill active" data-state="All" type="button">All Markets</button>
+        <button class="filter-pill" data-state="Georgia" type="button">Georgia</button>
+        <button class="filter-pill" data-state="Tennessee" type="button">Tennessee</button>
+        <button class="filter-pill" data-state="Florida" type="button">Florida</button>
+      </div>
+      <div class="filter-actions" style="margin-top:12px;">
+        <button class="type-pill" data-type="Residential" type="button">Residential</button>
+        <button class="type-pill" data-type="Commercial" type="button">Commercial</button>
+        <button class="type-pill" data-type="Land" type="button">Land</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="recommendedListings"><div class="section-head"><div><h3>Recommended Listings</h3><p>Recent listings based on your current match profile and selected market.</p></div><a class="btn btn-dark" href="/property-cards.html">Browse All Listings</a></div><div id="listingsWrap" class="projects-grid"></div></section>
+
+<section id="dealInbox" class="section"><div class="section-head"><div><h3>Deal Inbox</h3><p>Matched opportunities routed to you by VaultForge.</p></div><a class="btn btn-dark" href="/member-profile.html">Improve Match Profile</a></div><div id="matchesWrap"></div></section>
+
+<section id="myPainProjects" class="section"><div class="section-head"><div><h3>My Pain Projects</h3><p>Your submitted pain opportunities and actions.</p></div><a class="btn btn-blue" href="/pain.html">Create New Pain Project</a></div><div id="painProjectsWrap" class="projects-grid"></div></section>
+
+<section id="adminSection" class="section hidden"><div class="section-head"><div><h3>Admin Console</h3><p>Only admins should ever see this.</p></div><div class="badge gold">Admin only</div></div><div class="metrics" style="margin-top:0;"><div class="metric"><strong id="adminMembersCount">0</strong><span>Total member profiles</span></div><div class="metric"><strong id="adminPainCount">0</strong><span>Total pain projects</span></div><div class="metric"><strong id="adminListingsCount">0</strong><span>Total listings</span></div><div class="metric"><strong id="adminMatchesCount">0</strong><span>Total pain matches</span></div></div><div class="admin-grid" style="margin-top:16px;"><div class="admin-card"><div class="admin-head"><div><h4 class="admin-title">Recent Member Profiles</h4><div class="admin-meta">Delete profile rows only.</div></div></div><div id="adminProfilesWrap"></div></div><div class="admin-card"><div class="admin-head"><div><h4 class="admin-title">Recent Pain Projects</h4><div class="admin-meta">Approve, deny, or delete.</div></div></div><div id="adminPainWrap"></div></div><div class="admin-card"><div class="admin-head"><div><h4 class="admin-title">Recent Listings</h4><div class="admin-meta">Approve, deny, or delete.</div></div></div><div id="adminListingsWrap"></div></div></div></section>
+
+<section class="section" id="roadmapSection"><div class="statusbar" id="statusBar">Ready.</div></section><div class="footer-space"></div></main>
+
+<div id="opportunityModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow" id="modalEyebrow">Opportunity Form</div>
+        <h3 class="modal-title" id="modalTitle">Create Opportunity</h3>
+        <p class="hero-copy" id="modalCopy" style="margin:8px 0 0;max-width:none;">Complete the right form for the deal type you selected.</p>
+      </div>
+      <button class="close-btn" id="closeModalBtn" type="button">×</button>
+    </div>
+    <form id="opportunityForm">
+      <input type="hidden" id="opp_type">
+      <div class="field-grid-2" style="margin-bottom:12px;">
+        <div><label for="opp_address">Address</label><input id="opp_address" placeholder="123 Main St"></div>
+        <div><label for="opp_city">City</label><input id="opp_city" placeholder="Atlanta"></div>
+      </div>
+      <div class="field-grid-2" style="margin-bottom:12px;">
+        <div>
+          <label for="opp_state">State</label>
+          <select id="opp_state">
+            <option value="">Select</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Tennessee">Tennessee</option>
+            <option value="Florida">Florida</option>
+          </select>
+        </div>
+        <div><label for="opp_price">Asking Price</label><input id="opp_price" type="number" min="0" placeholder="250000"></div>
+      </div>
+
+      <div id="residentialFields" class="hidden">
+        <div class="field-grid-3" style="margin-bottom:12px;">
+          <div><label for="res_beds">Beds</label><input id="res_beds" type="number" min="0" placeholder="3"></div>
+          <div><label for="res_baths">Baths</label><input id="res_baths" type="number" min="0" step="0.5" placeholder="2"></div>
+          <div><label for="res_sqft">Sqft</label><input id="res_sqft" type="number" min="0" placeholder="1800"></div>
+        </div>
+        <div class="field-grid-2" style="margin-bottom:12px;">
+          <div><label for="res_arv">ARV</label><input id="res_arv" type="number" min="0" placeholder="425000"></div>
+          <div><label for="res_rehab">Rehab</label><input id="res_rehab" type="number" min="0" placeholder="45000"></div>
+        </div>
+      </div>
+
+      <div id="commercialFields" class="hidden">
+        <div class="field-grid-2" style="margin-bottom:12px;">
+          <div><label for="com_asset_type">Asset Type</label><input id="com_asset_type" placeholder="Retail / Office / Multifamily"></div>
+          <div><label for="com_units">Units</label><input id="com_units" type="number" min="0" placeholder="12"></div>
+        </div>
+        <div class="field-grid-3" style="margin-bottom:12px;">
+          <div><label for="com_noi">NOI</label><input id="com_noi" type="number" min="0" placeholder="120000"></div>
+          <div><label for="com_cap_rate">Cap Rate</label><input id="com_cap_rate" type="number" min="0" step="0.01" placeholder="7.25"></div>
+          <div><label for="com_occupancy">Occupancy %</label><input id="com_occupancy" type="number" min="0" max="100" placeholder="92"></div>
+        </div>
+      </div>
+
+      <div id="landFields" class="hidden">
+        <div class="field-grid-3" style="margin-bottom:12px;">
+          <div><label for="land_acres">Acres</label><input id="land_acres" type="number" min="0" step="0.01" placeholder="6.5"></div>
+          <div><label for="land_zoning">Zoning</label><input id="land_zoning" placeholder="R-3 / Mixed Use"></div>
+          <div><label for="land_access">Road Access</label><input id="land_access" placeholder="Paved / Gravel / None"></div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label for="land_utilities">Utilities</label>
+          <input id="land_utilities" placeholder="Water / Sewer / Power / Septic">
+        </div>
+      </div>
+
+      <div class="field-grid-2" style="margin-bottom:12px;">
+        <div>
+          <label for="opp_distress">Distress</label>
+          <select id="opp_distress">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+        <div>
+          <label for="opp_images">Opportunity Images</label>
+          <input id="opp_images" type="file" accept="image/*" multiple>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label for="opp_notes">Notes</label>
+        <textarea id="opp_notes" placeholder="Key details, issues, upside, timing, and what you need."></textarea>
+      </div>
+
+      <div class="file-note" style="margin-bottom:12px;">Uploads require a public Supabase Storage bucket named <strong>vaultforge-media</strong>. If your bucket name is different, change the constant in this file.</div>
+
+      <div class="modal-actions">
+        <button class="btn btn-green" id="saveOpportunityBtn" type="submit">Save Opportunity</button>
+        <button class="btn btn-dark" id="cancelOpportunityBtn" type="button">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+const SUPABASE_URL='https://mnwwvpuxrzostrplfgmq.supabase.co',SUPABASE_KEY='sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ';
+const STORAGE_BUCKET='vaultforge-media';
+const supabase=window.VaultForgeAuth&&window.VaultForgeAuth.supabase?window.VaultForgeAuth.supabase:window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let adminMode=false;
+let currentStateFilter='All';
+let allListings=[],allMatches=[],allPainProjects=[],currentUserId=null,currentProfile=null,currentPrefs=null;
+let isSavingOpportunity=false,isUploadingProfilePhoto=false;
+
+function setStatus(msg,kind=''){const el=document.getElementById('statusBar');el.textContent=msg;el.className='statusbar';if(kind)el.classList.add(kind)}
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function fmtMoney(v){const n=Number(v);if(!Number.isFinite(n))return '—';return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n)}
+function fmtDate(v){if(!v)return 'Unknown date';const d=new Date(v);if(Number.isNaN(d.getTime()))return 'Unknown date';return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
+function getProfileStates(prefs){if(Array.isArray(prefs?.target_states))return prefs.target_states.filter(Boolean);return []}
+function getRoleTags(profile,prefs){const tags=[];const push=v=>{const t=String(v||'').trim();if(t&&!tags.includes(t))tags.push(t)};['primary_role','role','account_type','member_type','title'].forEach(k=>profile&&profile[k]&&push(profile[k]));['role_types','roles'].forEach(k=>{const arr=(profile&&profile[k])||(prefs&&prefs[k]);if(Array.isArray(arr))arr.forEach(push)});if(!tags.length)push('Member');return tags.slice(0,6)}
+function profilePillText(profile,prefs){if(!profile&&!prefs)return{metric:'Start',copy:'Your member profile is not set yet.'};const hasStates=getProfileStates(prefs).length||(profile&&profile.primary_market?1:0);const hasRoles=getRoleTags(profile,prefs).length;return hasStates&&hasRoles?{metric:'Ready',copy:'Your match profile is active.'}:{metric:'Partial',copy:'Your profile is started but not fully match-ready yet.'}}
+function cleanDescription(text){const raw=String(text||'').trim();if(!raw)return 'No additional description available.';const marker='Structured Details:';return raw.includes(marker)?(raw.split(marker)[0].trim()||'No narrative description provided.'):raw}
+function detailPills(details){if(!details||typeof details!=='object')return '';const entries=Object.entries(details).filter(([,v])=>v!==null&&v!==''&&v!==undefined).slice(0,8);if(!entries.length)return '';return '<div class="tag-row" style="margin:0 0 12px;">'+entries.map(([k,v])=>'<div class="tag">'+esc(k.replaceAll('_',' ')+': '+v)+'</div>').join('')+'</div>'}
+function setTopProfile(profile,prefs){
+  const summary=profilePillText(profile,prefs);
+  document.getElementById('metricProfile').textContent=summary.metric;
+  document.getElementById('profileBadge').textContent='Profile '+summary.metric;
+  document.getElementById('profileSummaryCopy').textContent=summary.copy;
+  const roles=getRoleTags(profile,prefs);
+  const roleRow=document.getElementById('roleRow');
+  roleRow.innerHTML=roles.map(role=>'<div class="'+(String(role).toLowerCase()==='admin'?'role-pill admin':'role-pill')+'">'+esc(role)+'</div>').join('');
+  if(adminMode){roleRow.innerHTML+='<div class="role-pill admin">Admin Access</div>';document.getElementById('adminNavBtn').classList.remove('hidden')}else{document.getElementById('adminNavBtn').classList.add('hidden')}
+  const preview = document.getElementById('profilePhotoPreview');
+  preview.src = (profile && profile.avatar_url) ? profile.avatar_url : 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="100%" height="100%" rx="24" fill="#14213a"/><text x="50%" y="54%" fill="#d6ab4e" font-family="Arial" font-size="30" text-anchor="middle">VF</text></svg>');
+}
+async function deleteById(table,id,label){const {error}=await supabase.from(table).delete().eq('id',id);if(error) throw new Error(label+': '+error.message)}
+async function maybeDeleteListingByPainProjectId(painProjectId){if(!painProjectId) return {deleted:false};const result=await supabase.from('property_cards').delete().eq('pain_project_id',painProjectId).select('id');if(result.error){return {deleted:false,error:result.error.message}}return {deleted:Array.isArray(result.data)&&result.data.length>0,count:(result.data||[]).length}}
+function stateMatches(row){if(currentStateFilter==='All') return true;const state=String(row.state||row.property_state||row.location_state||row.city||row.pain_projects?.state||'').toLowerCase();return state.includes(currentStateFilter.toLowerCase())}
+function applyStateFilterButtons(){document.querySelectorAll('.filter-pill[data-state]').forEach(btn=>{btn.classList.toggle('active',btn.getAttribute('data-state')===currentStateFilter)})}
+function renderListings(rows){
+  const wrap=document.getElementById('listingsWrap');
+  const filtered=(rows||[]).filter(stateMatches);
+  document.getElementById('metricListingCount').textContent=String(filtered.length);
+  if(!filtered.length){wrap.innerHTML='<div class="empty-box">No listing alerts for this market yet.</div>';return}
+  wrap.innerHTML=filtered.slice(0,6).map(row=>{
+    const state=row.state||row.property_state||row.location_state||'—';
+    const title=row.title||row.property_title||row.name||'Listing';
+    const type=row.property_type||row.asset_type||row.deal_type||'—';
+    const price=row.asking_price??row.price??row.list_price??null;
+    const description=cleanDescription(row.description||row.notes||row.summary||'');
+    return `<article class="project-card"><div class="project-head"><div><h4 class="project-title">${esc(title)}</h4><div class="project-meta">Updated ${esc(fmtDate(row.created_at||row.updated_at))}</div></div><div class="score-badge">${esc(price!=null?fmtMoney(price):'—')}</div></div><div class="tag-row" style="margin-bottom:12px;"><div class="tag">${esc(state)}</div><div class="tag">${esc(type)}</div></div><div class="project-copy">${esc(description)}</div></article>`;
+  }).join('')
+}
+function renderPainProjects(rows){
+  const wrap=document.getElementById('painProjectsWrap');
+  const filtered=(rows||[]).filter(stateMatches);
+  document.getElementById('metricPainCount').textContent=String(filtered.length);
+  if(!filtered.length){wrap.innerHTML='<div class="empty-box">No pain projects for this market yet.</div>';return}
+  wrap.innerHTML=filtered.map(row=>`<article class="project-card"><div class="project-head"><div><h4 class="project-title">${esc(row.title||'Untitled Pain Project')}</h4><div class="project-meta">Created ${esc(fmtDate(row.created_at))}</div></div><div class="score-badge">${esc(row.price!=null?fmtMoney(row.price):'—')}</div></div><div class="tag-row" style="margin-bottom:12px;"><div class="tag">${esc(row.state||'—')}</div><div class="tag">${esc(row.property_type||'—')}</div><div class="tag">${esc(row.strategy||'—')}</div></div><div class="project-copy">${esc(cleanDescription(row.pain_text||row.description||''))}</div><div class="card-actions"><button class="action-btn red delete-own-project-btn" type="button" data-id="${esc(row.id)}">Delete Project</button></div></article>`).join('');
+  document.querySelectorAll('.delete-own-project-btn').forEach(btn=>btn.addEventListener('click',async function(){const id=btn.getAttribute('data-id');if(!id)return;if(!confirm('Delete this pain project?'))return;try{setStatus('Deleting project...');await deleteById('pain_projects',id,'Delete project failed');setStatus('Project deleted.','success');await boot()}catch(err){setStatus(err.message||'Could not delete project.','error')}}))
+}
+function renderMatches(rows){
+  const wrap=document.getElementById('matchesWrap');
+  const filtered=(rows||[]).filter(stateMatches);
+  document.getElementById('metricMatchCount').textContent=String(filtered.length);
+  if(!filtered.length){wrap.innerHTML='<div class="empty-box">No matches for this market yet.</div>';return}
+  const grouped={new:[],interested:[],contacted:[],passed:[]};
+  filtered.forEach(row=>{const status=String(row.status||'new').toLowerCase();(grouped[status]||grouped.new).push(row)});
+  function cardHtml(row){
+    const p=row.pain_projects||{};
+    const reasons=Array.isArray(row.match_reasons)?row.match_reasons.slice(0,4).join(' • '):'';
+    const status=String(row.status||'new').toLowerCase();
+    const detailId='deal-details-'+String(row.id);
+    const description=cleanDescription(p.pain_text||p.description||'');
+    return `<article class="match-card"><div class="match-head"><div><h4 class="match-title">${esc(p.title||'Matched Opportunity')}</h4><div class="match-meta">Matched ${esc(fmtDate(row.created_at))}</div></div><div class="score-badge">${esc(String(row.match_score||0))}</div></div><div class="match-tags" style="margin-bottom:12px;"><div class="match-tag">${esc(p.state||'—')}</div><div class="match-tag">${esc(p.property_type||'—')}</div><div class="match-tag">${esc(p.strategy||'—')}</div><div class="match-tag">${esc(p.price!=null?fmtMoney(p.price):'—')}</div></div><div class="match-reasons">${esc(reasons||'New match')}</div><div class="match-actions"><button class="action-btn view view-btn" type="button" data-detail-id="${esc(detailId)}">View Deal</button><button class="action-btn ${status==='interested'?'active-interested':''}" type="button" data-match-id="${esc(row.id)}" data-status="interested">Interested</button><button class="action-btn red ${status==='passed'?'active-passed':''}" type="button" data-match-id="${esc(row.id)}" data-status="passed" data-pain-project-id="${esc(row.pain_project_id||p.id||'')}">Pass + Delete Listing</button><button class="action-btn ${status==='contacted'?'active-contacted':''}" type="button" data-match-id="${esc(row.id)}" data-status="contacted">Contact Seller</button></div><div id="${esc(detailId)}" class="deal-details hidden"><h5 style="margin:0 0 10px;">Deal Details</h5>${detailPills(p.details_json)}<div class="project-copy">${esc(description)}</div></div></article>`
+  }
+  function sectionHtml(title,key){const items=grouped[key]||[];if(!items.length)return '';return `<div style="margin-bottom:20px;"><h4 style="margin:0 0 12px;font-size:1.02rem;color:#dce8ff;">${title}</h4><div class="projects-grid">${items.map(cardHtml).join('')}</div></div>`}
+  wrap.innerHTML=sectionHtml('New Matches','new')+sectionHtml('Interested','interested')+sectionHtml('Contacted','contacted')+sectionHtml('Passed','passed');
+  document.querySelectorAll('.view-btn[data-detail-id]').forEach(btn=>btn.addEventListener('click',function(){const panel=document.getElementById(btn.getAttribute('data-detail-id'));if(!panel)return;const isHidden=panel.classList.contains('hidden');panel.classList.toggle('hidden',!isHidden);btn.textContent=isHidden?'Hide Deal':'View Deal'}));
+  document.querySelectorAll('.action-btn[data-match-id]').forEach(btn=>btn.addEventListener('click',async function(){const matchId=btn.getAttribute('data-match-id'),status=btn.getAttribute('data-status');if(!matchId||!status)return;try{if(status==='passed'){if(!confirm('Mark passed and delete linked listing if one exists?'))return;setStatus('Passing match and deleting linked listing...');const painProjectId=btn.getAttribute('data-pain-project-id')||'';const upd=await supabase.from('pain_matches').update({status:'passed'}).eq('id',matchId);if(upd.error)throw new Error(upd.error.message);const delResult=await maybeDeleteListingByPainProjectId(painProjectId);if(delResult.error){setStatus('Match passed. Listing delete skipped: '+delResult.error,'error')}else if(delResult.deleted){setStatus('Match passed and linked listing deleted.','success')}else{setStatus('Match passed. No linked listing found to delete.','success')}await boot();return}setStatus('Updating match status...');const upd=await supabase.from('pain_matches').update({status:status}).eq('id',matchId);if(upd.error)throw new Error(upd.error.message);setStatus('Match status updated.','success');await boot()}catch(err){setStatus(err.message||'Match status update failed.','error')}}))
+}
+function renderAdminProfiles(rows){const wrap=document.getElementById('adminProfilesWrap');if(!rows.length){wrap.innerHTML='<div class="empty-box">No member profiles found.</div>';return}wrap.innerHTML=rows.map(row=>`<div class="mini-card" style="margin-bottom:12px;"><div class="admin-title" style="margin-bottom:6px;">${esc(row.full_name||'Member')}</div><div class="admin-copy">${esc(row.company_name||row.user_id||row.id||'')}</div><div class="admin-actions"><button class="action-btn red delete-profile-btn" type="button" data-id="${esc(row.id)}">Delete Profile</button></div></div>`).join('');document.querySelectorAll('.delete-profile-btn').forEach(btn=>btn.addEventListener('click',async function(){const id=btn.getAttribute('data-id');if(!id)return;if(!confirm('Delete this member profile row?'))return;try{setStatus('Deleting profile record...');await deleteById('member_profiles',id,'Delete profile failed');setStatus('Profile record deleted.','success');await loadAdmin()}catch(err){setStatus(err.message||'Could not delete profile record.','error')}}))}
+function renderAdminPain(rows){const wrap=document.getElementById('adminPainWrap');if(!rows.length){wrap.innerHTML='<div class="empty-box">No pain projects found.</div>';return}wrap.innerHTML=rows.map(row=>`<div class="mini-card" style="margin-bottom:12px;"><div class="admin-title" style="margin-bottom:6px;">${esc(row.title||'Pain Project')}</div><div class="admin-copy">${esc((row.state||'—')+' • '+(row.property_type||'—'))}</div><div class="admin-actions"><button class="action-btn green admin-pain-status-btn" type="button" data-id="${esc(row.id)}" data-status="approved">Approve</button><button class="action-btn gold admin-pain-status-btn" type="button" data-id="${esc(row.id)}" data-status="denied">Deny</button><button class="action-btn red admin-delete-pain-btn" type="button" data-id="${esc(row.id)}">Delete</button></div></div>`).join('');document.querySelectorAll('.admin-pain-status-btn').forEach(btn=>btn.addEventListener('click',async function(){const id=btn.getAttribute('data-id'),status=btn.getAttribute('data-status');try{setStatus('Updating pain project status...');const res=await supabase.from('pain_projects').update({status:status}).eq('id',id);if(res.error)throw new Error(res.error.message);setStatus('Pain project status updated.','success');await loadAdmin()}catch(err){setStatus(err.message||'Could not update pain project status.','error')}}));document.querySelectorAll('.admin-delete-pain-btn').forEach(btn=>btn.addEventListener('click',async function(){const id=btn.getAttribute('data-id');if(!confirm('Delete this pain project?'))return;try{setStatus('Deleting pain project...');await deleteById('pain_projects',id,'Delete pain project failed');setStatus('Pain project deleted.','success');await Promise.all([loadAdmin(),boot()])}catch(err){setStatus(err.message||'Could not delete pain project.','error')}}))}
+function renderAdminListings(rows){const wrap=document.getElementById('adminListingsWrap');if(!rows.length){wrap.innerHTML='<div class="empty-box">No listings found.</div>';return}wrap.innerHTML=rows.map(row=>`<div class="mini-card" style="margin-bottom:12px;"><div class="admin-title" style="margin-bottom:6px;">${esc(row.title||row.property_title||row.name||'Listing')}</div><div class="admin-copy">${esc((row.state||row.property_state||'—')+' • '+(row.property_type||row.asset_type||'—'))}</div><div class="admin-actions"><button class="action-btn green admin-listing-status-btn" type="button" data-id="${esc(row.id)}" data-status="approved">Approve</button><button class="action-btn gold admin-listing-status-btn" type="button" data-id="${esc(row.id)}" data-status="denied">Deny</button><button class="action-btn red admin-delete-listing-btn" type="button" data-id="${esc(row.id)}">Delete</button></div></div>`).join('');document.querySelectorAll('.admin-listing-status-btn').forEach(btn=>btn.addEventListener('click',async function(){const id=btn.getAttribute('data-id'),status=btn.getAttribute('data-status');try{setStatus('Updating listing status...');const res=await supabase.from('property_cards').update({status:status}).eq('id',id);if(res.error)throw new Error(res.error.message);setStatus('Listing status updated.','success');await loadAdmin()}catch(err){setStatus(err.message||'Could not update listing status.','error')}}));document.querySelectorAll('.admin-delete-listing-btn').forEach(btn=>btn.addEventListener('click',async function(){const id=btn.getAttribute('data-id');if(!confirm('Delete this listing?'))return;try{setStatus('Deleting listing...');await deleteById('property_cards',id,'Delete listing failed');setStatus('Listing deleted.','success');await Promise.all([loadAdmin(),boot()])}catch(err){setStatus(err.message||'Could not delete listing.','error')}}))}
+async function loadAdmin(){if(!adminMode)return;document.getElementById('adminSection').classList.remove('hidden');try{const [profiles,painRows,listingRows,matchesRows]=await Promise.all([supabase.from('member_profiles').select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(6),supabase.from('pain_projects').select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(6),supabase.from('property_cards').select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(6),supabase.from('pain_matches').select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(6)]);if(profiles.error)throw new Error(profiles.error.message);if(painRows.error)throw new Error(painRows.error.message);if(listingRows.error)throw new Error(listingRows.error.message);if(matchesRows.error)throw new Error(matchesRows.error.message);document.getElementById('adminMembersCount').textContent=String(profiles.count||0);document.getElementById('adminPainCount').textContent=String(painRows.count||0);document.getElementById('adminListingsCount').textContent=String(listingRows.count||0);document.getElementById('adminMatchesCount').textContent=String(matchesRows.count||0);renderAdminProfiles(profiles.data||[]);renderAdminPain(painRows.data||[]);renderAdminListings(listingRows.data||[])}catch(err){setStatus(err.message||'Admin data failed to load.','error')}}
+async function detectAdmin(){if(window.VaultForgeAuth&&typeof window.VaultForgeAuth.isAdmin==='function'){try{return await window.VaultForgeAuth.isAdmin()}catch(e){}}return false}
+function applyFilters(){applyStateFilterButtons();renderListings(allListings);renderPainProjects(allPainProjects);renderMatches(allMatches)}
+function syncStateSelect(){const sel=document.getElementById('opp_state');if(currentStateFilter!=='All') sel.value=currentStateFilter}
+function openOpportunityModal(type){
+  document.getElementById('opportunityModal').classList.remove('hidden');
+  document.getElementById('opp_type').value=type;
+  document.getElementById('modalEyebrow').textContent='Create '+type+' Opportunity';
+  document.getElementById('modalTitle').textContent=type+' Opportunity Form';
+  document.getElementById('modalCopy').textContent='Complete the '+type.toLowerCase()+' form with the right fields and save it to your pain projects.';
+  document.getElementById('residentialFields').classList.toggle('hidden',type!=='Residential');
+  document.getElementById('commercialFields').classList.toggle('hidden',type!=='Commercial');
+  document.getElementById('landFields').classList.toggle('hidden',type!=='Land');
+  syncStateSelect();
+}
+function closeOpportunityModal(){document.getElementById('opportunityModal').classList.add('hidden')}
+function collectOpportunityDetails(type){
+  if(type==='Residential'){
+    return {beds:document.getElementById('res_beds').value||null,baths:document.getElementById('res_baths').value||null,sqft:document.getElementById('res_sqft').value||null,arv:document.getElementById('res_arv').value||null,rehab:document.getElementById('res_rehab').value||null}
+  }
+  if(type==='Commercial'){
+    return {asset_type:document.getElementById('com_asset_type').value||null,units:document.getElementById('com_units').value||null,noi:document.getElementById('com_noi').value||null,cap_rate:document.getElementById('com_cap_rate').value||null,occupancy:document.getElementById('com_occupancy').value||null}
+  }
+  return {acres:document.getElementById('land_acres').value||null,zoning:document.getElementById('land_zoning').value||null,road_access:document.getElementById('land_access').value||null,utilities:document.getElementById('land_utilities').value||null}
+}
+function resetOpportunityForm(){document.getElementById('opportunityForm').reset();document.getElementById('opp_type').value='';syncStateSelect();document.getElementById('saveOpportunityBtn').disabled=false;document.getElementById('saveOpportunityBtn').textContent='Save Opportunity'}
+async function uploadFiles(files, folder){
+  const uploaded=[];
+  for(const file of files){
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const safeName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const up = await supabase.storage.from(STORAGE_BUCKET).upload(safeName, file, {upsert:false});
+    if(up.error) throw new Error(up.error.message);
+    const pub = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(safeName);
+    uploaded.push(pub.data.publicUrl);
+  }
+  return uploaded;
+}
+async function saveOpportunity(evt){
+  evt.preventDefault();
+  if(isSavingOpportunity) return;
+  isSavingOpportunity = true;
+  const saveBtn=document.getElementById('saveOpportunityBtn');
+  saveBtn.disabled=true;
+  saveBtn.textContent='Saving...';
+  const type=document.getElementById('opp_type').value;
+  const state=document.getElementById('opp_state').value;
+  const city=document.getElementById('opp_city').value.trim();
+  const address=document.getElementById('opp_address').value.trim();
+  const notes=document.getElementById('opp_notes').value.trim();
+  const price=document.getElementById('opp_price').value;
+  if(!type){setStatus('Choose an opportunity type.','error');isSavingOpportunity=false;saveBtn.disabled=false;saveBtn.textContent='Save Opportunity';return}
+  if(!state){setStatus('Select a state for this opportunity.','error');isSavingOpportunity=false;saveBtn.disabled=false;saveBtn.textContent='Save Opportunity';return}
+  if(!currentUserId){setStatus('No member session found.','error');isSavingOpportunity=false;saveBtn.disabled=false;saveBtn.textContent='Save Opportunity';return}
+  try{
+    setStatus('Uploading files and saving opportunity...');
+    const files=[...document.getElementById('opp_images').files];
+    let imageUrls=[];
+    if(files.length){
+      imageUrls = await uploadFiles(files, `opportunities/${currentUserId}`);
+    }
+    const details=collectOpportunityDetails(type);
+    const title = `${type} Opportunity - ${city || state}`;
+    const payload = {
+      user_id: currentUserId,
+      title: title,
+      state: state,
+      property_type: type,
+      strategy: type==='Land'?'Land Development':type==='Commercial'?'Value-Add':'Distressed',
+      price: price===''?null:Number(price),
+      pain_text: notes || `${type} opportunity submitted from members dashboard.`,
+      details_json: Object.assign({address:address||null,city:city||null,distress:document.getElementById('opp_distress').value==='true',image_urls:imageUrls}, details),
+      status: 'submitted'
+    };
+    const res=await supabase.from('pain_projects').insert(payload).select('id').single();
+    if(res.error) throw new Error(res.error.message);
+    setStatus(type+' opportunity saved.','success');
+    closeOpportunityModal();
+    resetOpportunityForm();
+    await boot();
+  }catch(err){
+    setStatus(err.message||'Could not save opportunity.','error');
+    saveBtn.disabled=false;
+    saveBtn.textContent='Save Opportunity';
+  }finally{
+    isSavingOpportunity=false;
+  }
+}
+async function uploadProfilePhoto(){
+  if(isUploadingProfilePhoto) return;
+  const input=document.getElementById('profilePhotoInput');
+  if(!input.files || !input.files.length){setStatus('Choose a profile image first.','error');return}
+  if(!currentUserId){setStatus('No member session found.','error');return}
+  const btn=document.getElementById('uploadProfilePhotoBtn');
+  isUploadingProfilePhoto=true;
+  btn.disabled=true;
+  btn.textContent='Uploading...';
+  try{
+    const urls=await uploadFiles([input.files[0]], `profiles/${currentUserId}`);
+    const photoUrl=urls[0];
+    const result=await supabase.from('member_profiles').update({avatar_url:photoUrl}).eq('user_id',currentUserId);
+    if(result.error) throw new Error(result.error.message);
+    document.getElementById('profilePhotoPreview').src=photoUrl;
+    setStatus('Profile photo uploaded.','success');
+    input.value='';
+  }catch(err){
+    setStatus(err.message||'Could not upload profile photo.','error');
+  }finally{
+    isUploadingProfilePhoto=false;
+    btn.disabled=false;
+    btn.textContent='Upload Profile Photo';
+  }
+}
+async function boot(){try{
+  const session=window.VaultForgeAuth&&typeof window.VaultForgeAuth.requireLogin==='function'?await window.VaultForgeAuth.requireLogin():(await supabase.auth.getSession()).data.session;
+  if(!session){window.location.href='/member-login.html';return}
+  document.getElementById('memberLine').textContent='Logged in as '+(session.user.email||'Member');
+  const userId=session.user.id;currentUserId=userId;
+  const [profileResult,prefsResult,painProjectsResult,matchesResult,listingsResult]=await Promise.all([
+    supabase.from('member_profiles').select('*').eq('user_id',userId).maybeSingle(),
+    supabase.from('member_match_preferences').select('*').eq('user_id',userId).maybeSingle(),
+    supabase.from('pain_projects').select('*').eq('user_id',userId).order('created_at',{ascending:false}),
+    supabase.from('pain_matches').select('id,pain_project_id,match_score,match_reasons,status,created_at,pain_projects(*)').eq('user_id',userId).order('match_score',{ascending:false}),
+    supabase.from('property_cards').select('*').order('created_at',{ascending:false}).limit(20)
+  ]);
+  if(profileResult.error)throw new Error(profileResult.error.message);
+  if(prefsResult.error)throw new Error(prefsResult.error.message);
+  if(painProjectsResult.error)throw new Error(painProjectsResult.error.message);
+  if(matchesResult.error)throw new Error(matchesResult.error.message);
+  if(listingsResult.error)throw new Error(listingsResult.error.message);
+  currentProfile=profileResult.data;currentPrefs=prefsResult.data;
+  adminMode=await detectAdmin();
+  setTopProfile(profileResult.data,prefsResult.data);
+  allListings=(listingsResult.data||[]);allPainProjects=(painProjectsResult.data||[]);allMatches=(matchesResult.data||[]);
+  applyFilters();
+  if(adminMode){document.getElementById('membershipBadge').textContent='Admin access active';await loadAdmin()}else{document.getElementById('membershipBadge').textContent='Founding member path';document.getElementById('adminSection').classList.add('hidden');document.getElementById('adminNavBtn').classList.add('hidden')}
+  setStatus('Dashboard ready.','success');
+}catch(err){setStatus(err.message||'Dashboard load failed.','error')}}
+document.getElementById('logoutBtn').addEventListener('click',async function(){try{if(window.VaultForgeAuth&&typeof window.VaultForgeAuth.logout==='function'){await window.VaultForgeAuth.logout()}else{await supabase.auth.signOut();window.location.href='/member-login.html'}}catch(err){window.location.href='/member-login.html'}});
+document.querySelectorAll('.filter-pill[data-state]').forEach(btn=>btn.addEventListener('click',function(){currentStateFilter=btn.getAttribute('data-state')||'All';applyFilters()}));
+document.querySelectorAll('.type-pill[data-type]').forEach(btn=>btn.addEventListener('click',function(){document.querySelectorAll('.type-pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');openOpportunityModal(btn.getAttribute('data-type'))}));
+document.getElementById('closeModalBtn').addEventListener('click',closeOpportunityModal);
+document.getElementById('cancelOpportunityBtn').addEventListener('click',function(){closeOpportunityModal();resetOpportunityForm()});
+document.getElementById('opportunityForm').addEventListener('submit',saveOpportunity);
+document.getElementById('opportunityModal').addEventListener('click',function(e){if(e.target.id==='opportunityModal'){closeOpportunityModal();resetOpportunityForm()}});
+document.getElementById('uploadProfilePhotoBtn').addEventListener('click',uploadProfilePhoto);
+boot();
+})();
+</script>
+</body>
+</html>
