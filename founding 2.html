@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Founding Access</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+<style>
+:root{
+  --bg:#030913; --bg2:#071427; --panel:#08172d; --panel2:#0b1f3f;
+  --text:#f6f8ff; --muted:#a7b5d6; --line:rgba(255,255,255,.08);
+  --gold:#d6ab4e; --gold2:#f1cf7b; --blue:#3f76ff; --green:#17c37f;
+  --red:#df6577; --shadow:0 28px 90px rgba(0,0,0,.42); --radius:30px;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0;scroll-behavior:smooth}
+body{
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),
+    radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),
+    radial-gradient(circle at 50% 100%, rgba(23,195,127,.06), transparent 22%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+button{font:inherit}
+.shell{max-width:1420px;margin:0 auto;padding:0 16px}
+.topbar{position:sticky;top:0;z-index:80;background:rgba(3,9,19,.74);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:58px;height:58px;border-radius:18px;object-fit:cover;border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow)}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2)}
+.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:.18s ease
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn-green{background:linear-gradient(135deg,var(--green),#10a96d);color:#fff}
+main{padding:32px 0 44px}
+.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:20px}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+.hero-left{padding:34px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:14px}
+h1{margin:0 0 16px;font-size:clamp(2.6rem,6vw,5.4rem);line-height:.92;letter-spacing:-.06em;max-width:12ch}
+.copy{color:var(--muted);line-height:1.72;font-size:1.05rem}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.trust-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.trust{border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px;background:rgba(255,255,255,.02)}
+.trust strong{display:block;font-size:1.35rem;margin-bottom:6px}
+.offer{border:1px solid rgba(241,207,123,.18);border-radius:26px;padding:24px;background:linear-gradient(135deg, rgba(214,171,78,.14), rgba(63,118,255,.08))}
+.price-big{font-size:clamp(2.5rem,6vw,4.4rem);font-weight:900;letter-spacing:-.05em;margin:10px 0}
+.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.tick{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;background:rgba(255,255,255,.02);text-align:center}
+.tick strong{display:block;font-size:2rem}
+.notice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.notice{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;background:rgba(255,255,255,.02)}
+.notice strong{display:block;margin-bottom:6px}
+.section{margin-top:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:22px;background:linear-gradient(180deg,#08172d,#07111f)}
+.card h3{margin:0 0 8px}
+.status{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}
+.hidden{display:none!important}
+@media(max-width:1100px){.hero,.grid3,.trust-row,.countdown,.notice-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <img src="IMG_2536.png" alt="VaultForge logo">
+      <div class="brand-copy">
+        <strong>VAULTFORGE</strong>
+        <span id="topLine">Founding Access • $49/month</span>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="btn btn-dark" href="/index.html">Home</a>
+      <a class="btn btn-dark" href="/member-login.html">Login</a>
+      <a class="btn btn-dark" href="/members.html">Dashboard</a>
+      <a class="btn btn-dark hidden" href="/admin.html" id="adminBtn">Admin</a>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+  <section class="hero">
+    <div class="panel hero-left">
+      <div class="eyebrow">Founder Window</div>
+      <h1>Get inside before the next wave pays more.</h1>
+      <div class="copy">Founding members lock in the current rate, enter the private network first, and build business inside VaultForge before broader rollout. This page is wired for Stripe checkout and Supabase unlock. Admin always bypasses payment.</div>
+      <div class="hero-actions">
+        <button class="btn btn-gold" id="joinBtn" type="button">Join Founding Access</button>
+        <a class="btn btn-dark" href="/member-profile.html">Complete Profile</a>
+        <a class="btn btn-blue" href="/members.html">Open Dashboard</a>
+      </div>
+      <div class="trust-row">
+        <div class="trust"><strong>Deals</strong><span class="copy">Premium listings, private opportunities, and live demand.</span></div>
+        <div class="trust"><strong>Capital</strong><span class="copy">Lender, JV, and operator relationships inside one network.</span></div>
+        <div class="trust"><strong>Access</strong><span class="copy">Member access unlocks once payment is confirmed.</span></div>
+      </div>
+      <div class="status" id="statusBox">Checking your access...</div>
+    </div>
+
+    <div class="panel offer">
+      <div class="eyebrow">Founder Offer</div>
+      <div class="price-big">$49 / month</div>
+      <div class="copy">This uses your Stripe price ID: <strong>price_1TORQ9C0TzboWMwOhbfgh9Po</strong>. Members go to Stripe checkout. On payment success, Supabase updates the member profile and unlocks the app.</div>
+      <div class="countdown">
+        <div class="tick"><strong id="days">14</strong><span>Days</span></div>
+        <div class="tick"><strong id="hours">00</strong><span>Hours</span></div>
+        <div class="tick"><strong id="minutes">00</strong><span>Minutes</span></div>
+        <div class="tick"><strong id="seconds">00</strong><span>Seconds</span></div>
+      </div>
+      <div class="notice-grid">
+        <div class="notice"><strong>Current User</strong><div class="copy" id="memberName">Not logged in</div></div>
+        <div class="notice"><strong>Access State</strong><div class="copy" id="accessState">Locked</div></div>
+        <div class="notice"><strong>Admin Bypass</strong><div class="copy" id="adminState">No</div></div>
+        <div class="notice"><strong>Paid Unlock</strong><div class="copy" id="paidState">Pending</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section grid3">
+    <div class="card">
+      <div class="eyebrow">1</div>
+      <h3>Create Login</h3>
+      <div class="copy">Members create an account and enter VaultForge.</div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">2</div>
+      <h3>Complete Profile</h3>
+      <div class="copy">Profile powers routing, matching, and notifications.</div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">3</div>
+      <h3>Stripe Checkout Unlock</h3>
+      <div class="copy">Checkout creates the subscription. Webhook updates Supabase and unlocks the member account.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const PRICE_ID = 'price_1TORQ9C0TzboWMwOhbfgh9Po';
+
+function setStatus(msg){ document.getElementById('statusBox').textContent = msg; }
+function setText(id, msg){ document.getElementById(id).textContent = msg; }
+
+function countdown(){
+  const target = Date.now() + (14 * 24 * 60 * 60 * 1000);
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function tick(){
+    let diff = Math.max(0, target - Date.now());
+    const days = Math.floor(diff / 86400000); diff -= days * 86400000;
+    const hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
+    const minutes = Math.floor(diff / 60000); diff -= minutes * 60000;
+    const seconds = Math.floor(diff / 1000);
+    setText('days', pad(days)); setText('hours', pad(hours)); setText('minutes', pad(minutes)); setText('seconds', pad(seconds));
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+async function refreshState(){
+  if(!window.VaultForgeAuth){
+    setStatus('auth.js not loaded.');
+    return null;
+  }
+
+  const access = await window.VaultForgeAuth.getAccessState();
+
+  if(!access.loggedIn){
+    setText('memberName','Guest');
+    setText('accessState','Login required');
+    setText('adminState','No');
+    setText('paidState','Not started');
+    setStatus('Login first, then continue to founder checkout.');
+    return null;
+  }
+
+  const profile = access.profile || {};
+  const displayName = profile.full_name || access.user?.email || 'Member';
+  const admin = !!access.isAdmin;
+  const paid = profile.paid_member === true || profile.founder_access === true || profile.plan === 'founder49';
+
+  setText('memberName', displayName);
+  setText('accessState', admin ? 'Admin unlocked' : access.founderUnlocked ? 'Unlocked' : 'Locked');
+  setText('adminState', admin ? 'Yes' : 'No');
+  setText('paidState', paid ? 'Confirmed' : 'Pending');
+
+  const adminBtn = document.getElementById('adminBtn');
+  adminBtn.classList.toggle('hidden', !admin);
+
+  if(admin){
+    setStatus('Admin bypass active. Opening admin does not require payment.');
+  } else if(paid){
+    setStatus('Payment already confirmed. You can enter the dashboard now.');
+  } else {
+    setStatus('Ready for Stripe founder checkout.');
+  }
+
+  return { access, paid };
+}
+
+async function goCheckout(){
+  try{
+    const state = await refreshState();
+    if(!state){
+      window.location.href = '/member-login.html';
+      return;
+    }
+
+    const { access, paid } = state;
+
+    if(access.isAdmin){
+      window.location.href = '/admin.html';
+      return;
+    }
+
+    if(paid){
+      window.location.href = '/members.html';
+      return;
+    }
+
+    if(!access.profile){
+      setStatus('Complete your profile first.');
+      window.location.href = '/member-profile.html';
+      return;
+    }
+
+    setStatus('Opening Stripe checkout...');
+
+    const res = await fetch('/.netlify/functions/create-checkout-session', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        priceId: PRICE_ID,
+        userId: access.user.id,
+        email: access.user.email || '',
+        successUrl: window.location.origin + '/founding.html?checkout=success',
+        cancelUrl: window.location.href
+      })
+    });
+
+    const json = await res.json().catch(() => ({}));
+
+    if(!res.ok || !json.url){
+      throw new Error(json.error || 'Could not create checkout session.');
+    }
+
+    window.location.href = json.url;
+  }catch(err){
+    console.error(err);
+    setStatus(err.message || 'Checkout failed.');
+  }
+}
+
+document.getElementById('joinBtn').addEventListener('click', goCheckout);
+countdown();
+refreshState();
+</script>
+</body>
+</html>
