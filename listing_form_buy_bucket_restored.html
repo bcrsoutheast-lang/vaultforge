@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Listing Form</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#030913;--bg2:#071427;--panel:#08172d;--panel2:#0b1f3f;--text:#f6f8ff;--muted:#a7b5d6;--line:rgba(255,255,255,.08);--gold:#d6ab4e;--gold2:#f1cf7b;--blue:#3f76ff;--shadow:0 28px 90px rgba(0,0,0,.42);--radius:24px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 10% 8%, rgba(214,171,78,.12), transparent 18%),radial-gradient(circle at 86% 12%, rgba(63,118,255,.10), transparent 18%),linear-gradient(180deg,var(--bg),var(--bg2))}
+.shell{max-width:1100px;margin:0 auto;padding:24px 16px}.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none}
+.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.full{grid-column:1/-1}
+input,textarea,select{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#09153f;color:#fff;outline:none}
+textarea{min-height:120px;resize:vertical}
+label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 7px}
+.status{margin-top:14px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}
+.section{margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)} h2,h3{margin:0 0 12px}
+.copy{color:var(--muted);line-height:1.6}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+@media(max-width:900px){.grid,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="panel">
+    <div class="actions">
+      <a class="btn btn-dark" href="/admin.html">Back to Admin</a>
+      <a class="btn btn-dark" href="/members.html">Member View</a>
+      <a class="btn btn-blue" id="viewBtn" href="#" style="display:none">View Listing</a>
+    </div>
+    <h1 id="mode">Create Listing</h1>
+    <div class="copy">Safe restore version. Keeps the working create/edit flow and brings the premium deal fields back.</div>
+
+    <div class="section">
+      <h3>Core Listing</h3>
+      <div class="grid">
+        <div><label>Title</label><input id="title"></div>
+        <div><label>Property Type</label><input id="property_type" placeholder="Residential / Commercial / Land"></div>
+        <div><label>State</label><input id="state"></div>
+        <div><label>City</label><input id="city"></div>
+        <div><label>Price</label><input id="price"></div>
+        <div><label>Status</label><select id="status"><option>Draft</option><option>Active</option></select></div>
+        <div class="full"><label>Main Description</label><textarea id="description" placeholder="Main summary of the opportunity"></textarea></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Deal Benefits</h3>
+      <div class="grid3">
+        <div><label>Buy Bucket</label><input id="buy_bucket" placeholder="Value-add hold / flip / development"></div>
+        <div><label>Exit Strategy</label><input id="exit_strategy" placeholder="Flip / Hold / Lease-up"></div>
+        <div><label>Seller Motivation</label><input id="seller_motivation" placeholder="Distress / inherited / timeline"></div>
+        <div><label>ARV / Exit Value</label><input id="arv"></div>
+        <div><label>Rehab Estimate</label><input id="rehab_estimate"></div>
+        <div><label>Rent / NOI</label><input id="rent_noi"></div>
+        <div><label>Cash Flow / Spread</label><input id="cash_flow"></div>
+        <div><label>Cap Rate / ROI</label><input id="cap_roi"></div>
+        <div><label>Benefit Tags</label><input id="benefit_tags" placeholder="off market, value add, strong location"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Property Details</h3>
+      <div class="grid3">
+        <div><label>Bedrooms</label><input id="bedrooms"></div>
+        <div><label>Bathrooms</label><input id="bathrooms"></div>
+        <div><label>Square Feet</label><input id="sqft"></div>
+        <div><label>Building Size</label><input id="building_size"></div>
+        <div><label>Zoning</label><input id="zoning"></div>
+        <div><label>Occupancy</label><input id="occupancy"></div>
+        <div><label>Acres</label><input id="acres"></div>
+        <div><label>Frontage</label><input id="frontage"></div>
+        <div><label>Utilities</label><input id="utilities"></div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:18px">
+      <button class="btn btn-gold" id="saveBtn" type="button">Save Listing</button>
+    </div>
+    <div id="statusBox" class="status">Ready.</div>
+  </div>
+</div>
+
+<script>
+const sb=supabase.createClient('https://mnwwvpuxrzostrplfgmq.supabase.co','sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ');
+const editId=new URLSearchParams(location.search).get('edit');
+const extraMap={
+  'Buy Bucket':'buy_bucket',
+  'Exit Strategy':'exit_strategy',
+  'Seller Motivation':'seller_motivation',
+  'ARV':'arv',
+  'Rehab':'rehab_estimate',
+  'Rent':'rent_noi',
+  'Cash Flow':'cash_flow',
+  'Cap Rate / ROI':'cap_roi',
+  'Benefit Tags':'benefit_tags',
+  'Bedrooms':'bedrooms',
+  'Bathrooms':'bathrooms',
+  'Square Feet':'sqft',
+  'Building Size':'building_size',
+  'Zoning':'zoning',
+  'Occupancy':'occupancy',
+  'Acres':'acres',
+  'Frontage':'frontage',
+  'Utilities':'utilities'
+};
+function $(id){return document.getElementById(id)}
+function setStatus(msg){$('statusBox').textContent=msg}
+function setVal(id,v){ if($(id)) $(id).value=v??''; }
+function val(id){ return $(id).value; }
+
+function buildDescription(){
+  const main = val('description').trim();
+  const extras = Object.entries(extraMap).map(([label,id]) => [label, val(id).trim()]).filter(([,v]) => v).map(([label,v]) => `${label}: ${v}`);
+  return [main, ...extras].filter(Boolean).join('\\n');
+}
+
+function hydrateDescription(text){
+  const lines = String(text||'').split(/\\n+/);
+  const main=[];
+  for(const line of lines){
+    const idx=line.indexOf(':');
+    if(idx>0){
+      const key=line.slice(0,idx).trim();
+      const value=line.slice(idx+1).trim();
+      if(extraMap[key]){ setVal(extraMap[key], value); continue; }
+    }
+    main.push(line);
+  }
+  setVal('description', main.join('\\n').trim());
+}
+
+async function load(){
+  if(!editId) return;
+  $('mode').textContent='Edit Listing';
+  $('viewBtn').style.display='inline-flex';
+  $('viewBtn').href='/listing.html?id='+encodeURIComponent(editId);
+  setStatus('Loading listing...');
+  const resp=await sb.from('property_cards').select('*').eq('id',editId).maybeSingle();
+  if(resp.error||!resp.data){ setStatus('Could not load listing.'); return; }
+  const d=resp.data;
+  setVal('title', d.title);
+  setVal('property_type', d.property_type);
+  setVal('state', d.state);
+  setVal('city', d.city);
+  setVal('price', d.price);
+  setVal('status', d.status||'Draft');
+  hydrateDescription(d.description||'');
+  setStatus('Edit mode ready.');
+}
+
+async function save(){
+  const payload = {
+    title: val('title'),
+    property_type: val('property_type'),
+    state: val('state'),
+    city: val('city'),
+    price: val('price'),
+    status: val('status'),
+    description: buildDescription()
+  };
+  setStatus('Saving...');
+  if(editId){
+    const resp=await sb.from('property_cards').update(payload).eq('id',editId).select().maybeSingle();
+    if(resp.error){ setStatus(resp.error.message || 'Save failed.'); return; }
+    window.location.href='/listing.html?id='+encodeURIComponent(editId);
+  }else{
+    const resp=await sb.from('property_cards').insert([payload]).select().maybeSingle();
+    if(resp.error){ setStatus(resp.error.message || 'Create failed.'); return; }
+    window.location.href='/listing.html?id='+encodeURIComponent(resp.data.id);
+  }
+}
+$('saveBtn').addEventListener('click', save);
+load();
+</script>
+</body>
+</html>
