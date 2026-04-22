@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Pain</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#030913;--bg2:#071427;--panel:#08172d;--panel2:#0b1f3f;--text:#f6f8ff;--muted:#a7b5d6;--line:rgba(255,255,255,.08);--gold:#d6ab4e;--gold2:#f1cf7b;--blue:#3f76ff;--green:#17c37f;--red:#df6577;--shadow:0 28px 90px rgba(0,0,0,.42);--radius:28px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),radial-gradient(circle at 50% 100%, rgba(23,195,127,.06), transparent 22%),linear-gradient(180deg,var(--bg),var(--bg2))}
+a{text-decoration:none;color:inherit}button,input,textarea,select{font:inherit}
+.shell{max-width:1480px;margin:0 auto;padding:0 16px}
+.topbar{position:sticky;top:0;z-index:70;background:rgba(3,9,19,.78);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}.brand img{width:58px;height:58px;border-radius:18px;object-fit:cover;border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow)}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2)}.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:.18s ease}
+.btn:hover{transform:translateY(-2px)}.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.page{padding:24px 0 38px;display:grid;gap:18px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+h1{margin:0 0 12px;font-size:clamp(2.4rem,5vw,4.2rem);line-height:.92;letter-spacing:-.05em}.copy{color:var(--muted);line-height:1.7;font-size:1.03rem}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.metric{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;background:rgba(255,255,255,.02)}.metric strong{display:block;font-size:1.9rem;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:#c9d4f0;font-weight:800;margin:0 0 8px}
+input,textarea,select{width:100%;padding:14px 15px;border-radius:16px;border:1px solid rgba(255,255,255,.11);background:#09153f;color:#fff;outline:none}
+textarea{min-height:120px;resize:vertical}
+.choice-row{display:flex;gap:10px;flex-wrap:wrap}
+.choice-btn{padding:14px 18px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:#fff;font-weight:800;cursor:pointer;min-width:120px;text-align:center}
+.choice-btn.active{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103;border-color:transparent}
+.status{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}
+.feed{display:grid;gap:14px}
+.card{background:linear-gradient(180deg,#08172d,#06111f);border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+.card-body{padding:18px}.card h3{margin:0 0 10px;font-size:1.3rem}.pills{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px}.pill{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:.82rem;font-weight:800}.pill.live{background:#183c2a;color:#c2f4da}
+.hidden{display:none!important}
+@media(max-width:1100px){.hero,.grid{grid-template-columns:1fr}}
+@media(max-width:760px){.metric-grid,.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="shell topbar-inner"><div class="brand"><img src="IMG_2536.png" alt="VaultForge logo"><div class="brand-copy"><strong>VAULTFORGE</strong><span id="lineText">Pain opportunities</span></div></div><div class="nav"><a class="btn btn-dark" href="/members.html">Dashboard</a><a class="btn btn-dark" href="/property-cards.html">Listings</a><a class="btn btn-blue" href="#submitPain">Submit Pain</a><a class="btn btn-dark" href="/member-profile.html">My Profile</a><a class="btn btn-dark hidden" href="/admin.html" id="adminBtn">Admin</a></div></div></div>
+
+<div class="shell page">
+  <section class="hero">
+    <div class="panel"><div class="eyebrow">Need-Based Deal Flow</div><h1>Pain creates opportunity.</h1><div class="copy">This version reduces typing and lets members tap what they need. Better intake, better categorization, better matching later.</div><div class="hero-actions"><a class="btn btn-gold" href="#submitPain">Submit Pain</a><a class="btn btn-dark" href="/members.html">Back to Dashboard</a><a class="btn btn-dark hidden" href="/admin.html" id="adminHeroBtn">Admin</a></div></div>
+    <div class="panel"><div class="eyebrow">Pain Snapshot</div><div class="metric-grid"><div class="metric"><strong id="countAll">0</strong><span class="copy">Total Pain</span></div><div class="metric"><strong id="countUrgent">0</strong><span class="copy">Urgent</span></div><div class="metric"><strong id="countCapital">0</strong><span class="copy">Capital Need</span></div><div class="metric"><strong id="countMarket">—</strong><span class="copy">My Market</span></div></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel" id="submitPain">
+      <div class="eyebrow">Submit Pain</div>
+      <div class="form-grid">
+        <div class="full"><label>Title</label><input id="pain_title" placeholder="Example: Need Georgia lender fast"></div>
+
+        <div class="full">
+          <label>Category</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="pain_category" data-value="Capital Needed">Capital Needed</button>
+            <button type="button" class="choice-btn" data-target="pain_category" data-value="Buyer Needed">Buyer Needed</button>
+            <button type="button" class="choice-btn" data-target="pain_category" data-value="Seller Problem">Seller Problem</button>
+            <button type="button" class="choice-btn" data-target="pain_category" data-value="Operator Needed">Operator Needed</button>
+            <button type="button" class="choice-btn" data-target="pain_category" data-value="JV Needed">JV Needed</button>
+            <button type="button" class="choice-btn" data-target="pain_category" data-value="Disposition">Disposition</button>
+          </div>
+          <input type="hidden" id="pain_category" value="Capital Needed">
+        </div>
+
+        <div class="full">
+          <label>State / Market</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="pain_market" data-value="Georgia">Georgia</button>
+            <button type="button" class="choice-btn" data-target="pain_market" data-value="Tennessee">Tennessee</button>
+            <button type="button" class="choice-btn" data-target="pain_market" data-value="Florida">Florida</button>
+            <button type="button" class="choice-btn" data-target="pain_market" data-value="Multi Market">Multi Market</button>
+          </div>
+          <input type="hidden" id="pain_market" value="Georgia">
+        </div>
+
+        <div class="full">
+          <label>Urgency</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="pain_urgency" data-value="Normal">Normal</button>
+            <button type="button" class="choice-btn" data-target="pain_urgency" data-value="High">High</button>
+            <button type="button" class="choice-btn" data-target="pain_urgency" data-value="Urgent">Urgent</button>
+          </div>
+          <input type="hidden" id="pain_urgency" value="Normal">
+        </div>
+
+        <div class="full">
+          <label>Timeline</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="pain_timeline" data-value="ASAP">ASAP</button>
+            <button type="button" class="choice-btn" data-target="pain_timeline" data-value="30 Days">30 Days</button>
+            <button type="button" class="choice-btn" data-target="pain_timeline" data-value="60 Days">60 Days</button>
+            <button type="button" class="choice-btn" data-target="pain_timeline" data-value="Flexible">Flexible</button>
+          </div>
+          <input type="hidden" id="pain_timeline" value="ASAP">
+        </div>
+
+        <div class="full">
+          <label>Who Is Needed</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="pain_role_needed" data-value="Lender">Lender</button>
+            <button type="button" class="choice-btn" data-target="pain_role_needed" data-value="Buyer">Buyer</button>
+            <button type="button" class="choice-btn" data-target="pain_role_needed" data-value="Investor">Investor</button>
+            <button type="button" class="choice-btn" data-target="pain_role_needed" data-value="Operator">Operator</button>
+            <button type="button" class="choice-btn" data-target="pain_role_needed" data-value="Wholesaler">Wholesaler</button>
+            <button type="button" class="choice-btn" data-target="pain_role_needed" data-value="Broker">Broker</button>
+          </div>
+          <input type="hidden" id="pain_role_needed" value="Lender">
+        </div>
+
+        <div class="full"><label>Description</label><textarea id="pain_description" placeholder="Describe the pain, timeline, who is needed, and why it matters now."></textarea></div>
+      </div>
+      <div class="hero-actions"><button class="btn btn-gold" id="submitBtn" type="button">Post Pain</button><a class="btn btn-dark" href="/members.html">Back to Members</a></div>
+      <div class="status" id="statusBox">Ready.</div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow">Private Feed</div>
+      <div class="feed" id="feedWrap"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const sb = supabase.createClient('https://mnwwvpuxrzostrplfgmq.supabase.co','sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ');
+let rows = [], currentUserId = null, painTable = null;
+function esc(v){ return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+function setStatus(msg){ document.getElementById('statusBox').textContent = msg; }
+function showAdminButtons(show){ ['adminBtn','adminHeroBtn'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.toggle('hidden', !show); }); }
+function norm(v){ return String(v||'').trim().toLowerCase(); }
+function setChoice(target, value){
+  document.querySelectorAll('.choice-btn[data-target="'+target+'"]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.value === value);
+  });
+  document.getElementById(target).value = value;
+}
+function cardHtml(r){
+  const category = r.category || r.pain_category || 'Pain';
+  const market = r.market || r.state || r.location || '—';
+  const urgency = r.urgency || 'Normal';
+  const title = r.title || 'Untitled Pain';
+  const desc = r.description || r.details || 'No details yet.';
+  return `<article class="card"><div class="card-body"><h3>${esc(title)}</h3><div class="pills"><div class="pill">${esc(category)}</div><div class="pill">${esc(market)}</div><div class="pill ${norm(urgency)==='urgent'?'live':''}">${esc(urgency)}</div></div><div class="copy">${esc(desc).slice(0,220)}${desc.length>220?'...':''}</div></div></article>`;
+}
+function renderFeed(){
+  const wrap = document.getElementById('feedWrap');
+  if(!rows.length){ wrap.innerHTML = '<div class="copy">No pain opportunities yet.</div>'; return; }
+  wrap.innerHTML = rows.slice(0,8).map(cardHtml).join('');
+}
+function setCounts(myProfile){
+  document.getElementById('countAll').textContent = String(rows.length);
+  document.getElementById('countUrgent').textContent = String(rows.filter(r => norm(r.urgency)==='urgent').length);
+  document.getElementById('countCapital').textContent = String(rows.filter(r => norm(r.category || r.pain_category).includes('capital')).length);
+  document.getElementById('countMarket').textContent = myProfile?.primary_market || '—';
+}
+async function detectPainTable(){
+  for(const t of ['pain','pain_requests']){
+    try{
+      const resp = await sb.from(t).select('*').limit(1);
+      if(!resp.error) return t;
+    }catch(e){}
+  }
+  return null;
+}
+async function loadPage(){
+  try{
+    document.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click', ()=> setChoice(btn.dataset.target, btn.dataset.value)));
+    const session = (await sb.auth.getSession())?.data?.session;
+    if(!session){ window.location.href = '/member-login.html'; return; }
+    currentUserId = session.user.id;
+    document.getElementById('lineText').textContent = 'Logged in as ' + (session.user.email || 'member');
+    const prof = await sb.from('member_profiles').select('*').eq('user_id', currentUserId).maybeSingle();
+    const myProfile = (!prof.error && prof.data) ? prof.data : null;
+    showAdminButtons(!!(myProfile && (myProfile.role === 'admin' || myProfile.is_admin === true)));
+    painTable = await detectPainTable();
+    if(!painTable){
+      rows = []; setCounts(myProfile); renderFeed(); setStatus('Pain table not found, but page is live.'); return;
+    }
+    const resp = await sb.from(painTable).select('*').order('created_at',{ascending:false}).limit(100);
+    if(resp.error) throw resp.error;
+    rows = Array.isArray(resp.data) ? resp.data : [];
+    setCounts(myProfile); renderFeed(); setStatus('Pain board ready.');
+  } catch(e){
+    console.error(e); rows = []; setCounts(null); renderFeed(); setStatus(e.message || 'Failed to load pain page.');
+  }
+}
+async function submitPain(){
+  try{
+    if(!painTable){ setStatus('Pain table not found.'); return; }
+    const title = document.getElementById('pain_title').value.trim();
+    const category = document.getElementById('pain_category').value;
+    const market = document.getElementById('pain_market').value;
+    const urgency = document.getElementById('pain_urgency').value;
+    const timeline = document.getElementById('pain_timeline').value;
+    const role_needed = document.getElementById('pain_role_needed').value;
+    const description = document.getElementById('pain_description').value.trim();
+    if(!title || !description){ setStatus('Add a title and description.'); return; }
+    const payload = { title, category, market, urgency, description: `${description}\nTimeline: ${timeline}\nRole Needed: ${role_needed}`, user_id: currentUserId };
+    setStatus('Posting pain...');
+    const resp = await sb.from(painTable).insert([payload]);
+    if(resp.error) throw resp.error;
+    document.getElementById('pain_title').value=''; document.getElementById('pain_description').value='';
+    setChoice('pain_category','Capital Needed'); setChoice('pain_market','Georgia'); setChoice('pain_urgency','Normal'); setChoice('pain_timeline','ASAP'); setChoice('pain_role_needed','Lender');
+    await loadPage(); setStatus('Pain posted.');
+  } catch(e){ console.error(e); setStatus(e.message || 'Failed to post pain.'); }
+}
+document.getElementById('submitBtn').addEventListener('click', submitPain);
+loadPage();
+</script>
+</body>
+</html>
