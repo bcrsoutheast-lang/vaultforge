@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Member Profile</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#030913;--bg2:#071427;--panel:#08172d;--panel2:#0b1f3f;--text:#f6f8ff;--muted:#a7b5d6;--line:rgba(255,255,255,.08);--gold:#d6ab4e;--gold2:#f1cf7b;--blue:#3f76ff;--green:#17c37f;--red:#df6577;--shadow:0 28px 90px rgba(0,0,0,.42);--radius:28px}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),radial-gradient(circle at 50% 100%, rgba(23,195,127,.06), transparent 22%),linear-gradient(180deg,var(--bg),var(--bg2))}
+a{text-decoration:none;color:inherit}button,input,textarea,select{font:inherit}
+.shell{max-width:1450px;margin:0 auto;padding:0 16px}
+.topbar{position:sticky;top:0;z-index:80;background:rgba(3,9,19,.78);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}.brand img{width:58px;height:58px;border-radius:18px;object-fit:cover;border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow)}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2)}.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.btn{appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:.18s ease}
+.btn:hover{transform:translateY(-2px)}.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.page{padding:24px 0 36px;display:grid;gap:18px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.hero-card{min-height:290px;display:grid;align-items:center;position:relative;overflow:hidden}.hero-card:before{content:"";position:absolute;inset:auto -40px -40px auto;width:240px;height:240px;border-radius:999px;background:radial-gradient(circle, rgba(214,171,78,.18), transparent 65%)}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+h1{margin:0 0 12px;font-size:clamp(2.4rem,5vw,4.2rem);line-height:.92;letter-spacing:-.05em}.copy{color:var(--muted);line-height:1.68;font-size:1.04rem}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.profile-top{display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center}
+.avatar{width:120px;height:120px;border-radius:26px;overflow:hidden;border:1px solid rgba(214,171,78,.22);background:linear-gradient(135deg, rgba(214,171,78,.18), rgba(255,255,255,.05));display:grid;place-items:center;font-size:2.2rem;font-weight:900;color:var(--gold2)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:.82rem;font-weight:800}.badge.gold{background:rgba(214,171,78,.12);border-color:rgba(214,171,78,.28);color:#f3d898}.badge.green{background:rgba(23,195,127,.12);border-color:rgba(23,195,127,.28);color:#c9f7df}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;background:rgba(255,255,255,.02)}.metric strong{display:block;font-size:1.8rem;margin-bottom:6px}
+.two-col{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.section-title{margin:0 0 14px;font-size:1.4rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:#c9d4f0;font-weight:800;margin:0 0 8px}
+input,textarea,select{width:100%;padding:14px 15px;border-radius:16px;border:1px solid rgba(255,255,255,.11);background:#09153f;color:#fff;outline:none}
+textarea{min-height:120px;resize:vertical}
+.choice-row{display:flex;gap:10px;flex-wrap:wrap}
+.choice-btn{padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);font-weight:800;cursor:pointer;color:#fff}
+.choice-btn.active{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103;border-color:transparent}
+.info-card{border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;background:rgba(255,255,255,.02)}
+.info-list{display:grid;gap:12px}.info-list div{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}.info-list div:last-child{border-bottom:none}
+.status{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}
+.hidden{display:none!important}
+@media(max-width:1100px){.hero,.two-col{grid-template-columns:1fr}}
+@media(max-width:760px){.form-grid,.metric-grid,.profile-top{grid-template-columns:1fr}.avatar{width:100px;height:100px}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="shell topbar-inner"><div class="brand"><img src="IMG_2536.png" alt="VaultForge logo"><div class="brand-copy"><strong>VAULTFORGE</strong><span id="topLine">Member profile</span></div></div><div class="nav"><a class="btn btn-dark" href="/members.html">Dashboard</a><a class="btn btn-dark" href="/property-cards.html">Listings</a><a class="btn btn-blue" href="/listing-form.html">Create Listing</a><a class="btn btn-dark" href="/pain.html">Pain</a><a class="btn btn-dark hidden" href="/admin.html" id="adminBtn">Admin</a></div></div></div>
+
+<div class="shell page">
+  <section class="hero">
+    <div class="panel hero-card"><div><div class="eyebrow">Network Positioning</div><h1 id="heroTitle">Build a profile that makes money move.</h1><div class="copy">This version uses buttons for role, state, and investment focus so members can finish faster on mobile.</div><div class="hero-actions"><button class="btn btn-gold" id="saveTopBtn" type="button">Save Profile</button><a class="btn btn-dark" href="/members.html">Back to Dashboard</a></div></div></div>
+    <div class="panel"><div class="profile-top"><div class="avatar" id="avatarBox">VF</div><div><div style="font-size:1.6rem;font-weight:900" id="displayName">Member Name</div><div class="copy" id="displayCompany">Your company and market positioning show here.</div><div class="badges"><div class="badge gold" id="roleBadge">Role</div><div class="badge" id="marketBadge">Market</div><div class="badge green" id="focusBadge">Strategy</div></div></div></div><div class="metric-grid" style="margin-top:18px"><div class="metric"><strong id="profilePercent">0%</strong><span class="copy">Profile strength</span></div><div class="metric"><strong id="roleMetric">—</strong><span class="copy">Primary role</span></div><div class="metric"><strong id="marketMetric">—</strong><span class="copy">Primary market</span></div><div class="metric"><strong id="focusMetric">—</strong><span class="copy">Investment focus</span></div></div></div>
+  </section>
+
+  <section class="two-col">
+    <div class="panel">
+      <h2 class="section-title">Profile Details</h2>
+      <div class="form-grid">
+        <div><label>Full Name</label><input id="full_name" placeholder="Your full name"></div>
+        <div><label>Company Name</label><input id="company_name" placeholder="Your company"></div>
+
+        <div class="full">
+          <label>Primary Market</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="primary_market" data-value="Georgia">Georgia</button>
+            <button type="button" class="choice-btn" data-target="primary_market" data-value="Tennessee">Tennessee</button>
+            <button type="button" class="choice-btn" data-target="primary_market" data-value="Florida">Florida</button>
+            <button type="button" class="choice-btn" data-target="primary_market" data-value="Multi Market">Multi Market</button>
+          </div>
+          <input type="hidden" id="primary_market" value="Georgia">
+        </div>
+
+        <div><label>Phone</label><input id="phone" placeholder="Best number"></div>
+        <div><label>Email</label><input id="email_display" placeholder="Email shown to members"></div>
+        <div><label>Website</label><input id="website" placeholder="Website or social link"></div>
+        <div><label>Profile Photo URL</label><input id="profile_photo_url" placeholder="Paste photo URL if you want profile image"></div>
+
+        <div class="full">
+          <label>Primary Role</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="role" data-value="Investor">Investor</button>
+            <button type="button" class="choice-btn" data-target="role" data-value="Buyer">Buyer</button>
+            <button type="button" class="choice-btn" data-target="role" data-value="Lender">Lender</button>
+            <button type="button" class="choice-btn" data-target="role" data-value="Wholesaler">Wholesaler</button>
+            <button type="button" class="choice-btn" data-target="role" data-value="Broker">Broker</button>
+            <button type="button" class="choice-btn" data-target="role" data-value="Developer">Developer</button>
+            <button type="button" class="choice-btn" data-target="role" data-value="Operator">Operator</button>
+          </div>
+          <input type="hidden" id="role" value="Investor">
+        </div>
+
+        <div class="full">
+          <label>Investment Focus</label>
+          <div class="choice-row">
+            <button type="button" class="choice-btn active" data-target="investment_focus" data-value="Fix & Flip">Fix & Flip</button>
+            <button type="button" class="choice-btn" data-target="investment_focus" data-value="Buy & Hold">Buy & Hold</button>
+            <button type="button" class="choice-btn" data-target="investment_focus" data-value="Multifamily">Multifamily</button>
+            <button type="button" class="choice-btn" data-target="investment_focus" data-value="Land">Land</button>
+            <button type="button" class="choice-btn" data-target="investment_focus" data-value="Debt">Debt</button>
+            <button type="button" class="choice-btn" data-target="investment_focus" data-value="JV">JV</button>
+          </div>
+          <input type="hidden" id="investment_focus" value="Fix & Flip">
+        </div>
+
+        <div class="full"><label>Buy Box</label><textarea id="buy_box" placeholder="Describe deal size, locations, and what you are looking for."></textarea></div>
+        <div class="full"><label>Bio</label><textarea id="bio" placeholder="Tell members who you are, what you do, and why people should connect with you."></textarea></div>
+      </div>
+
+      <div class="hero-actions" style="margin-top:18px"><button class="btn btn-gold" id="saveBtn" type="button">Save Profile</button><a class="btn btn-dark" href="/members.html">Back to Members</a></div>
+      <div class="status" id="statusBox">Ready.</div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">Profile Preview</h2>
+      <div class="info-card">
+        <div style="font-weight:900;font-size:1.25rem" id="previewName">Member Name</div>
+        <div class="copy" id="previewHeadline">Role • Market • Strategy</div>
+        <div class="badges"><div class="badge gold" id="previewRole">Investor</div><div class="badge" id="previewMarket">Georgia</div><div class="badge green" id="previewFocus">Fix & Flip</div></div>
+        <div class="info-list">
+          <div><strong>Company</strong><div class="copy" id="previewCompany">—</div></div>
+          <div><strong>Contact</strong><div class="copy" id="previewContact">—</div></div>
+          <div><strong>Website</strong><div class="copy" id="previewWebsite">—</div></div>
+          <div><strong>Buy Box</strong><div class="copy" id="previewBuyBox">—</div></div>
+          <div><strong>Bio</strong><div class="copy" id="previewBio">—</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const sb = supabase.createClient('https://mnwwvpuxrzostrplfgmq.supabase.co','sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ');
+let currentUserId = null, existingProfileId = null;
+function $(id){ return document.getElementById(id); }
+function showAdminButtons(show){ const el=$('adminBtn'); if(el) el.classList.toggle('hidden', !show); }
+function setStatus(msg){ $('statusBox').textContent = msg; }
+function setVal(id, v){ if($(id)) $(id).value = v ?? ''; }
+function getVal(id){ return ($(id)?.value || '').trim(); }
+function setChoice(target, value){
+  document.querySelectorAll('.choice-btn[data-target="'+target+'"]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.value === value);
+  });
+  setVal(target, value);
+  refreshPreview();
+}
+function completeness(){ const fields=[getVal('full_name'),getVal('company_name'),getVal('primary_market'),getVal('phone'),getVal('email_display'),getVal('website'),getVal('role'),getVal('investment_focus'),getVal('buy_box'),getVal('bio'),getVal('profile_photo_url')]; const filled=fields.filter(Boolean).length; return Math.max(18, Math.min(100, Math.round((filled / fields.length) * 100))); }
+function refreshPreview(){
+  const name=getVal('full_name')||'Member Name', company=getVal('company_name')||'No company yet', market=getVal('primary_market')||'Market', role=getVal('role')||'Role', focus=getVal('investment_focus')||'Strategy';
+  const phone=getVal('phone'), email=getVal('email_display'), website=getVal('website'), buyBox=getVal('buy_box')||'No buy box yet.', bio=getVal('bio')||'No bio yet.', photo=getVal('profile_photo_url'), percent=completeness();
+  $('heroTitle').textContent='Welcome, '+name+'.'; $('displayName').textContent=name; $('displayCompany').textContent=company+' • '+market; $('roleBadge').textContent=role; $('marketBadge').textContent=market; $('focusBadge').textContent=focus;
+  $('profilePercent').textContent=percent+'%'; $('roleMetric').textContent=role; $('marketMetric').textContent=market; $('focusMetric').textContent=focus;
+  $('previewName').textContent=name; $('previewHeadline').textContent=role+' • '+market+' • '+focus; $('previewRole').textContent=role; $('previewMarket').textContent=market; $('previewFocus').textContent=focus;
+  $('previewCompany').textContent=company; $('previewContact').textContent=[phone,email].filter(Boolean).join(' • ')||'—'; $('previewWebsite').textContent=website||'—'; $('previewBuyBox').textContent=buyBox; $('previewBio').textContent=bio; $('topLine').textContent='Profile strength '+percent+'%';
+  if(photo){ $('avatarBox').innerHTML='<img src="'+photo.replaceAll('"','&quot;')+'" alt="Profile photo">'; } else { $('avatarBox').textContent=(name||'VF').slice(0,2).toUpperCase(); }
+}
+async function loadProfile(){
+  try{
+    setStatus('Loading profile...');
+    document.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click', ()=>setChoice(btn.dataset.target, btn.dataset.value)));
+    const sessionResp=await sb.auth.getSession(), session=sessionResp?.data?.session;
+    if(!session){ window.location.href='/member-login.html'; return; }
+    currentUserId=session.user.id; setVal('email_display', session.user.email || '');
+    const resp=await sb.from('member_profiles').select('*').eq('user_id', currentUserId).maybeSingle();
+    if(resp.error && resp.error.code !== 'PGRST116') throw resp.error;
+    const profile=resp.data||null;
+    showAdminButtons(!!(profile && (profile.role==='admin' || profile.is_admin===true)));
+    if(profile){
+      existingProfileId=profile.id||null;
+      setVal('full_name', profile.full_name); setVal('company_name', profile.company_name); setChoice('primary_market', profile.primary_market || 'Georgia');
+      setVal('phone', profile.phone); setVal('email_display', profile.email_display || session.user.email || ''); setVal('website', profile.website); setVal('profile_photo_url', profile.profile_photo_url);
+      setChoice('role', profile.role || 'Investor'); setChoice('investment_focus', profile.investment_focus || 'Fix & Flip');
+      setVal('buy_box', profile.buy_box); setVal('bio', profile.bio);
+    } else {
+      setChoice('primary_market','Georgia'); setChoice('role','Investor'); setChoice('investment_focus','Fix & Flip');
+    }
+    refreshPreview(); setStatus('Profile ready.');
+  } catch(e){ console.error(e); setStatus(e.message || 'Failed to load profile.'); }
+}
+async function saveProfile(){
+  try{
+    if(!currentUserId){ setStatus('No active session found.'); return; }
+    const payload={ user_id: currentUserId, full_name:getVal('full_name'), company_name:getVal('company_name'), primary_market:getVal('primary_market'), phone:getVal('phone'), email_display:getVal('email_display'), website:getVal('website'), profile_photo_url:getVal('profile_photo_url'), role:getVal('role'), investment_focus:getVal('investment_focus'), buy_box:getVal('buy_box'), bio:getVal('bio') };
+    setStatus('Saving profile...');
+    let resp;
+    if(existingProfileId){ resp=await sb.from('member_profiles').update(payload).eq('id', existingProfileId).select().maybeSingle(); }
+    else { resp=await sb.from('member_profiles').insert([payload]).select().maybeSingle(); }
+    if(resp.error) throw resp.error;
+    existingProfileId = resp.data?.id || existingProfileId;
+    refreshPreview(); showAdminButtons(!!(payload.role==='admin' || resp.data?.is_admin===true)); setStatus('Profile saved.');
+  } catch(e){ console.error(e); setStatus(e.message || 'Failed to save profile.'); }
+}
+['full_name','company_name','phone','email_display','website','profile_photo_url','buy_box','bio'].forEach(id=>$(id).addEventListener('input', refreshPreview));
+$('saveBtn').addEventListener('click', saveProfile); $('saveTopBtn').addEventListener('click', saveProfile);
+loadProfile();
+</script>
+</body>
+</html>
