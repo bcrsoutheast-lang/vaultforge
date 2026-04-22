@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#030913; --bg2:#071427; --panel:#08172d; --panel2:#0b1f3f;
+  --text:#f6f8ff; --muted:#a7b5d6; --line:rgba(255,255,255,.08);
+  --gold:#d6ab4e; --gold2:#f1cf7b; --blue:#3f76ff; --green:#17c37f;
+  --red:#df6577; --warn:#f5a623; --shadow:0 28px 90px rgba(0,0,0,.42); --radius:28px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),
+    radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),
+    radial-gradient(circle at 50% 100%, rgba(23,195,127,.06), transparent 22%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+button,input,textarea{font:inherit}
+.shell{max-width:1500px;margin:0 auto;padding:0 16px}
+.topbar{position:sticky;top:0;z-index:80;background:rgba(3,9,19,.80);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(16px)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:58px;height:58px;border-radius:18px;object-fit:cover;border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow)}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2)}
+.brand-copy span{display:block;color:var(--muted);font-size:.95rem}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center;transition:.18s ease
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn-red{background:linear-gradient(135deg,var(--red),#cf4f62);color:#fff}
+.page{padding:24px 0 36px;display:grid;gap:18px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.hero-card{min-height:280px;display:grid;align-items:center;position:relative;overflow:hidden}
+.hero-card:before{content:"";position:absolute;inset:auto -50px -50px auto;width:260px;height:260px;border-radius:999px;background:radial-gradient(circle, rgba(214,171,78,.20), transparent 65%)}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+h1{margin:0 0 12px;font-size:clamp(2.4rem,5vw,4.3rem);line-height:.92;letter-spacing:-.05em}
+.copy{color:var(--muted);line-height:1.68;font-size:1.04rem}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.metric{background:linear-gradient(180deg,var(--panel),#071223);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+.metric strong{display:block;font-size:2rem;margin-bottom:6px}.metric span{color:var(--muted)}
+.content-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.section-title{margin:0 0 14px;font-size:1.45rem}
+.list{display:grid;gap:12px}
+.item-btn{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;
+  padding:18px;font-size:18px;font-weight:700;color:#fff;cursor:pointer;text-align:left
+}
+.item-btn:hover{background:rgba(255,255,255,.06)}
+.status{margin-top:14px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:14px;color:#d6e4ff;line-height:1.5}
+.feed{display:grid;gap:12px}
+.feed-item{padding:14px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.02)}
+.admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.admin-card{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;background:rgba(255,255,255,.02)}
+.admin-card strong{display:block;font-size:1.6rem;margin-bottom:6px}
+.hidden{display:none!important}
+@media(max-width:1180px){.hero,.content-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.metric-grid,.admin-grid{grid-template-columns:1fr 1fr}.nav{width:100%}}
+@media(max-width:640px){.metric-grid,.admin-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <img src="IMG_2536.png" alt="VaultForge logo">
+      <div class="brand-copy">
+        <strong>VAULTFORGE ADMIN</strong>
+        <span id="adminLine">Loading command center...</span>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="btn btn-dark" href="/members.html">Member View</a>
+      <a class="btn btn-dark" href="/property-cards.html">Listings Board</a>
+      <a class="btn btn-blue" href="/listing-form.html">Create Listing</a>
+      <a class="btn btn-dark" href="/pain.html">Pain Engine</a>
+      <a class="btn btn-gold" href="/founding.html">Founder Page</a>
+      <a class="btn btn-red" href="/member-login.html" id="logoutLink">Logout</a>
+    </div>
+  </div>
+</div>
+
+<div class="shell page">
+  <section class="hero">
+    <div class="panel hero-card">
+      <div style="position:relative;z-index:1">
+        <div class="eyebrow">Owner Command Center</div>
+        <h1>Run the network.</h1>
+        <div class="copy">This admin build is aligned with the members dashboard and pain engine. Admin is never locked out. Listings, pain, routing, growth, and revenue live in one place.</div>
+        <div class="hero-actions">
+          <a class="btn btn-blue" href="/listing-form.html">Create Listing</a>
+          <a class="btn btn-dark" href="/property-cards.html">Open Listings Board</a>
+          <a class="btn btn-dark" href="/pain.html">Open Pain Engine</a>
+          <a class="btn btn-dark" href="/members.html">Open Member View</a>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="eyebrow">System Status</div>
+      <div class="admin-grid">
+        <div class="admin-card"><strong id="listingsCount">0</strong><div class="copy">Listings loaded</div></div>
+        <div class="admin-card"><strong id="painCount">0</strong><div class="copy">Pain opportunities</div></div>
+        <div class="admin-card"><strong id="memberCount">0</strong><div class="copy">Profiles in network</div></div>
+      </div>
+      <div class="status" id="systemStatus">Checking system...</div>
+    </div>
+  </section>
+
+  <section class="metric-grid">
+    <div class="metric"><strong id="activeListings">0</strong><span>Active Listings</span></div>
+    <div class="metric"><strong id="draftListings">0</strong><span>Draft Listings</span></div>
+    <div class="metric"><strong id="urgentPain">0</strong><span>Urgent Pain</span></div>
+    <div class="metric"><strong id="adminAlerts">0</strong><span>Admin Alerts</span></div>
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <h2 class="section-title">Fast Workflow</h2>
+      <div class="list">
+        <button class="item-btn" id="openListingsBtn">1. Open Listings Board</button>
+        <button class="item-btn" id="openFirstListingBtn">2. Open First Listing</button>
+        <button class="item-btn" id="openFirstEditBtn">3. Open First Edit</button>
+        <button class="item-btn" id="openPainBtn">4. Open Pain Engine</button>
+        <button class="item-btn" id="openMembersBtn">5. Open Member View</button>
+      </div>
+      <div class="status" id="workflowStatus">Ready.</div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">Growth Targets</h2>
+      <div class="list">
+        <button class="item-btn" data-member-filter="georgia|lender">Georgia Lenders</button>
+        <button class="item-btn" data-member-filter="florida|buyer">Florida Buyers</button>
+        <button class="item-btn" data-member-filter="tennessee|operator">Tennessee Operators</button>
+        <button class="item-btn" data-member-filter="georgia|investor">Georgia Investors</button>
+      </div>
+      <div class="status" id="growthStatus">These open member search with prefilled filters.</div>
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <h2 class="section-title">Revenue Focus</h2>
+      <div class="list">
+        <button class="item-btn" id="goFounderBtn">$49 Founder Access</button>
+        <button class="item-btn" id="goListingsRevenueBtn">Featured Listings Upsell</button>
+        <button class="item-btn" id="goMembersRevenueBtn">Paid Network Expansion</button>
+        <button class="item-btn" id="goPainRevenueBtn">Priority Pain Routing</button>
+      </div>
+      <div class="status" id="revenueStatus">Routes point to the pages that matter right now.</div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">Notifications + Matching</h2>
+      <div class="feed" id="matchFeed"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const sb = supabase.createClient('https://mnwwvpuxrzostrplfgmq.supabase.co','sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ');
+
+let listings = [], painRows = [], members = [], painTable = null;
+
+function $(id){ return document.getElementById(id); }
+function setStatus(id, msg){ $(id).textContent = msg; }
+function safeNum(v){ return Number.isFinite(Number(v)) ? Number(v) : 0; }
+function isLive(r){ return ['active','live','approved'].includes(String(r.status||'').toLowerCase()); }
+
+async function safeLogout(){ try{ await sb.auth.signOut(); }catch(e){} }
+
+async function detectPainTable(){
+  for(const t of ['pain','pain_requests']){
+    try{
+      const resp = await sb.from(t).select('*').limit(1);
+      if(!resp.error) return t;
+    }catch(e){}
+  }
+  return null;
+}
+
+function renderMatchFeed(){
+  const items = [];
+  const urgent = painRows.filter(r => String(r.urgency||'').toLowerCase() === 'urgent');
+  const capitalPain = painRows.filter(r => String(r.category||'').toLowerCase().includes('capital'));
+  const georgiaListings = listings.filter(r => String(r.state||'').toLowerCase().includes('georgia'));
+  const lenders = members.filter(r => String(r.role||'').toLowerCase().includes('lender'));
+
+  if(urgent.length){
+    items.push({
+      title: `${urgent.length} urgent pain opportunit${urgent.length===1?'y':'ies'}`,
+      body: 'These should be first in admin review and notification routing.'
+    });
+  }
+  if(capitalPain.length && lenders.length){
+    items.push({
+      title: `${capitalPain.length} capital requests can route to ${lenders.length} lender profile${lenders.length===1?'':'s'}`,
+      body: 'Matching is only useful if lender profiles stay clean and searchable.'
+    });
+  }
+  if(georgiaListings.length){
+    items.push({
+      title: `${georgiaListings.length} Georgia listing${georgiaListings.length===1?'':'s'} live in system`,
+      body: 'State-based routing is ready to use for growth and notifications.'
+    });
+  }
+  if(!items.length){
+    items.push({
+      title: 'System is clean but quiet',
+      body: 'Add listings, pain opportunities, or member profiles to start routing matches.'
+    });
+  }
+
+  $('matchFeed').innerHTML = items.map(item =>
+    `<div class="feed-item"><div style="font-weight:800">${item.title}</div><div class="copy" style="font-size:.96rem">${item.body}</div></div>`
+  ).join('');
+}
+
+function updateMetrics(){
+  $('listingsCount').textContent = String(listings.length);
+  $('painCount').textContent = String(painRows.length);
+  $('memberCount').textContent = String(members.length);
+
+  const active = listings.filter(isLive).length;
+  const drafts = listings.filter(r => String(r.status||'').toLowerCase() === 'draft').length;
+  const urgent = painRows.filter(r => String(r.urgency||'').toLowerCase() === 'urgent').length;
+  const alerts = drafts + urgent;
+
+  $('activeListings').textContent = String(active);
+  $('draftListings').textContent = String(drafts);
+  $('urgentPain').textContent = String(urgent);
+  $('adminAlerts').textContent = String(alerts);
+
+  $('systemStatus').textContent = 'Admin connected. Listings, pain, and member profiles loaded into one command center.';
+  renderMatchFeed();
+}
+
+function go(url){ window.location.href = url; }
+
+async function openFirstListing(){
+  setStatus('workflowStatus', 'Looking for a listing...');
+  if(listings.length && listings[0].id){
+    go('/listing.html?id=' + encodeURIComponent(listings[0].id));
+    return;
+  }
+  setStatus('workflowStatus', 'No listing found. Open Listings Board instead.');
+}
+
+async function openFirstEdit(){
+  setStatus('workflowStatus', 'Looking for a listing to edit...');
+  if(listings.length && listings[0].id){
+    go('/listing-form.html?edit=' + encodeURIComponent(listings[0].id));
+    return;
+  }
+  setStatus('workflowStatus', 'No listing found to edit. Create one first.');
+}
+
+function filterMembers(state, role){
+  setStatus('growthStatus', 'Opening member view for ' + state + ' / ' + role + '.');
+  go('/members.html?state=' + encodeURIComponent(state) + '&role=' + encodeURIComponent(role));
+}
+
+async function loadAdmin(){
+  try{
+    const session = (await sb.auth.getSession())?.data?.session;
+    if(!session){
+      window.location.href = '/member-login.html';
+      return;
+    }
+    $('adminLine').textContent = 'Logged in as ' + (session.user.email || 'admin');
+
+    painTable = await detectPainTable();
+
+    const queries = [
+      sb.from('property_cards').select('*').order('created_at',{ascending:false}).limit(150),
+      sb.from('member_profiles').select('*').limit(150)
+    ];
+    if(painTable){
+      queries.push(sb.from(painTable).select('*').order('created_at',{ascending:false}).limit(150));
+    }
+
+    const results = await Promise.allSettled(queries);
+
+    const listingsResp = results[0];
+    const membersResp = results[1];
+    const painResp = results[2];
+
+    listings = listingsResp.status === 'fulfilled' && !listingsResp.value.error && Array.isArray(listingsResp.value.data)
+      ? listingsResp.value.data : [];
+    members = membersResp.status === 'fulfilled' && !membersResp.value.error && Array.isArray(membersResp.value.data)
+      ? membersResp.value.data : [];
+    painRows = painResp && painResp.status === 'fulfilled' && !painResp.value.error && Array.isArray(painResp.value.data)
+      ? painResp.value.data : [];
+
+    updateMetrics();
+  } catch(e){
+    console.error(e);
+    setStatus('systemStatus', 'Admin loaded in safe mode.');
+    renderMatchFeed();
+  }
+}
+
+$('logoutLink').addEventListener('click', safeLogout);
+$('openListingsBtn').addEventListener('click', () => go('/property-cards.html'));
+$('openFirstListingBtn').addEventListener('click', openFirstListing);
+$('openFirstEditBtn').addEventListener('click', openFirstEdit);
+$('openPainBtn').addEventListener('click', () => go('/pain.html'));
+$('openMembersBtn').addEventListener('click', () => go('/members.html'));
+
+document.querySelectorAll('[data-member-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const [state, role] = btn.getAttribute('data-member-filter').split('|');
+    filterMembers(state, role);
+  });
+});
+
+$('goFounderBtn').addEventListener('click', () => go('/founding.html'));
+$('goListingsRevenueBtn').addEventListener('click', () => go('/property-cards.html'));
+$('goMembersRevenueBtn').addEventListener('click', () => go('/members.html'));
+$('goPainRevenueBtn').addEventListener('click', () => go('/pain.html'));
+
+loadAdmin();
+</script>
+</body>
+</html>
