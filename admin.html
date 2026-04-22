@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaultForge Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#06111f;
+      --bg2:#0a1930;
+      --card:#10233f;
+      --line:rgba(255,255,255,.08);
+      --text:#fff;
+      --muted:#9fb0d1;
+      --gold:#d6ab4e;
+      --blue:#4e8dff;
+      --green:#15c67d;
+      --red:#ff5f72;
+      --warn:#f5a623;
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--text);
+    }
+    .wrap{max-width:1400px;margin:auto;padding:24px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+    .brand{font-size:34px;font-weight:900;letter-spacing:.08em;color:var(--gold)}
+    .sub{color:var(--muted);margin-top:4px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:none;
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .dark{background:rgba(255,255,255,.05);color:#fff;border:1px solid var(--line)}
+    .blue{background:var(--blue);color:#fff}
+    .green{background:var(--green);color:#08150f}
+    .red{background:var(--red);color:#fff}
+    .warn{background:var(--warn);color:#111}
+    .gold{background:var(--gold);color:#111}
+    .status{
+      margin-bottom:18px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      color:#dce7ff;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:20px;
+    }
+    .big{font-size:34px;font-weight:900;margin-bottom:6px}
+    .label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    h2{margin:0 0 14px;font-size:22px}
+    .queue{display:grid;gap:12px}
+    .queue-card{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+    }
+    .pills{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px}
+    .pill{
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      font-size:12px;
+      font-weight:800;
+    }
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .small{font-size:13px;color:var(--muted)}
+    .search{
+      width:100%;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#0a1a33;
+      color:#fff;
+      border:1px solid var(--line);
+      margin-bottom:12px;
+    }
+    @media(max-width:1100px){
+      .row,.grid2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="brand">VAULTFORGE ADMIN</div>
+        <div class="sub" id="adminSub">Owner Command Center</div>
+      </div>
+      <div class="actions">
+        <a class="btn dark" href="/members.html">Members</a>
+        <a class="btn dark" href="/property-cards.html">Listings</a>
+        <a class="btn blue" href="/listing-form.html">Create Listing</a>
+        <a class="btn dark" href="/pain.html">Pain</a>
+      </div>
+    </div>
+
+    <div class="status" id="statusBox">Loading admin...</div>
+
+    <div class="row">
+      <div class="card"><div class="big" id="memberCount">--</div><div class="label">Members</div></div>
+      <div class="card"><div class="big" id="listingCount">--</div><div class="label">Listings</div></div>
+      <div class="card"><div class="big" id="painCount">--</div><div class="label">Pain Requests</div></div>
+      <div class="card"><div class="big" id="draftCount">--</div><div class="label">Draft Listings</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>Draft Listings</h2>
+        <input class="search" id="searchBox" placeholder="Search listings by title, city, state">
+        <div class="queue" id="draftQueue"></div>
+      </div>
+
+      <div class="card">
+        <h2>Quick Actions</h2>
+        <div class="toolbar">
+          <button class="btn gold" id="refreshBtn" type="button">Refresh</button>
+          <button class="btn green" id="approveAllBtn" type="button">Approve All Drafts</button>
+        </div>
+        <div class="small">This is the recovery admin. Stable first, fancy second.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://mnwwvpuxrzostrplfgmq.supabase.co',
+      'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ'
+    );
+
+    let listings = [];
+
+    function setStatus(msg){
+      document.getElementById('statusBox').textContent = msg;
+    }
+
+    function esc(v){
+      return String(v ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+    }
+
+    function fmtMoney(v){
+      const n = Number(v);
+      return Number.isFinite(n)
+        ? new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n)
+        : '—';
+    }
+
+    function filteredDrafts(){
+      const q = document.getElementById('searchBox').value.trim().toLowerCase();
+      return listings
+        .filter(r => String(r.status || '').toLowerCase() === 'draft')
+        .filter(r => {
+          if(!q) return true;
+          return [r.title, r.city, r.state, r.property_type].join(' ').toLowerCase().includes(q);
+        });
+    }
+
+    function renderDrafts(){
+      const box = document.getElementById('draftQueue');
+      const rows = filteredDrafts();
+
+      if(!rows.length){
+        box.innerHTML = '<div class="small">No draft listings found.</div>';
+        return;
+      }
+
+      box.innerHTML = rows.map(r => `
+        <div class="queue-card">
+          <div style="font-weight:900;font-size:20px">${esc(r.title || 'Untitled Listing')}</div>
+          <div class="pills">
+            <span class="pill">${esc(r.status || 'Draft')}</span>
+            <span class="pill">${esc(r.state || '—')}</span>
+            <span class="pill">${esc(r.property_type || '—')}</span>
+          </div>
+          <div class="small">${esc(r.city || '—')} • ${esc(fmtMoney(r.price))}</div>
+          <div class="toolbar">
+            <a class="btn dark" href="/listing.html?id=${encodeURIComponent(r.id)}">View</a>
+            <a class="btn blue" href="/listing-form.html?edit=${encodeURIComponent(r.id)}">Edit</a>
+            <button class="btn green" type="button" onclick="setListingStatus('${String(r.id).replaceAll("'", "\\'")}','Active')">Approve / Live</button>
+            <button class="btn red" type="button" onclick="deleteListing('${String(r.id).replaceAll("'", "\\'")}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function setListingStatus(id, status){
+      const ok = confirm('Set listing to ' + status + '?');
+      if(!ok) return;
+
+      setStatus('Saving...');
+      const { error } = await supabase.from('property_cards').update({ status }).eq('id', id);
+
+      if(error){
+        setStatus(error.message);
+        return;
+      }
+
+      await loadAdmin();
+      setStatus('Saved.');
+    }
+
+    async function deleteListing(id){
+      const ok = confirm('Delete listing?');
+      if(!ok) return;
+
+      setStatus('Deleting...');
+      const { error } = await supabase.from('property_cards').delete().eq('id', id);
+
+      if(error){
+        setStatus(error.message);
+        return;
+      }
+
+      await loadAdmin();
+      setStatus('Deleted.');
+    }
+
+    async function approveAllDrafts(){
+      const drafts = listings.filter(r => String(r.status || '').toLowerCase() === 'draft');
+      if(!drafts.length){
+        setStatus('No draft listings found.');
+        return;
+      }
+
+      const ok = confirm('Approve all draft listings?');
+      if(!ok) return;
+
+      setStatus('Approving drafts...');
+      const ids = drafts.map(r => r.id);
+
+      const { error } = await supabase.from('property_cards').update({ status:'Active' }).in('id', ids);
+
+      if(error){
+        setStatus(error.message);
+        return;
+      }
+
+      await loadAdmin();
+      setStatus('All drafts approved.');
+    }
+
+    async function safeCount(tableName){
+      try{
+        const resp = await supabase.from(tableName).select('*', { count:'exact' });
+        if(resp.error) return 0;
+        return resp.count || (resp.data || []).length || 0;
+      }catch(e){
+        return 0;
+      }
+    }
+
+    async function loadAdmin(){
+      try{
+        setStatus('Loading admin...');
+
+        const listingResp = await supabase
+          .from('property_cards')
+          .select('*', { count:'exact' })
+          .order('created_at', { ascending:false });
+
+        if(listingResp.error){
+          throw listingResp.error;
+        }
+
+        listings = listingResp.data || [];
+
+        const memberCount = await safeCount('member_profiles');
+        let painCount = await safeCount('pain');
+        if(!painCount){
+          painCount = await safeCount('pain_requests');
+        }
+
+        document.getElementById('memberCount').textContent = memberCount;
+        document.getElementById('listingCount').textContent = listingResp.count || listings.length || 0;
+        document.getElementById('painCount').textContent = painCount;
+        document.getElementById('draftCount').textContent =
+          listings.filter(r => String(r.status || '').toLowerCase() === 'draft').length;
+
+        renderDrafts();
+        setStatus('Admin ready.');
+      } catch(e){
+        console.log(e);
+        setStatus('Admin failed to load: ' + (e.message || 'unknown error'));
+      }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', loadAdmin);
+    document.getElementById('approveAllBtn').addEventListener('click', approveAllDrafts);
+    document.getElementById('searchBox').addEventListener('input', renderDrafts);
+
+    loadAdmin();
+  </script>
+</body>
+</html>
