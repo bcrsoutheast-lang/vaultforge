@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Members</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#030913; --bg2:#071427; --panel:#08172d; --panel2:#0b1f3f;
+  --text:#f6f8ff; --muted:#a7b5d6; --line:rgba(255,255,255,.08);
+  --gold:#d6ab4e; --gold2:#f1cf7b; --blue:#3f76ff; --green:#17c37f;
+  --red:#df6577; --shadow:0 28px 90px rgba(0,0,0,.42); --radius:28px;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),
+    radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),
+    radial-gradient(circle at 50% 100%, rgba(23,195,127,.06), transparent 22%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+.shell{max-width:1500px;margin:0 auto;padding:0 16px}
+.hero-top{
+  padding:26px 0 18px;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(214,171,78,.14), transparent 18%),
+    radial-gradient(circle at 78% 16%, rgba(63,118,255,.16), transparent 22%),
+    linear-gradient(180deg, rgba(1,7,18,.96), rgba(2,12,28,.88));
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.brandbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:flex-start;gap:14px}
+.brand img{width:92px;height:92px;border-radius:22px;object-fit:cover;border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow)}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2);font-size:clamp(1.6rem,4vw,2.6rem)}
+.brand-copy span{display:block;color:var(--muted);font-size:clamp(1rem,2vw,1.2rem);line-height:1.35;margin-top:6px;max-width:640px}
+.button-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.big-btn{
+  appearance:none;border:none;cursor:pointer;border-radius:26px;padding:24px 18px;min-height:92px;
+  font-weight:900;font-size:clamp(1.05rem,2vw,1.55rem);display:flex;align-items:center;justify-content:center;text-align:center;
+  border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow)
+}
+.big-btn.dark{background:rgba(255,255,255,.035);color:#fff}
+.big-btn.blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.big-btn.gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.layout{padding:24px 0 34px;display:grid;gap:18px}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+.h2{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:900;letter-spacing:-.04em;margin:0 0 10px}
+.copy{color:var(--muted);line-height:1.64}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;background:rgba(255,255,255,.02);text-align:center}
+.stat strong{display:block;font-size:2rem;margin-bottom:8px}
+.quick-filters{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.filter-btn{
+  appearance:none;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#fff;border-radius:20px;
+  padding:15px 12px;font-weight:800;cursor:pointer
+}
+.filter-btn.active{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103;border-color:transparent}
+.notice{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:14px;color:#d6e4ff}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.card{background:linear-gradient(180deg,#08172d,#06111f);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:var(--shadow)}
+.card-body{padding:20px}
+.card h3{margin:0 0 8px;font-size:1.75rem;letter-spacing:-.03em}
+.small{font-size:.95rem;color:var(--muted)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:12px 16px;min-height:48px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center
+}
+.btn.dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn.blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.btn.gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.btn.green{background:linear-gradient(135deg,#24b37a,#17855b);color:#fff}
+.btn.red{background:linear-gradient(135deg,var(--red),#cf4f62);color:#fff}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:.82rem;font-weight:800}
+.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.meta{border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:12px;background:rgba(255,255,255,.02)}
+.meta b{display:block;margin-bottom:4px}
+.state-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.state-btn{
+  appearance:none;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#fff;border-radius:22px;padding:18px;text-align:left;cursor:pointer
+}
+.state-btn strong{display:block;font-size:1.15rem;margin-bottom:4px}
+.state-btn span{display:block;color:var(--muted);font-size:.92rem}
+.state-btn.active{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103;border-color:transparent}
+.state-btn.active span{color:#161103}
+.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.profile-card{background:linear-gradient(180deg,#08172d,#06111f);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:var(--shadow)}
+.profile-head{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center}
+.avatar{width:64px;height:64px;border-radius:20px;overflow:hidden;background:linear-gradient(135deg, rgba(214,171,78,.18), rgba(255,255,255,.05));border:1px solid rgba(214,171,78,.22);display:grid;place-items:center;font-weight:900;color:var(--gold2)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+@media(max-width:1100px){
+  .button-grid,.stats,.quick-filters,.cards,.state-grid,.profile-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .button-grid,.stats,.quick-filters,.cards,.state-grid,.profile-grid{grid-template-columns:1fr}
+  .brand img{width:76px;height:76px}
+  .big-btn{min-height:84px;padding:20px 16px}
+}
+</style>
+</head>
+<body>
+<div class="hero-top">
+  <div class="shell">
+    <div class="brandbar">
+      <div class="brand">
+        <img src="IMG_2536.png" alt="VaultForge logo">
+        <div class="brand-copy">
+          <strong>VAULTFORGE</strong>
+          <span id="memberLine">Private network for deals, capital, and connections</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-grid">
+      <a href="/members.html"><button class="big-btn dark">Dashboard</button></a>
+      <a href="/property-cards.html"><button class="big-btn dark">All Listings</button></a>
+      <a href="/listing-form.html"><button class="big-btn blue">Create Listing</button></a>
+      <a href="/pain.html"><button class="big-btn dark">Pain Engine</button></a>
+      <a href="/member-profile.html"><button class="big-btn dark">Profile</button></a>
+      <a href="/founding.html"><button class="big-btn gold">Founder Access</button></a>
+    </div>
+  </div>
+</div>
+
+<div class="shell layout">
+  <section class="panel">
+    <div class="eyebrow">Member Command</div>
+    <div class="h2">Keep your area clean. Move deals fast.</div>
+    <div class="copy">This is your working dashboard. Manage your own listings, mark deals sold, pause what is not ready, delete dead inventory, and move between the core parts of VaultForge without using the browser back button.</div>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">My Listing Stats</div>
+    <div class="stats">
+      <div class="stat"><strong id="activeCt">0</strong><span class="small">Active</span></div>
+      <div class="stat"><strong id="soldCt">0</strong><span class="small">Sold</span></div>
+      <div class="stat"><strong id="pausedCt">0</strong><span class="small">Paused</span></div>
+      <div class="stat"><strong id="draftCt">0</strong><span class="small">Draft</span></div>
+    </div>
+    <div class="notice" id="msg" style="margin-top:16px">Loading your listings...</div>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">Quick Filters</div>
+    <div class="quick-filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="active">Active</button>
+      <button class="filter-btn" data-filter="sold">Sold</button>
+      <button class="filter-btn" data-filter="paused">Paused</button>
+      <button class="filter-btn" data-filter="draft">Draft</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">My Listings</div>
+    <div class="cards" id="grid"></div>
+  </section>
+
+  <section class="panel" id="profilesSection">
+    <div class="eyebrow">Profiles By State</div>
+    <div class="state-grid">
+      <button class="state-btn active" data-profile-state="all">
+        <strong id="allProfilesCount">0 Profiles</strong>
+        <span>All markets</span>
+      </button>
+      <button class="state-btn" data-profile-state="Georgia">
+        <strong id="gaProfilesCount">0 Profiles</strong>
+        <span>Georgia</span>
+      </button>
+      <button class="state-btn" data-profile-state="Tennessee">
+        <strong id="tnProfilesCount">0 Profiles</strong>
+        <span>Tennessee</span>
+      </button>
+      <button class="state-btn" data-profile-state="Florida">
+        <strong id="flProfilesCount">0 Profiles</strong>
+        <span>Florida</span>
+      </button>
+    </div>
+    <div class="notice" style="margin-top:16px">
+      <strong id="profilesHeading">All Profiles</strong>
+      <div class="small" id="profilesSubheading" style="margin-top:6px">Tap a state and jump straight to that market.</div>
+    </div>
+    <div class="profile-grid" id="profilesGrid" style="margin-top:16px"></div>
+  </section>
+</div>
+
+<script>
+const sb = supabase.createClient(
+  'https://mnwwvpuxrzostrplfgmq.supabase.co',
+  'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ'
+);
+
+let uid = null;
+let allRows = [];
+let memberRows = [];
+let currentFilter = 'all';
+let currentProfileState = 'all';
+
+function msg(t){ document.getElementById('msg').textContent = t; }
+
+function esc(v){
+  return String(v || '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#39;');
+}
+
+function money(v){
+  const n = Number(v);
+  if (isNaN(n)) return '—';
+  return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+}
+
+function normalizeState(s){
+  const v = String(s || '').trim().toLowerCase();
+  if(v === 'ga') return 'georgia';
+  if(v === 'tn') return 'tennessee';
+  if(v === 'fl') return 'florida';
+  return v;
+}
+
+function renderStats(rows){
+  const count = st => rows.filter(r => String(r.status || 'draft').toLowerCase() === st).length;
+  document.getElementById('activeCt').textContent = count('active');
+  document.getElementById('soldCt').textContent = count('sold');
+  document.getElementById('pausedCt').textContent = count('paused');
+  document.getElementById('draftCt').textContent = count('draft');
+}
+
+function setActiveFilterButtons(){
+  document.querySelectorAll('[data-filter]').forEach(btn=>{
+    btn.classList.toggle('active', btn.getAttribute('data-filter') === currentFilter);
+  });
+}
+
+function renderListings(){
+  const grid = document.getElementById('grid');
+  let rows = [...allRows];
+  if(currentFilter !== 'all'){
+    rows = rows.filter(r => String(r.status || 'draft').toLowerCase() === currentFilter);
+  }
+
+  if(!rows.length){
+    grid.innerHTML = '<div class="notice">No listings in this filter.</div>';
+    return;
+  }
+
+  grid.innerHTML = rows.map(r => `
+    <article class="card">
+      <div class="card-body">
+        <h3>${esc(r.title || 'Untitled')}</h3>
+        <div class="small">${esc(r.city || '')} ${esc(r.state || '')}</div>
+        <div class="badges">
+          <div class="badge">${esc(r.status || 'draft')}</div>
+          <div class="badge">${esc(r.property_type || 'Type')}</div>
+        </div>
+        <div class="meta-grid">
+          <div class="meta"><b>Price</b>${money(r.price)}</div>
+          <div class="meta"><b>Status</b>${esc(r.status || 'draft')}</div>
+        </div>
+        <div class="actions">
+          <a href="/listing.html?id=${encodeURIComponent(r.id)}"><button class="btn dark">View</button></a>
+          <a href="/listing-form.html?edit=${encodeURIComponent(r.id)}"><button class="btn blue">Edit</button></a>
+          <button class="btn green" onclick="setStatus('${r.id}','sold')">Sold</button>
+          <button class="btn dark" onclick="setStatus('${r.id}','paused')">Pause</button>
+          <button class="btn gold" onclick="setStatus('${r.id}','active')">Activate</button>
+          <button class="btn red" onclick="removeListing('${r.id}')">Delete</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function setProfileCounts(){
+  const ga = memberRows.filter(r => normalizeState(r.primary_market) === 'georgia').length;
+  const tn = memberRows.filter(r => normalizeState(r.primary_market) === 'tennessee').length;
+  const fl = memberRows.filter(r => normalizeState(r.primary_market) === 'florida').length;
+  document.getElementById('allProfilesCount').textContent = memberRows.length + ' Profiles';
+  document.getElementById('gaProfilesCount').textContent = ga + ' Profiles';
+  document.getElementById('tnProfilesCount').textContent = tn + ' Profiles';
+  document.getElementById('flProfilesCount').textContent = fl + ' Profiles';
+}
+
+function setActiveProfileButtons(){
+  document.querySelectorAll('[data-profile-state]').forEach(btn=>{
+    btn.classList.toggle('active', btn.getAttribute('data-profile-state') === currentProfileState);
+  });
+}
+
+function renderProfiles(){
+  let rows = [...memberRows];
+  if(currentProfileState !== 'all'){
+    rows = rows.filter(r => normalizeState(r.primary_market) === normalizeState(currentProfileState));
+  }
+
+  document.getElementById('profilesHeading').textContent = currentProfileState === 'all' ? 'All Profiles' : currentProfileState + ' Profiles';
+  document.getElementById('profilesSubheading').textContent = rows.length
+    ? 'Showing ' + rows.length + ' profile' + (rows.length === 1 ? '' : 's') + '.'
+    : 'No profiles in this market yet.';
+
+  const grid = document.getElementById('profilesGrid');
+  if(!rows.length){
+    grid.innerHTML = '<div class="notice">No profiles found in this state.</div>';
+    return;
+  }
+
+  grid.innerHTML = rows.map(r => {
+    const name = r.full_name || 'Member';
+    const company = r.company_name || 'VaultForge member';
+    const role = r.role || 'Role';
+    const market = r.primary_market || 'Market';
+    const focus = r.investment_focus || 'Strategy';
+    const photo = r.profile_photo_url || '';
+    return `
+      <article class="profile-card">
+        <div class="profile-head">
+          <div class="avatar">${photo ? `<img src="${esc(photo)}" alt="Profile photo">` : esc((name || 'VF').slice(0,2).toUpperCase())}</div>
+          <div>
+            <h3>${esc(name)}</h3>
+            <div class="small">${esc(company)}</div>
+          </div>
+        </div>
+        <div class="badges">
+          <div class="badge">${esc(market)}</div>
+          <div class="badge">${esc(role)}</div>
+          <div class="badge">${esc(focus)}</div>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+async function setStatus(id,status){
+  msg('Updating...');
+  const res = await sb.from('property_cards')
+    .update({status:status})
+    .eq('id',id)
+    .eq('user_id',uid);
+
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  setActiveFilterButtons();
+  renderListings();
+  msg('Updated to ' + status);
+}
+
+async function removeListing(id){
+  if(!confirm('Delete this listing?')) return;
+  msg('Deleting...');
+  const res = await sb.from('property_cards')
+    .delete()
+    .eq('id',id)
+    .eq('user_id',uid);
+
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  setActiveFilterButtons();
+  renderListings();
+  msg('Deleted.');
+}
+
+async function load(){
+  const sess = await sb.auth.getSession();
+  const s = sess?.data?.session;
+  if(!s){ location.href='/member-login.html'; return; }
+  uid = s.user.id;
+
+  const [listingsRes, profilesRes] = await Promise.all([
+    sb.from('property_cards').select('*').eq('user_id', uid).order('created_at',{ascending:false}),
+    sb.from('member_profiles').select('*').order('created_at',{ascending:false}).limit(300)
+  ]);
+
+  if(listingsRes.error){ msg(listingsRes.error.message); return; }
+
+  allRows = listingsRes.data || [];
+  memberRows = profilesRes.error ? [] : (profilesRes.data || []).filter(r => !r.is_admin && r.role !== 'admin');
+
+  renderStats(allRows);
+  setProfileCounts();
+  setActiveFilterButtons();
+  setActiveProfileButtons();
+  renderListings();
+  renderProfiles();
+  msg('Manage your listings below.');
+}
+
+document.querySelectorAll('[data-filter]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentFilter = btn.getAttribute('data-filter');
+    setActiveFilterButtons();
+    renderListings();
+    msg(currentFilter === 'all' ? 'Showing all listings.' : 'Showing ' + currentFilter + ' listings.');
+  });
+});
+
+document.querySelectorAll('[data-profile-state]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentProfileState = btn.getAttribute('data-profile-state');
+    setActiveProfileButtons();
+    renderProfiles();
+    document.getElementById('profilesSection').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+
+load();
+</script>
+</body>
+</html>
