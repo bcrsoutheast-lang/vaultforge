@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#030913; --bg2:#071427; --panel:#08172d; --panel2:#0b1f3f;
+  --text:#f6f8ff; --muted:#a7b5d6; --line:rgba(255,255,255,.08);
+  --gold:#d6ab4e; --gold2:#f1cf7b; --blue:#3f76ff; --green:#17c37f;
+  --red:#df6577; --warn:#f5a623; --shadow:0 28px 90px rgba(0,0,0,.42); --radius:28px;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),
+    radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),
+    radial-gradient(circle at 50% 100%, rgba(23,195,127,.06), transparent 22%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+.shell{max-width:1500px;margin:0 auto;padding:0 16px}
+.hero-top{
+  padding:26px 0 18px;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(214,171,78,.14), transparent 18%),
+    radial-gradient(circle at 78% 16%, rgba(63,118,255,.16), transparent 22%),
+    linear-gradient(180deg, rgba(1,7,18,.96), rgba(2,12,28,.88));
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.brandbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:flex-start;gap:14px}
+.brand img{width:92px;height:92px;border-radius:22px;object-fit:cover;border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow)}
+.brand-copy strong{display:block;letter-spacing:.18em;color:var(--gold2);font-size:clamp(1.6rem,4vw,2.6rem)}
+.brand-copy span{display:block;color:var(--muted);font-size:clamp(1rem,2vw,1.2rem);line-height:1.35;margin-top:6px;max-width:720px}
+.button-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.big-btn{
+  appearance:none;border:none;cursor:pointer;border-radius:26px;padding:24px 18px;min-height:92px;
+  font-weight:900;font-size:clamp(1.05rem,2vw,1.55rem);display:flex;align-items:center;justify-content:center;text-align:center;
+  border:1px solid rgba(255,255,255,.10);box-shadow:var(--shadow)
+}
+.big-btn.dark{background:rgba(255,255,255,.035);color:#fff}
+.big-btn.blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.big-btn.gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.big-btn.red{background:linear-gradient(135deg,var(--red),#cf4f62);color:#fff}
+.layout{padding:24px 0 34px;display:grid;gap:18px}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+.h2{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:900;letter-spacing:-.04em;margin:0 0 10px}
+.copy{color:var(--muted);line-height:1.64}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.stat{border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;background:rgba(255,255,255,.02);text-align:center}
+.stat strong{display:block;font-size:2rem;margin-bottom:8px}
+.notice{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:14px;color:#d6e4ff}
+.section-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tab-btn{
+  appearance:none;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#fff;border-radius:20px;
+  padding:15px 12px;font-weight:800;cursor:pointer
+}
+.tab-btn.active{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103;border-color:transparent}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.card{background:linear-gradient(180deg,#08172d,#06111f);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:var(--shadow)}
+.card-body{padding:20px}
+.card h3{margin:0 0 8px;font-size:1.55rem;letter-spacing:-.03em}
+.small{font-size:.95rem;color:var(--muted)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:12px 16px;min-height:48px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center
+}
+.btn.dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn.blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.btn.gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.btn.green{background:linear-gradient(135deg,#24b37a,#17855b);color:#fff}
+.btn.red{background:linear-gradient(135deg,var(--red),#cf4f62);color:#fff}
+.btn.warn{background:linear-gradient(135deg,var(--warn),#d18912);color:#161103}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:.82rem;font-weight:800}
+.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.meta{border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:12px;background:rgba(255,255,255,.02)}
+.meta b{display:block;margin-bottom:4px}
+.hidden{display:none!important}
+@media(max-width:1200px){
+  .button-grid,.stats,.section-tabs,.cards{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .button-grid,.stats,.section-tabs,.cards,.meta-grid{grid-template-columns:1fr}
+  .brand img{width:76px;height:76px}
+  .big-btn{min-height:84px;padding:20px 16px}
+}
+</style>
+</head>
+<body>
+<div class="hero-top">
+  <div class="shell">
+    <div class="brandbar">
+      <div class="brand">
+        <img src="IMG_2536.png" alt="VaultForge logo">
+        <div class="brand-copy">
+          <strong>VAULTFORGE ADMIN</strong>
+          <span id="adminLine">Run listings, members, pain, and approvals from one command center</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-grid">
+      <a href="/admin.html"><button class="big-btn dark">Dashboard</button></a>
+      <a href="/members.html"><button class="big-btn dark">Members</button></a>
+      <a href="/property-cards.html"><button class="big-btn dark">Listings Board</button></a>
+      <a href="/listing-form.html"><button class="big-btn blue">Create Listing</button></a>
+      <a href="/pain.html"><button class="big-btn dark">Pain Engine</button></a>
+      <a href="/founding.html"><button class="big-btn gold">Founder Access</button></a>
+    </div>
+  </div>
+</div>
+
+<div class="shell layout">
+  <section class="panel">
+    <div class="eyebrow">Admin Command</div>
+    <div class="h2">Approve, deny, clean, and route the whole network.</div>
+    <div class="copy">Use this command center to manage listings, member profiles, and pain opportunities. Admin can approve, deny, pause, mark sold, suspend, resolve, and delete without leaving the page.</div>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">System Snapshot</div>
+    <div class="stats">
+      <div class="stat"><strong id="listingsCt">0</strong><span class="small">Listings</span></div>
+      <div class="stat"><strong id="activeCt">0</strong><span class="small">Active</span></div>
+      <div class="stat"><strong id="draftCt">0</strong><span class="small">Draft</span></div>
+      <div class="stat"><strong id="membersCt">0</strong><span class="small">Members</span></div>
+      <div class="stat"><strong id="painCt">0</strong><span class="small">Pain</span></div>
+      <div class="stat"><strong id="alertsCt">0</strong><span class="small">Alerts</span></div>
+    </div>
+    <div class="notice" id="msg" style="margin-top:16px">Loading admin system...</div>
+  </section>
+
+  <section class="panel">
+    <div class="eyebrow">Command Sections</div>
+    <div class="section-tabs">
+      <button class="tab-btn active" data-tab="listings">Listings</button>
+      <button class="tab-btn" data-tab="members">Members</button>
+      <button class="tab-btn" data-tab="pain">Pain</button>
+    </div>
+  </section>
+
+  <section class="panel" id="listingsPanel">
+    <div class="eyebrow">Listings Control</div>
+    <div class="cards" id="listingsGrid"></div>
+  </section>
+
+  <section class="panel hidden" id="membersPanel">
+    <div class="eyebrow">Member Control</div>
+    <div class="cards" id="membersGrid"></div>
+  </section>
+
+  <section class="panel hidden" id="painPanel">
+    <div class="eyebrow">Pain Control</div>
+    <div class="cards" id="painGrid"></div>
+  </section>
+</div>
+
+<script>
+const sb = supabase.createClient(
+  'https://mnwwvpuxrzostrplfgmq.supabase.co',
+  'sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ'
+);
+
+let listings = [];
+let members = [];
+let painRows = [];
+let painTable = null;
+let activeTab = 'listings';
+
+function msg(t){ document.getElementById('msg').textContent = t; }
+function esc(v){
+  return String(v || '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#39;');
+}
+function money(v){
+  const n = Number(v);
+  if(isNaN(n)) return '—';
+  return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+}
+function isLive(r){ return ['active','live','approved'].includes(String(r.status||'').toLowerCase()); }
+
+function setActiveTabs(){
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === activeTab);
+  });
+  document.getElementById('listingsPanel').classList.toggle('hidden', activeTab !== 'listings');
+  document.getElementById('membersPanel').classList.toggle('hidden', activeTab !== 'members');
+  document.getElementById('painPanel').classList.toggle('hidden', activeTab !== 'pain');
+}
+
+function updateCounts(){
+  document.getElementById('listingsCt').textContent = listings.length;
+  document.getElementById('activeCt').textContent = listings.filter(r => String(r.status||'').toLowerCase() === 'active').length;
+  document.getElementById('draftCt').textContent = listings.filter(r => String(r.status||'').toLowerCase() === 'draft').length;
+  document.getElementById('membersCt').textContent = members.length;
+  document.getElementById('painCt').textContent = painRows.length;
+  const alerts = listings.filter(r => ['draft','denied'].includes(String(r.status||'').toLowerCase())).length
+    + painRows.filter(r => String(r.urgency||'').toLowerCase() === 'urgent').length
+    + members.filter(r => r.suspended === true).length;
+  document.getElementById('alertsCt').textContent = alerts;
+}
+
+function renderListings(){
+  const grid = document.getElementById('listingsGrid');
+  if(!listings.length){
+    grid.innerHTML = '<div class="notice">No listings found.</div>';
+    return;
+  }
+  grid.innerHTML = listings.map(r => `
+    <article class="card">
+      <div class="card-body">
+        <h3>${esc(r.title || 'Untitled')}</h3>
+        <div class="small">${esc(r.city || '')} ${esc(r.state || '')}</div>
+        <div class="badges">
+          <div class="badge">${esc(r.status || 'draft')}</div>
+          <div class="badge">${esc(r.property_type || 'Type')}</div>
+          <div class="badge">${money(r.price)}</div>
+        </div>
+        <div class="meta-grid">
+          <div class="meta"><b>Owner</b>${esc(r.user_id || '—')}</div>
+          <div class="meta"><b>Created</b>${esc((r.created_at || '').slice(0,10) || '—')}</div>
+        </div>
+        <div class="actions">
+          <a href="/listing.html?id=${encodeURIComponent(r.id)}"><button class="btn dark">View</button></a>
+          <a href="/listing-form.html?edit=${encodeURIComponent(r.id)}"><button class="btn blue">Edit</button></a>
+          <button class="btn green" onclick="setListingStatus('${r.id}','active')">Approve</button>
+          <button class="btn warn" onclick="setListingStatus('${r.id}','denied')">Deny</button>
+          <button class="btn dark" onclick="setListingStatus('${r.id}','paused')">Pause</button>
+          <button class="btn gold" onclick="setListingStatus('${r.id}','sold')">Sold</button>
+          <button class="btn red" onclick="deleteListing('${r.id}')">Delete</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderMembers(){
+  const grid = document.getElementById('membersGrid');
+  if(!members.length){
+    grid.innerHTML = '<div class="notice">No member profiles found.</div>';
+    return;
+  }
+  grid.innerHTML = members.map(r => `
+    <article class="card">
+      <div class="card-body">
+        <h3>${esc(r.full_name || 'Member')}</h3>
+        <div class="small">${esc(r.company_name || 'No company')} • ${esc(r.primary_market || 'No market')}</div>
+        <div class="badges">
+          <div class="badge">${esc(r.role || 'Role')}</div>
+          <div class="badge">${r.suspended ? 'Suspended' : 'Active'}</div>
+          <div class="badge">${r.founder_access ? 'Founder' : 'Standard'}</div>
+        </div>
+        <div class="meta-grid">
+          <div class="meta"><b>Email</b>${esc(r.email_display || '—')}</div>
+          <div class="meta"><b>Phone</b>${esc(r.phone || '—')}</div>
+        </div>
+        <div class="actions">
+          <a href="/members.html"><button class="btn dark">View</button></a>
+          <button class="btn green" onclick="approveMember('${r.id}')">Approve</button>
+          <button class="btn warn" onclick="denyMember('${r.id}')">Deny</button>
+          <button class="btn dark" onclick="toggleSuspendMember('${r.id}', ${r.suspended === true ? 'false' : 'true'})">${r.suspended === true ? 'Unsuspend' : 'Suspend'}</button>
+          <button class="btn gold" onclick="grantFounder('${r.id}')">Grant Founder</button>
+          <button class="btn red" onclick="deleteMember('${r.id}')">Delete</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderPain(){
+  const grid = document.getElementById('painGrid');
+  if(!painRows.length){
+    grid.innerHTML = '<div class="notice">No pain rows found.</div>';
+    return;
+  }
+  grid.innerHTML = painRows.map(r => `
+    <article class="card">
+      <div class="card-body">
+        <h3>${esc(r.title || r.problem || 'Pain Opportunity')}</h3>
+        <div class="small">${esc(r.category || 'No category')} • ${esc(r.urgency || 'Normal')}</div>
+        <div class="badges">
+          <div class="badge">${esc(r.status || 'open')}</div>
+          <div class="badge">${esc(r.category || '—')}</div>
+          <div class="badge">${esc(r.urgency || '—')}</div>
+        </div>
+        <div class="meta-grid">
+          <div class="meta"><b>Owner</b>${esc(r.user_id || '—')}</div>
+          <div class="meta"><b>Created</b>${esc((r.created_at || '').slice(0,10) || '—')}</div>
+        </div>
+        <div class="actions">
+          <a href="/pain.html"><button class="btn dark">View</button></a>
+          <button class="btn green" onclick="setPainStatus('${r.id}','resolved')">Resolve</button>
+          <button class="btn dark" onclick="setPainStatus('${r.id}','open')">Keep Open</button>
+          <button class="btn warn" onclick="setPainStatus('${r.id}','denied')">Deny</button>
+          <button class="btn red" onclick="deletePain('${r.id}')">Delete</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+async function setListingStatus(id, status){
+  msg('Updating listing...');
+  const res = await sb.from('property_cards').update({status}).eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Listing updated to ' + status + '.');
+}
+
+async function deleteListing(id){
+  if(!confirm('Delete this listing?')) return;
+  msg('Deleting listing...');
+  const res = await sb.from('property_cards').delete().eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Listing deleted.');
+}
+
+async function approveMember(id){
+  msg('Approving member...');
+  const res = await sb.from('member_profiles').update({approved:true, suspended:false}).eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Member approved.');
+}
+
+async function denyMember(id){
+  msg('Denying member...');
+  const res = await sb.from('member_profiles').update({approved:false}).eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Member denied.');
+}
+
+async function toggleSuspendMember(id, value){
+  msg('Updating member...');
+  const boolVal = value === true || value === 'true';
+  const res = await sb.from('member_profiles').update({suspended:boolVal}).eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg(boolVal ? 'Member suspended.' : 'Member unsuspended.');
+}
+
+async function grantFounder(id){
+  msg('Granting founder access...');
+  const res = await sb.from('member_profiles').update({founder_access:true, paid_member:true, plan:'founder49'}).eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Founder access granted.');
+}
+
+async function deleteMember(id){
+  if(!confirm('Delete this member profile?')) return;
+  msg('Deleting member...');
+  const res = await sb.from('member_profiles').delete().eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Member deleted.');
+}
+
+async function setPainStatus(id, status){
+  if(!painTable){ msg('Pain table not found.'); return; }
+  msg('Updating pain...');
+  const res = await sb.from(painTable).update({status}).eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Pain updated to ' + status + '.');
+}
+
+async function deletePain(id){
+  if(!painTable){ msg('Pain table not found.'); return; }
+  if(!confirm('Delete this pain row?')) return;
+  msg('Deleting pain...');
+  const res = await sb.from(painTable).delete().eq('id', id);
+  if(res.error){ msg(res.error.message); return; }
+  await load();
+  msg('Pain deleted.');
+}
+
+async function detectPainTable(){
+  for(const t of ['pain','pain_requests']){
+    try{
+      const resp = await sb.from(t).select('*').limit(1);
+      if(!resp.error) return t;
+    }catch(e){}
+  }
+  return null;
+}
+
+async function load(){
+  const sess = await sb.auth.getSession();
+  const s = sess?.data?.session;
+  if(!s){ location.href='/member-login.html'; return; }
+
+  painTable = await detectPainTable();
+
+  const queries = [
+    sb.from('property_cards').select('*').order('created_at',{ascending:false}).limit(200),
+    sb.from('member_profiles').select('*').order('created_at',{ascending:false}).limit(200)
+  ];
+  if(painTable){
+    queries.push(sb.from(painTable).select('*').order('created_at',{ascending:false}).limit(200));
+  }
+
+  const results = await Promise.allSettled(queries);
+  const listingRes = results[0];
+  const memberRes = results[1];
+  const painRes = results[2];
+
+  listings = listingRes.status === 'fulfilled' && !listingRes.value.error ? (listingRes.value.data || []) : [];
+  members = memberRes.status === 'fulfilled' && !memberRes.value.error ? (memberRes.value.data || []) : [];
+  painRows = painRes && painRes.status === 'fulfilled' && !painRes.value.error ? (painRes.value.data || []) : [];
+
+  updateCounts();
+  renderListings();
+  renderMembers();
+  renderPain();
+  setActiveTabs();
+  msg('Admin command center ready.');
+}
+
+document.querySelectorAll('[data-tab]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    activeTab = btn.getAttribute('data-tab');
+    setActiveTabs();
+  });
+});
+
+load();
+</script>
+</body>
+</html>
