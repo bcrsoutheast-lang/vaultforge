@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VaultForge | Pain Engine Fixed</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#030913; --bg2:#071427; --panel:#08172d; --panel2:#0b1f3f;
+  --text:#f6f8ff; --muted:#a7b5d6; --line:rgba(255,255,255,.08);
+  --gold:#d6ab4e; --gold2:#f1cf7b; --blue:#3f76ff; --green:#17c37f;
+  --red:#df6577; --warn:#f5a623; --shadow:0 28px 90px rgba(0,0,0,.42); --radius:26px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:Arial,Helvetica,sans-serif;color:var(--text);min-height:100vh;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(214,171,78,.16), transparent 18%),
+    radial-gradient(circle at 86% 12%, rgba(63,118,255,.12), transparent 18%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+a{text-decoration:none;color:inherit}
+button,input,textarea{font:inherit}
+.shell{max-width:1320px;margin:0 auto;padding:18px 16px 120px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:52px;height:52px;border-radius:16px;object-fit:cover;border:1px solid rgba(214,171,78,.28);box-shadow:var(--shadow)}
+.brand strong{display:block;color:var(--gold2);letter-spacing:.16em}
+.brand span{display:block;color:var(--muted);font-size:.94rem}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{
+  appearance:none;border:none;cursor:pointer;border-radius:16px;padding:13px 18px;min-height:50px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-align:center
+}
+.btn-dark{background:rgba(255,255,255,.035);border:1px solid var(--line);color:#fff}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#2758da);color:#fff}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103}
+.btn-green{background:linear-gradient(135deg,#24b37a,#17855b);color:#fff}
+.btn-red{background:linear-gradient(135deg,var(--red),#cf4f62);color:#fff}
+.btn-warn{background:linear-gradient(135deg,var(--warn),#d18912);color:#161103}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-bottom:18px}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:900;margin-bottom:12px}
+h1{margin:0 0 10px;font-size:clamp(2.2rem,5vw,4rem);line-height:.93;letter-spacing:-.05em}
+.copy{color:var(--muted);line-height:1.68;font-size:1.04rem}
+.hero-card{border:1px solid rgba(214,171,78,.22);border-radius:24px;padding:22px;background:linear-gradient(135deg, rgba(214,171,78,.12), rgba(255,255,255,.03))}
+.note-card{border:1px solid rgba(23,195,127,.22);border-radius:20px;padding:16px;background:rgba(23,195,127,.10)}
+.section{margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)}
+.section:first-of-type{margin-top:0;padding-top:0;border-top:none}
+.rule{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:12px 0 18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+label{display:block;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:#c9d4f0;font-weight:800;margin:0 0 8px}
+input,textarea{
+  width:100%;padding:15px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.11);
+  background:#09153f;color:#fff;outline:none
+}
+textarea{min-height:130px;resize:vertical}
+.choice-field{
+  width:100%;padding:15px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.11);
+  background:#09153f;color:#fff;outline:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:700
+}
+.choice-field span:last-child{color:var(--gold2)}
+.notice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.notice{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;background:rgba(255,255,255,.02)}
+.notice strong{display:block;margin-bottom:6px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.card{background:linear-gradient(180deg,#08172d,#06111f);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:var(--shadow)}
+.card-body{padding:20px}
+.card h3{margin:0 0 8px;font-size:1.45rem;letter-spacing:-.03em}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);font-size:.82rem;font-weight:800}
+.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.meta{border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:12px;background:rgba(255,255,255,.02)}
+.meta b{display:block;margin-bottom:4px}
+.small{font-size:.95rem;color:var(--muted)}
+.status{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;color:#d6e4ff}
+.mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mode-btn{
+  appearance:none;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#fff;border-radius:22px;padding:18px;text-align:left;cursor:pointer
+}
+.mode-btn strong{display:block;font-size:1.15rem;margin-bottom:4px}
+.mode-btn span{display:block;color:var(--muted);font-size:.92rem}
+.mode-btn.active{background:linear-gradient(135deg,var(--gold2),#b5892f);color:#161103;border-color:transparent}
+.mode-btn.active span{color:#161103}
+body.modal-open{overflow:hidden}
+body.modal-open .sticky-actions{display:none}
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(1,5,15,.82);backdrop-filter:blur(8px);display:none;
+  align-items:center;justify-content:center;z-index:1000;padding:14px;padding-bottom:max(14px, env(safe-area-inset-bottom))
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  width:min(760px,100%);
+  max-height:calc(100dvh - 28px);
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:22px
+}
+.modal-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;position:sticky;top:0;background:linear-gradient(180deg,var(--panel),var(--panel2));padding-bottom:8px;z-index:2}
+.modal-title{font-size:1.3rem;font-weight:900}
+.modal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.pick-btn{appearance:none;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:#fff;border-radius:16px;padding:18px;min-height:64px;font-weight:800;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}
+.sticky-actions{
+  position:fixed;left:0;right:0;bottom:0;z-index:95;
+  background:rgba(3,9,19,.92);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.08)
+}
+.sticky-inner{max-width:1320px;margin:0 auto;padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap}
+.hidden{display:none!important}
+@media(max-width:980px){.hero,.grid,.notice-grid,.cards,.mode-row{grid-template-columns:1fr}}
+@media(max-width:760px){.modal-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">
+      <img src="IMG_2536.png" alt="VaultForge logo">
+      <div>
+        <strong>VAULTFORGE</strong>
+        <span id="topLine">Pain engine power workflow</span>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn btn-dark" href="/members.html">Back to Members</a>
+      <a class="btn btn-dark" href="/property-cards.html">Back to Listings</a>
+      <a class="btn btn-dark hidden" id="adminBtn" href="/admin.html">Back to Admin</a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="panel">
+      <div class="eyebrow">Pain Engine</div>
+      <h1>Route real problems to the right people fast.</h1>
+      <div class="copy">General pain stays simple. Deal pain uses property-specific fields. Pain Deal mirrors the create listing workflow with popup selectors and a stronger analyzer.</div>
+      <div class="rule"></div>
+      <div class="hero-card">
+        <div style="font-weight:900;font-size:1.4rem;margin-bottom:8px">Clear problem. Clear route.</div>
+        <div class="copy">Choose the mode that fits the problem. Buttons now work, selectors sit above the bottom action bar, and the form uses pain labels instead of listing labels.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="eyebrow">Routing Read</div>
+      <div class="note-card">
+        <div style="font-weight:900;font-size:1.1rem;margin-bottom:8px">AI + Admin aware</div>
+        <div class="copy">Pain Deal uses state, property type, spread logic, urgency, and route logic closer to create listing, but submits as pain.</div>
+      </div>
+      <div class="notice-grid" style="margin-top:14px">
+        <div class="notice"><strong>Best Match</strong><div class="copy" id="bestMatch">Lenders</div></div>
+        <div class="notice"><strong>Likely Route</strong><div class="copy" id="likelyRoute">Admin + members</div></div>
+        <div class="notice"><strong>Urgency Score</strong><div class="copy" id="urgencyScore">Standard</div></div>
+        <div class="notice"><strong>Revenue Flag</strong><div class="copy" id="revenueFlag">Normal</div></div>
+      </div>
+      <div class="status" id="statusBox">Ready.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">Pain Mode</div>
+    <div class="mode-row">
+      <button class="mode-btn active" type="button" data-mode="general">
+        <strong>General Pain</strong>
+        <span>Capital, buyer, lender, partner, operator, rescue, or disposition needs.</span>
+      </button>
+      <button class="mode-btn" type="button" data-mode="deal">
+        <strong>Deal Pain</strong>
+        <span>Property-specific pain with simple property fields.</span>
+      </button>
+      <button class="mode-btn" type="button" data-mode="pain_deal">
+        <strong>Pain Deal</strong>
+        <span>Create-listing style form with advanced selector fields and analyzer.</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section">
+      <div class="eyebrow">Submit Pain</div>
+      <div class="rule"></div>
+
+      <div id="generalPainForm">
+        <div class="grid">
+          <div class="full"><label>Title</label><input id="title" placeholder="Example: Need lender for fast close in Georgia"></div>
+          <div><label>Category</label><button type="button" class="choice-field" data-open-picker="category"><span id="category_display">Capital</span><span>Choose</span></button><input type="hidden" id="category" value="Capital"></div>
+          <div><label>State</label><button type="button" class="choice-field" data-open-picker="state"><span id="state_display">Georgia</span><span>Choose</span></button><input type="hidden" id="state" value="Georgia"></div>
+          <div><label>Urgency</label><button type="button" class="choice-field" data-open-picker="urgency"><span id="urgency_display">Normal</span><span>Choose</span></button><input type="hidden" id="urgency" value="Normal"></div>
+          <div><label>Status</label><button type="button" class="choice-field" data-open-picker="status"><span id="status_display">Open</span><span>Choose</span></button><input type="hidden" id="status" value="Open"></div>
+          <div><label>Budget / Need Size</label><input id="budget" placeholder="Example: 150000"></div>
+          <div><label>Timeline</label><input id="timeline" placeholder="Example: 7 days"></div>
+          <div class="full"><label>Problem / Need</label><textarea id="problem" placeholder="Describe the need clearly."></textarea></div>
+          <div class="full"><label>Desired Outcome</label><textarea id="outcome" placeholder="What result are you trying to create?"></textarea></div>
+        </div>
+      </div>
+
+      <div id="dealPainForm" class="hidden">
+        <div class="grid">
+          <div class="full"><label>Deal Pain Title</label><input id="deal_title" placeholder="Example: Need buyer for residential flip in Florida"></div>
+          <div><label>Property Type</label><button type="button" class="choice-field" data-open-picker="deal_property_type"><span id="deal_property_type_display">Residential</span><span>Choose</span></button><input type="hidden" id="deal_property_type" value="Residential"></div>
+          <div><label>State</label><button type="button" class="choice-field" data-open-picker="deal_state"><span id="deal_state_display">Georgia</span><span>Choose</span></button><input type="hidden" id="deal_state" value="Georgia"></div>
+          <div><label>Need Type</label><button type="button" class="choice-field" data-open-picker="deal_need_type"><span id="deal_need_type_display">Buyer</span><span>Choose</span></button><input type="hidden" id="deal_need_type" value="Buyer"></div>
+          <div><label>Urgency</label><button type="button" class="choice-field" data-open-picker="deal_urgency"><span id="deal_urgency_display">Normal</span><span>Choose</span></button><input type="hidden" id="deal_urgency" value="Normal"></div>
+          <div><label>City</label><input id="deal_city" placeholder="Enter city"></div>
+          <div><label>Timeline</label><input id="deal_timeline" placeholder="Example: 10 days"></div>
+          <div><label>Asking Price</label><input id="deal_price" placeholder="Example: 185000"></div>
+          <div><label>ARV / Exit</label><input id="deal_arv" placeholder="Example: 285000"></div>
+          <div><label>Rehab</label><input id="deal_rehab" placeholder="Example: 45000"></div>
+          <div><label>Budget / Gap</label><input id="deal_budget" placeholder="Example: 120000"></div>
+          <div><label>Occupancy</label><button type="button" class="choice-field" data-open-picker="deal_occupancy"><span id="deal_occupancy_display">Vacant</span><span>Choose</span></button><input type="hidden" id="deal_occupancy" value="Vacant"></div>
+          <div><label>Seller Motivation</label><button type="button" class="choice-field" data-open-picker="deal_seller_motivation"><span id="deal_seller_motivation_display">Distress</span><span>Choose</span></button><input type="hidden" id="deal_seller_motivation" value="Distress"></div>
+          <div class="full"><label>Deal Problem</label><textarea id="deal_problem" placeholder="Describe the property-specific pain."></textarea></div>
+          <div class="full"><label>Desired Deal Outcome</label><textarea id="deal_outcome" placeholder="What should happen next for this property?"></textarea></div>
+        </div>
+      </div>
+
+      <div id="painDealForm" class="hidden">
+        <div class="grid">
+          <div class="full"><label>Pain Deal Title</label><input id="pd_title" placeholder="Example: Need capital and buyer route for Georgia flip"></div>
+
+          <div><label>Property Type</label><button type="button" class="choice-field" data-open-picker="pd_property_type"><span id="pd_property_type_display">Residential</span><span>Choose</span></button><input type="hidden" id="pd_property_type" value="Residential"></div>
+          <div><label>State</label><button type="button" class="choice-field" data-open-picker="pd_state"><span id="pd_state_display">Georgia</span><span>Choose</span></button><input type="hidden" id="pd_state" value="Georgia"></div>
+
+          <div><label>Pain Type</label><button type="button" class="choice-field" data-open-picker="pd_need_type"><span id="pd_need_type_display">Capital</span><span>Choose</span></button><input type="hidden" id="pd_need_type" value="Capital"></div>
+          <div><label>Status</label><button type="button" class="choice-field" data-open-picker="pd_status"><span id="pd_status_display">Open</span><span>Choose</span></button><input type="hidden" id="pd_status" value="Open"></div>
+
+          <div><label>Deal Type</label><button type="button" class="choice-field" data-open-picker="pd_deal_type"><span id="pd_deal_type_display">For Sale</span><span>Choose</span></button><input type="hidden" id="pd_deal_type" value="For Sale"></div>
+          <div><label>Urgency</label><button type="button" class="choice-field" data-open-picker="pd_urgency"><span id="pd_urgency_display">Normal</span><span>Choose</span></button><input type="hidden" id="pd_urgency" value="Normal"></div>
+
+          <div><label>City</label><input id="pd_city" placeholder="Enter city"></div>
+          <div><label>Price</label><input id="pd_price" placeholder="Enter price"></div>
+
+          <div><label>Buy Bucket</label><button type="button" class="choice-field" data-open-picker="pd_buy_bucket"><span id="pd_buy_bucket_display">Flip</span><span>Choose</span></button><input type="hidden" id="pd_buy_bucket" value="Flip"></div>
+          <div><label>Exit Strategy</label><button type="button" class="choice-field" data-open-picker="pd_exit_strategy"><span id="pd_exit_strategy_display">Flip</span><span>Choose</span></button><input type="hidden" id="pd_exit_strategy" value="Flip"></div>
+
+          <div><label>Seller Motivation</label><button type="button" class="choice-field" data-open-picker="pd_seller_motivation"><span id="pd_seller_motivation_display">Distress</span><span>Choose</span></button><input type="hidden" id="pd_seller_motivation" value="Distress"></div>
+          <div><label>Condition</label><button type="button" class="choice-field" data-open-picker="pd_condition"><span id="pd_condition_display">Light</span><span>Choose</span></button><input type="hidden" id="pd_condition" value="Light"></div>
+
+          <div><label>Timeline</label><button type="button" class="choice-field" data-open-picker="pd_timeline"><span id="pd_timeline_display">Flexible</span><span>Choose</span></button><input type="hidden" id="pd_timeline" value="Flexible"></div>
+          <div><label>Occupancy</label><button type="button" class="choice-field" data-open-picker="pd_occupancy"><span id="pd_occupancy_display">Vacant</span><span>Choose</span></button><input type="hidden" id="pd_occupancy" value="Vacant"></div>
+
+          <div><label>ARV / Exit Value</label><input id="pd_arv" placeholder="Example: 580000"></div>
+          <div><label>Rehab Estimate</label><input id="pd_rehab" placeholder="Example: 65000"></div>
+
+          <div><label>Rent / NOI</label><input id="pd_rent_noi" placeholder="Rent or annual NOI"></div>
+          <div><label>Cash Flow / Spread</label><input id="pd_cash_flow" placeholder="Cash flow / wholesale spread"></div>
+
+          <div><label>Cap Rate / ROI</label><input id="pd_cap_roi" placeholder="Example: 8.5%"></div>
+          <div><label>Benefit Tags</label><input id="pd_benefit_tags" placeholder="off market, value add, strong location"></div>
+
+          <div><label>Bedrooms</label><input id="pd_bedrooms"></div>
+          <div><label>Bathrooms</label><input id="pd_bathrooms"></div>
+
+          <div><label>Square Feet</label><input id="pd_sqft"></div>
+          <div><label>Building Size</label><input id="pd_building_size"></div>
+
+          <div><label>Zoning</label><input id="pd_zoning"></div>
+          <div><label>Acres</label><input id="pd_acres"></div>
+
+          <div><label>Frontage</label><input id="pd_frontage"></div>
+          <div><label>Utilities</label><input id="pd_utilities"></div>
+
+          <div class="full"><label>Main Pain Deal Problem</label><textarea id="pd_problem" placeholder="Describe the pain deal clearly in listing-style language."></textarea></div>
+          <div class="full"><label>Desired Pain Deal Outcome</label><textarea id="pd_outcome" placeholder="What exact next move or result do you need?"></textarea></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">Pain Queue</div>
+    <div class="cards" id="painGrid"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="pickerModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="eyebrow" style="margin-bottom:6px">Select Value</div>
+        <div class="modal-title" id="pickerTitle">Choose</div>
+      </div>
+      <button type="button" class="btn btn-dark" id="closeModalBtn">Close</button>
+    </div>
+    <div class="modal-grid" id="pickerGrid"></div>
+  </div>
+</div>
+
+<div class="sticky-actions">
+  <div class="sticky-inner">
+    <button class="btn btn-dark" id="analyzeBtn" type="button">Analyze Pain</button>
+    <button class="btn btn-gold" id="saveDraftBtn" type="button">Save Draft</button>
+    <button class="btn btn-blue" id="submitBtn" type="button">Submit Pain</button>
+    <button class="btn btn-dark" id="clearBtn" type="button">Clear Form</button>
+  </div>
+</div>
+
+<script>
+const sb = supabase.createClient('https://mnwwvpuxrzostrplfgmq.supabase.co','sb_publishable_sXXlF9GsNcVYnr2BxABAwg_T-BV19qJ');
+
+const PICKERS = {
+  category:['Capital','Buyer','Operator','Lender','Partner','Rescue','Disposition','Acquisition'],
+  state:['Georgia','Tennessee','Florida','Other'],
+  urgency:['Normal','High','Urgent'],
+  status:['Open','Draft','Resolved','Denied','Assigned'],
+  deal_property_type:['Residential','Commercial','Land'],
+  deal_state:['Georgia','Tennessee','Florida','Other'],
+  deal_need_type:['Buyer','Capital','Lender','Operator','Partner','Rescue','Disposition'],
+  deal_urgency:['Normal','High','Urgent'],
+  deal_occupancy:['Vacant','Occupied','Partially Occupied','Unknown'],
+  deal_seller_motivation:['Distress','Inherited','Timeline','Vacant','Debt Pressure','Unknown'],
+  pd_property_type:['Residential','Commercial','Land'],
+  pd_state:['Georgia','Tennessee','Florida','Other'],
+  pd_need_type:['Capital','Buyer','Operator','Lender','Partner','Rescue','Disposition'],
+  pd_status:['Open','Draft','Resolved','Denied','Assigned'],
+  pd_deal_type:['For Sale','For Lease','Assignment'],
+  pd_urgency:['Normal','High','Urgent'],
+  pd_buy_bucket:['Flip','Buy & Hold','Value Add','Development','Wholesale'],
+  pd_exit_strategy:['Flip','Hold','Refi','Lease Up','Assign'],
+  pd_seller_motivation:['Distress','Inherited','Timeline','Vacant','Debt Pressure'],
+  pd_condition:['Light','Moderate','Heavy','Full Gut'],
+  pd_timeline:['ASAP','30 Days','60 Days','Flexible'],
+  pd_occupancy:['Vacant','Occupied','Partially Occupied','Unknown']
+};
+
+let activePicker = null;
+let currentUserId = null;
+let isAdminUser = false;
+let painTable = null;
+let painRows = [];
+let currentMode = 'general';
+
+function $(id){ return document.getElementById(id); }
+function setStatus(msg){ $('statusBox').textContent = msg; }
+function esc(v){ return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+function val(id){ return ($(id)?.value || '').trim(); }
+function setVal(id, v){ if($(id)) $(id).value = v ?? ''; }
+function num(v){ const n = Number(String(v || '').replace(/[^0-9.\-]/g,'')); return isNaN(n) ? 0 : n; }
+function money(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(n || 0)); }
+
+function setChoice(target, value){
+  setVal(target, value);
+  const label = $(target + '_display');
+  if(label) label.textContent = value || 'Choose';
+  analyzePain();
+}
+
+function openPicker(target){
+  activePicker = target;
+  $('pickerTitle').textContent = target.replaceAll('_',' ');
+  $('pickerGrid').innerHTML = (PICKERS[target] || []).map(opt =>
+    `<button type="button" class="pick-btn" data-pick-value="${esc(opt)}">${esc(opt)}</button>`
+  ).join('');
+  document.body.classList.add('modal-open');
+  $('pickerModal').classList.add('show');
+  document.querySelectorAll('[data-pick-value]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      setChoice(activePicker, btn.getAttribute('data-pick-value'));
+      closePicker();
+    });
+  });
+}
+function closePicker(){
+  $('pickerModal').classList.remove('show');
+  document.body.classList.remove('modal-open');
+  activePicker = null;
+}
+
+function setMode(mode){
+  currentMode = mode;
+  document.querySelectorAll('[data-mode]').forEach(btn=>{
+    btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+  });
+  $('generalPainForm').classList.toggle('hidden', mode !== 'general');
+  $('dealPainForm').classList.toggle('hidden', mode !== 'deal');
+  $('painDealForm').classList.toggle('hidden', mode !== 'pain_deal');
+  analyzePain();
+}
+
+async function detectPainTable(){
+  for(const t of ['pain','pain_requests']){
+    try{
+      const resp = await sb.from(t).select('*').limit(1);
+      if(!resp.error) return t;
+    }catch(e){}
+  }
+  return null;
+}
+
+async function requireSession(){
+  const sessionResp = await sb.auth.getSession();
+  const session = sessionResp?.data?.session;
+  if(!session){
+    setStatus('You must be logged in.');
+    setTimeout(() => { window.location.href = '/member-login.html'; }, 400);
+    return null;
+  }
+  currentUserId = session.user.id;
+  $('topLine').textContent = 'Logged in as ' + (session.user.email || 'member');
+  const prof = await sb.from('member_profiles').select('role,is_admin').eq('user_id', currentUserId).maybeSingle();
+  if(!prof.error && prof.data && (prof.data.role === 'admin' || prof.data.is_admin === true)){
+    isAdminUser = true;
+    $('adminBtn').classList.remove('hidden');
+  }
+  return session;
+}
+
+function analyzeGeneralPain(){
+  const category = val('category') || 'Capital';
+  const state = val('state') || 'Georgia';
+  const urgency = val('urgency') || 'Normal';
+  const budget = num(val('budget'));
+  let best = 'Admin', route = `${state} admin`, urgencyScore = 'Standard', revenueFlag = 'Normal';
+  if(category === 'Capital'){ best = 'Lenders'; route = `${state} lenders + admin`; }
+  if(category === 'Buyer'){ best = 'Buyers'; route = `${state} buyers + admin`; }
+  if(category === 'Operator'){ best = 'Operators'; route = `${state} operators + admin`; }
+  if(category === 'Partner'){ best = 'Partners'; route = `${state} partners + admin`; }
+  if(category === 'Rescue'){ best = 'Admin + operators'; route = `${state} rescue route`; }
+  if(urgency === 'High') urgencyScore = 'High';
+  if(urgency === 'Urgent') urgencyScore = 'Immediate';
+  if(budget >= 100000) revenueFlag = 'High-value route';
+  if(category === 'Capital' && budget >= 250000) revenueFlag = 'Lender priority';
+  return {best, route, urgencyScore, revenueFlag};
+}
+
+function analyzeDealPain(){
+  const propertyType = val('deal_property_type') || 'Residential';
+  const state = val('deal_state') || 'Georgia';
+  const needType = val('deal_need_type') || 'Buyer';
+  const urgency = val('deal_urgency') || 'Normal';
+  const price = num(val('deal_price'));
+  const arv = num(val('deal_arv'));
+  const rehab = num(val('deal_rehab'));
+  const budget = num(val('deal_budget'));
+  const spread = arv && price ? (arv - price - rehab) : 0;
+  let best = 'Admin', route = `${state} deal desk`, urgencyScore = 'Standard', revenueFlag = 'Normal';
+  if(needType === 'Buyer'){ best = `${propertyType} buyers`; route = `${state} ${propertyType.toLowerCase()} buyers + admin`; }
+  if(needType === 'Capital' || needType === 'Lender'){ best = 'Lenders'; route = `${state} lenders + admin`; }
+  if(needType === 'Operator'){ best = `${propertyType} operators`; route = `${state} operators + admin`; }
+  if(needType === 'Rescue'){ best = 'Admin + rescue operators'; route = `${state} rescue route`; }
+  if(urgency === 'High') urgencyScore = 'High';
+  if(urgency === 'Urgent') urgencyScore = 'Immediate';
+  if(spread > 50000) revenueFlag = 'Strong deal spread';
+  if(budget >= 100000) revenueFlag = 'Large gap to route';
+  if(propertyType === 'Commercial') revenueFlag = revenueFlag === 'Normal' ? 'Commercial route' : revenueFlag;
+  return {best, route, urgencyScore, revenueFlag};
+}
+
+function analyzePainDeal(){
+  const type = val('pd_property_type') || 'Residential';
+  const state = val('pd_state') || 'Georgia';
+  const needType = val('pd_need_type') || 'Capital';
+  const urgency = val('pd_urgency') || 'Normal';
+  const price = num(val('pd_price'));
+  const arv = num(val('pd_arv'));
+  const rehab = num(val('pd_rehab'));
+  const explicitSpread = num(val('pd_cash_flow'));
+  const budget = num(val('pd_rent_noi')) || num(val('pd_price')) || 0;
+  const spread = explicitSpread || (arv && price ? (arv - price - rehab) : 0);
+
+  let best = `${type} buyers`;
+  let route = `${state} ${type.toLowerCase()} route + admin`;
+  let urgencyScore = 'Standard';
+  let revenueFlag = 'Normal';
+
+  if(needType === 'Capital' || needType === 'Lender'){ best = 'Lenders'; route = `${state} lenders + admin`; }
+  if(needType === 'Buyer'){ best = `${type} buyers`; route = `${state} ${type.toLowerCase()} buyers + admin`; }
+  if(needType === 'Operator'){ best = `${type} operators`; route = `${state} operators + admin`; }
+  if(needType === 'Partner'){ best = 'Partners'; route = `${state} partners + admin`; }
+  if(needType === 'Rescue'){ best = 'Admin + rescue route'; route = `${state} rescue desk`; }
+  if(type === 'Commercial'){ route = `${state} commercial desk + admin`; }
+  if(type === 'Land'){ route = `${state} land buyers + builders + admin`; }
+
+  if(urgency === 'High') urgencyScore = 'High';
+  if(urgency === 'Urgent') urgencyScore = 'Immediate';
+
+  if(spread > 100000) revenueFlag = 'Elite spread';
+  else if(spread > 50000) revenueFlag = 'Strong spread';
+  else if(budget >= 100000) revenueFlag = 'High-value route';
+  else if(type === 'Commercial') revenueFlag = 'Commercial route';
+
+  return {best, route, urgencyScore, revenueFlag};
+}
+
+function analyzePain(){
+  let result;
+  if(currentMode === 'pain_deal') result = analyzePainDeal();
+  else if(currentMode === 'deal') result = analyzeDealPain();
+  else result = analyzeGeneralPain();
+  $('bestMatch').textContent = result.best;
+  $('likelyRoute').textContent = result.route;
+  $('urgencyScore').textContent = result.urgencyScore;
+  $('revenueFlag').textContent = result.revenueFlag;
+  setStatus('Pain analysis ready.');
+}
+
+function clearGeneralForm(){
+  setVal('title',''); setChoice('category','Capital'); setChoice('state','Georgia'); setChoice('urgency','Normal'); setChoice('status','Open');
+  setVal('budget',''); setVal('timeline',''); setVal('problem',''); setVal('outcome','');
+}
+function clearDealForm(){
+  setVal('deal_title',''); setChoice('deal_property_type','Residential'); setChoice('deal_state','Georgia'); setChoice('deal_need_type','Buyer');
+  setChoice('deal_urgency','Normal'); setVal('deal_city',''); setVal('deal_timeline',''); setVal('deal_price',''); setVal('deal_arv','');
+  setVal('deal_rehab',''); setVal('deal_budget',''); setChoice('deal_occupancy','Vacant'); setChoice('deal_seller_motivation','Distress');
+  setVal('deal_problem',''); setVal('deal_outcome','');
+}
+function clearPainDealForm(){
+  setVal('pd_title',''); setChoice('pd_property_type','Residential'); setChoice('pd_state','Georgia'); setChoice('pd_need_type','Capital');
+  setChoice('pd_status','Open'); setChoice('pd_deal_type','For Sale'); setChoice('pd_urgency','Normal'); setVal('pd_city',''); setVal('pd_price','');
+  setChoice('pd_buy_bucket','Flip'); setChoice('pd_exit_strategy','Flip'); setChoice('pd_seller_motivation','Distress'); setChoice('pd_condition','Light');
+  setChoice('pd_timeline','Flexible'); setChoice('pd_occupancy','Vacant'); setVal('pd_arv',''); setVal('pd_rehab',''); setVal('pd_rent_noi','');
+  setVal('pd_cash_flow',''); setVal('pd_cap_roi',''); setVal('pd_benefit_tags',''); setVal('pd_bedrooms',''); setVal('pd_bathrooms',''); setVal('pd_sqft','');
+  setVal('pd_building_size',''); setVal('pd_zoning',''); setVal('pd_acres',''); setVal('pd_frontage',''); setVal('pd_utilities','');
+  setVal('pd_problem',''); setVal('pd_outcome','');
+}
+function clearForm(){
+  clearGeneralForm(); clearDealForm(); clearPainDealForm(); analyzePain(); setStatus('Form cleared.');
+}
+
+function buildPayload(statusValue){
+  if(currentMode === 'pain_deal'){
+    return {
+      title: val('pd_title') || '',
+      category: 'Pain Deal',
+      state: val('pd_state'),
+      urgency: val('pd_urgency'),
+      status: statusValue,
+      budget: num(val('pd_cash_flow')) || num(val('pd_rent_noi')) || num(val('pd_price')) || null,
+      timeline: val('pd_timeline') || null,
+      problem: [
+        `Mode: Pain Deal`,
+        `Property Type: ${val('pd_property_type')}`,
+        `Pain Type: ${val('pd_need_type')}`,
+        `Deal Type: ${val('pd_deal_type')}`,
+        val('pd_city') ? `City: ${val('pd_city')}` : '',
+        val('pd_price') ? `Price: ${val('pd_price')}` : '',
+        val('pd_arv') ? `ARV: ${val('pd_arv')}` : '',
+        val('pd_rehab') ? `Rehab: ${val('pd_rehab')}` : '',
+        val('pd_buy_bucket') ? `Buy Bucket: ${val('pd_buy_bucket')}` : '',
+        val('pd_exit_strategy') ? `Exit Strategy: ${val('pd_exit_strategy')}` : '',
+        val('pd_seller_motivation') ? `Seller Motivation: ${val('pd_seller_motivation')}` : '',
+        val('pd_condition') ? `Condition: ${val('pd_condition')}` : '',
+        val('pd_occupancy') ? `Occupancy: ${val('pd_occupancy')}` : '',
+        val('pd_rent_noi') ? `Rent/NOI: ${val('pd_rent_noi')}` : '',
+        val('pd_cash_flow') ? `Cash Flow/Spread: ${val('pd_cash_flow')}` : '',
+        val('pd_cap_roi') ? `Cap Rate/ROI: ${val('pd_cap_roi')}` : '',
+        val('pd_benefit_tags') ? `Benefit Tags: ${val('pd_benefit_tags')}` : '',
+        val('pd_bedrooms') ? `Bedrooms: ${val('pd_bedrooms')}` : '',
+        val('pd_bathrooms') ? `Bathrooms: ${val('pd_bathrooms')}` : '',
+        val('pd_sqft') ? `Square Feet: ${val('pd_sqft')}` : '',
+        val('pd_building_size') ? `Building Size: ${val('pd_building_size')}` : '',
+        val('pd_zoning') ? `Zoning: ${val('pd_zoning')}` : '',
+        val('pd_acres') ? `Acres: ${val('pd_acres')}` : '',
+        val('pd_frontage') ? `Frontage: ${val('pd_frontage')}` : '',
+        val('pd_utilities') ? `Utilities: ${val('pd_utilities')}` : '',
+        val('pd_problem')
+      ].filter(Boolean).join('\n'),
+      outcome: [
+        val('pd_outcome'),
+        `Advanced Analyzer Route: ${$('likelyRoute').textContent}`
+      ].filter(Boolean).join('\n')
+    };
+  }
+
+  if(currentMode === 'deal'){
+    return {
+      title: val('deal_title') || '',
+      category: 'Deal Pain',
+      state: val('deal_state'),
+      urgency: val('deal_urgency'),
+      status: statusValue,
+      budget: num(val('deal_budget')) || null,
+      timeline: val('deal_timeline') || null,
+      problem: [
+        `Need Type: ${val('deal_need_type')}`,
+        `Property Type: ${val('deal_property_type')}`,
+        val('deal_city') ? `City: ${val('deal_city')}` : '',
+        val('deal_price') ? `Price: ${val('deal_price')}` : '',
+        val('deal_arv') ? `ARV: ${val('deal_arv')}` : '',
+        val('deal_rehab') ? `Rehab: ${val('deal_rehab')}` : '',
+        val('deal_occupancy') ? `Occupancy: ${val('deal_occupancy')}` : '',
+        val('deal_seller_motivation') ? `Seller Motivation: ${val('deal_seller_motivation')}` : '',
+        val('deal_problem')
+      ].filter(Boolean).join('\n'),
+      outcome: [val('deal_outcome'), 'Mode: Deal Pain'].filter(Boolean).join('\n')
+    };
+  }
+
+  return {
+    title: val('title'),
+    category: val('category'),
+    state: val('state'),
+    urgency: val('urgency'),
+    status: statusValue,
+    budget: val('budget') === '' ? null : num(val('budget')),
+    timeline: val('timeline') || null,
+    problem: val('problem'),
+    outcome: val('outcome')
+  };
+}
+
+async function savePain(statusValue){
+  const session = await requireSession();
+  if(!session) return;
+  if(!painTable){ setStatus('Pain table not found.'); return; }
+  const payload = buildPayload(statusValue);
+  payload.user_id = currentUserId;
+  if(!payload.title){ setStatus('Add a title first.'); return; }
+  if(!payload.problem){ setStatus('Describe the need first.'); return; }
+  setStatus('Saving...');
+  const resp = await sb.from(painTable).insert([payload]).select().maybeSingle();
+  if(resp.error){ setStatus(resp.error.message || 'Save failed.'); return; }
+  setStatus('Pain submitted.');
+  clearForm();
+  await loadPainRows();
+}
+
+async function setPainStatus(id, status){
+  if(!painTable) return;
+  setStatus('Updating pain...');
+  const resp = await sb.from(painTable).update({status}).eq('id', id);
+  if(resp.error){ setStatus(resp.error.message || 'Update failed.'); return; }
+  setStatus('Pain updated to ' + status + '.');
+  await loadPainRows();
+}
+
+async function deletePain(id){
+  if(!painTable) return;
+  if(!confirm('Delete this pain item?')) return;
+  setStatus('Deleting pain...');
+  const resp = await sb.from(painTable).delete().eq('id', id);
+  if(resp.error){ setStatus(resp.error.message || 'Delete failed.'); return; }
+  setStatus('Pain deleted.');
+  await loadPainRows();
+}
+
+function renderPainRows(){
+  const grid = $('painGrid');
+  if(!painRows.length){
+    grid.innerHTML = '<div class="notice">No pain items found yet.</div>';
+    return;
+  }
+  grid.innerHTML = painRows.map(r => `
+    <article class="card">
+      <div class="card-body">
+        <h3>${esc(r.title || 'Pain Opportunity')}</h3>
+        <div class="small">${esc(r.state || '')} • ${esc(r.category || '')}</div>
+        <div class="badges">
+          <div class="badge">${esc(r.status || 'open')}</div>
+          <div class="badge">${esc(r.urgency || 'normal')}</div>
+          <div class="badge">${esc(r.category || '—')}</div>
+        </div>
+        <div class="copy">${esc((r.problem || 'No details').slice(0,180))}${(String(r.problem || '').length > 180) ? '...' : ''}</div>
+        <div class="meta-grid">
+          <div class="meta"><b>Budget</b>${r.budget ? money(r.budget) : '—'}</div>
+          <div class="meta"><b>Timeline</b>${esc(r.timeline || '—')}</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+          <button class="btn btn-green" type="button" onclick="setPainStatus('${r.id}','resolved')">Resolve</button>
+          <button class="btn btn-dark" type="button" onclick="setPainStatus('${r.id}','open')">Keep Open</button>
+          <button class="btn btn-warn" type="button" onclick="setPainStatus('${r.id}','denied')">Deny</button>
+          <button class="btn btn-blue" type="button" onclick="setPainStatus('${r.id}','assigned')">Assign</button>
+          <button class="btn btn-red" type="button" onclick="deletePain('${r.id}')">Delete</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+async function loadPainRows(){
+  if(!painTable) return;
+  const resp = await sb.from(painTable).select('*').order('created_at',{ascending:false}).limit(100);
+  painRows = resp.error ? [] : (resp.data || []);
+  renderPainRows();
+}
+
+async function init(){
+  document.querySelectorAll('[data-open-picker]').forEach(btn=>{
+    btn.addEventListener('click', ()=> openPicker(btn.getAttribute('data-open-picker')));
+  });
+  document.querySelectorAll('[data-mode]').forEach(btn=>{
+    btn.addEventListener('click', ()=> setMode(btn.getAttribute('data-mode')));
+  });
+  $('closeModalBtn').addEventListener('click', closePicker);
+  $('pickerModal').addEventListener('click', e=>{ if(e.target === $('pickerModal')) closePicker(); });
+  $('analyzeBtn').addEventListener('click', analyzePain);
+  $('saveDraftBtn').addEventListener('click', ()=> savePain('Draft'));
+  $('submitBtn').addEventListener('click', ()=> savePain('Open'));
+  $('clearBtn').addEventListener('click', clearForm);
+
+  [
+    'title','budget','timeline','problem','outcome',
+    'deal_title','deal_city','deal_timeline','deal_price','deal_arv','deal_rehab','deal_budget','deal_problem','deal_outcome',
+    'pd_title','pd_city','pd_price','pd_arv','pd_rehab','pd_rent_noi','pd_cash_flow','pd_cap_roi','pd_benefit_tags',
+    'pd_bedrooms','pd_bathrooms','pd_sqft','pd_building_size','pd_zoning','pd_acres','pd_frontage','pd_utilities','pd_problem','pd_outcome'
+  ].forEach(id=>{
+    $(id).addEventListener('input', analyzePain);
+  });
+
+  analyzePain();
+  const session = await requireSession();
+  if(!session) return;
+  painTable = await detectPainTable();
+  if(!painTable){
+    setStatus('Pain table not found. Create pain or pain_requests in Supabase.');
+    return;
+  }
+  await loadPainRows();
+  setStatus('Pain engine ready.');
+}
+init();
+</script>
+</body>
+</html>
